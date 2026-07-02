@@ -1,98 +1,48 @@
 -- ============================================================================
--- Yeon (緣) — Seed data for the pilot demo
--- Run AFTER schema.sql. Gives you a coordinator, mentors, mentees, and a few
--- in-progress matches/sessions so every screen has something to show.
+-- Homework Hub — Seed data for the demo
+-- Run AFTER schema.sql. Creates teachers, students, a class catalog, one
+-- student's enrollments, and assignments due around "today" so the feed and
+-- calendar have content immediately.
 -- ============================================================================
 
--- Coordinator ---------------------------------------------------------------
-insert into profiles (id, name, role, grade, interests, communication_style, personality_tags, availability, bio)
-values
-  ('00000000-0000-0000-0000-000000000001', 'Chaehyun', 'coordinator', 12,
-   '{community,leadership,music}', 'supportive', '{empathetic,connector,trustworthy}',
-   '{Mon-PM,Wed-PM,Fri-PM}', 'Matching coordinator & community lead for Yeon.');
+-- People --------------------------------------------------------------------
+insert into profiles (id, name, role, grade) values
+  ('00000000-0000-0000-0000-0000000000d1', 'Ms. Anderson', 'teacher', null),
+  ('00000000-0000-0000-0000-0000000000d2', 'Mr. Brooks',   'teacher', null),
+  ('00000000-0000-0000-0000-0000000000d3', 'Dr. Chen',     'teacher', null),
+  ('00000000-0000-0000-0000-0000000000d4', 'Sr. Diaz',     'teacher', null),
+  ('00000000-0000-0000-0000-0000000000e1', 'Mina (Student)', 'student', 10),
+  ('00000000-0000-0000-0000-0000000000e2', 'Jay (Student)',  'student', 11),
+  ('00000000-0000-0000-0000-0000000000a1', 'School Office', 'admin', null);
 
--- Mentors -------------------------------------------------------------------
-insert into profiles (id, name, role, grade, subjects, interests, communication_style, personality_tags, availability, bio)
-values
-  ('00000000-0000-0000-0000-000000000011', 'Jisoo Park', 'mentor', 12,
-   '[{"subject":"Calculus","strength":5},{"subject":"Physics","strength":4}]',
-   '{robotics,chess,basketball}', 'structured', '{patient,organized}',
-   '{Mon-PM,Wed-PM,Sat-AM}', 'AP Calc & Physics. Loves breaking big problems into small steps.'),
+-- Class catalog -------------------------------------------------------------
+insert into classes (id, name, subject, grade_level, teacher_id, period, room, school_year) values
+  ('00000000-0000-0000-0000-0000000000c1', 'Algebra II',                  'Math',             10, '00000000-0000-0000-0000-0000000000d1', 'P1', '201',   '2026-2027'),
+  ('00000000-0000-0000-0000-0000000000c2', 'AP Calculus AB',              'Math',             11, '00000000-0000-0000-0000-0000000000d1', 'P2', '201',   '2026-2027'),
+  ('00000000-0000-0000-0000-0000000000c3', 'Biology',                     'Science',          10, '00000000-0000-0000-0000-0000000000d3', 'P3', 'Lab A', '2026-2027'),
+  ('00000000-0000-0000-0000-0000000000c4', 'AP Chemistry',                'Science',          11, '00000000-0000-0000-0000-0000000000d3', 'P4', 'Lab B', '2026-2027'),
+  ('00000000-0000-0000-0000-0000000000c5', 'English 10',                  'English',          10, '00000000-0000-0000-0000-0000000000d2', 'P2', '110',   '2026-2027'),
+  ('00000000-0000-0000-0000-0000000000c6', 'AP English Literature',       'English',          11, '00000000-0000-0000-0000-0000000000d2', 'P5', '110',   '2026-2027'),
+  ('00000000-0000-0000-0000-0000000000c7', 'World History',               'History',          10, '00000000-0000-0000-0000-0000000000d2', 'P6', '115',   '2026-2027'),
+  ('00000000-0000-0000-0000-0000000000c8', 'Spanish III',                 'World Language',   10, '00000000-0000-0000-0000-0000000000d4', 'P1', '120',   '2026-2027'),
+  ('00000000-0000-0000-0000-0000000000c9', 'Intro to Computer Science',   'Computer Science', 10, '00000000-0000-0000-0000-0000000000d3', 'P7', 'Lab C', '2026-2027');
 
-  ('00000000-0000-0000-0000-000000000012', 'Daniel Cho', 'mentor', 11,
-   '[{"subject":"Chemistry","strength":5},{"subject":"Biology","strength":4}]',
-   '{biology,cooking,kpop}', 'supportive', '{warm,encouraging}',
-   '{Tue-PM,Thu-PM,Sun-PM}', 'Future pre-med. Makes chem feel less scary.'),
+-- Mina's enrollments --------------------------------------------------------
+insert into enrollments (student_id, class_id) values
+  ('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000c1'),
+  ('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000c3'),
+  ('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000c5'),
+  ('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000c8');
 
-  ('00000000-0000-0000-0000-000000000013', 'Mina Seo', 'mentor', 12,
-   '[{"subject":"English Literature","strength":5},{"subject":"History","strength":4}]',
-   '{debate,reading,film}', 'direct', '{candid,motivating}',
-   '{Mon-PM,Thu-PM,Sat-PM}', 'Essay structure & close reading. Honest, fast feedback.'),
-
-  ('00000000-0000-0000-0000-000000000014', 'Kevin Lim', 'mentor', 11,
-   '[{"subject":"Computer Science","strength":5},{"subject":"Calculus","strength":3}]',
-   '{coding,gaming,robotics}', 'easygoing', '{chill,creative}',
-   '{Wed-PM,Fri-PM,Sun-PM}', 'CS & intro Python. We build small projects together.'),
-
-  ('00000000-0000-0000-0000-000000000015', 'Soyeon Han', 'mentor', 12,
-   '[{"subject":"Spanish","strength":5},{"subject":"English Literature","strength":3}]',
-   '{languages,travel,music}', 'supportive', '{friendly,patient}',
-   '{Tue-PM,Thu-PM,Sat-AM}', 'Bilingual. Conversation-first language practice.');
-
--- Mentees -------------------------------------------------------------------
-insert into profiles (id, name, role, grade, is_new_student, subjects, interests, communication_style, personality_tags, availability, bio)
-values
-  ('00000000-0000-0000-0000-000000000021', 'Yuna Kim', 'mentee', 9, true,
-   '[{"subject":"Calculus","need":5}]',
-   '{chess,basketball,robotics}', 'structured', '{shy,curious}',
-   '{Mon-PM,Sat-AM}', 'New 9th-grade transfer. Math moves fast here.'),
-
-  ('00000000-0000-0000-0000-000000000022', 'Ethan Yoon', 'mentee', 10, false,
-   '[{"subject":"Chemistry","need":4}]',
-   '{cooking,kpop,biology}', 'supportive', '{friendly,anxious-about-tests}',
-   '{Tue-PM,Sun-PM}', 'Want to feel calm before chem quizzes.'),
-
-  ('00000000-0000-0000-0000-000000000023', 'Hana Lee', 'mentee', 9, true,
-   '[{"subject":"English Literature","need":5}]',
-   '{reading,film,debate}', 'direct', '{determined}',
-   '{Mon-PM,Thu-PM}', 'New student. Need help with analytical essays.'),
-
-  ('00000000-0000-0000-0000-000000000024', 'Leo Jung', 'mentee', 10, false,
-   '[{"subject":"Computer Science","need":4}]',
-   '{gaming,coding,robotics}', 'easygoing', '{playful,self-taught}',
-   '{Wed-PM,Sun-PM}', 'Can code a bit, want to get serious about it.'),
-
-  ('00000000-0000-0000-0000-000000000025', 'Sara Moon', 'mentee', 11, false,
-   '[{"subject":"Spanish","need":3}]',
-   '{travel,music,languages}', 'supportive', '{outgoing}',
-   '{Tue-PM,Sat-AM}', 'Conversational Spanish for an exchange trip.'),
-
-  ('00000000-0000-0000-0000-000000000026', 'Noah Bae', 'mentee', 9, true,
-   '[{"subject":"Physics","need":4},{"subject":"Calculus","need":3}]',
-   '{basketball,chess,gaming}', 'structured', '{quiet,hardworking}',
-   '{Mon-PM,Sat-AM}', 'New here. Physics feels overwhelming.');
-
--- An active, healthy match with a short session history ----------------------
-insert into matches (id, mentor_id, mentee_id, subject, status, requested_by, score, score_breakdown, coordinator_note)
-values
-  ('00000000-0000-0000-0000-000000000101',
-   '00000000-0000-0000-0000-000000000011', -- Jisoo (mentor)
-   '00000000-0000-0000-0000-000000000021', -- Yuna (mentee)
-   'Calculus', 'active', 'mentee', 88,
-   '{"subject":40,"compatibility":31,"time":10,"coordinator":7}',
-   'Both love chess & robotics — great rapport early on.');
-
-insert into sessions (match_id, session_no, date, topic, duration_min, satisfaction, relationship_fit, mentee_growth)
-values
-  ('00000000-0000-0000-0000-000000000101', 1, current_date - 21, 'Limits & continuity', 60, 4, 'good', false),
-  ('00000000-0000-0000-0000-000000000101', 2, current_date - 14, 'Derivatives intro',   60, 5, 'good', false),
-  ('00000000-0000-0000-0000-000000000101', 3, current_date - 7,  'Chain rule practice',  60, 5, 'good', true);
-
--- A pending request waiting for a mentor to accept --------------------------
-insert into matches (id, mentor_id, mentee_id, subject, status, requested_by, score, score_breakdown)
-values
-  ('00000000-0000-0000-0000-000000000102',
-   '00000000-0000-0000-0000-000000000013', -- Mina (mentor)
-   '00000000-0000-0000-0000-000000000023', -- Hana (mentee)
-   'English Literature', 'requested', 'mentee', 84,
-   '{"subject":40,"compatibility":29,"time":10,"coordinator":5}');
+-- Assignments (due dates relative to today so filters show content) ----------
+insert into assignments (class_id, title, description, assigned_date, due_date, type, link, created_by) values
+  ('00000000-0000-0000-0000-0000000000c1', 'Quadratics worksheet §4.3', 'Problems 1–20, show your work.', current_date - 2, current_date,      'homework', null, '00000000-0000-0000-0000-0000000000d1'),
+  ('00000000-0000-0000-0000-0000000000c1', 'Unit 4 quiz', 'Covers factoring and the quadratic formula.', current_date - 5, current_date + 3,  'quiz',     null, '00000000-0000-0000-0000-0000000000d1'),
+  ('00000000-0000-0000-0000-0000000000c3', 'Cell organelles reading', 'Read ch. 3 and answer the review questions.', current_date - 1, current_date + 1, 'homework', 'https://example.com/bio-ch3', '00000000-0000-0000-0000-0000000000d3'),
+  ('00000000-0000-0000-0000-0000000000c3', 'Osmosis lab report', 'Full write-up: hypothesis, method, results, conclusion.', current_date - 3, current_date + 6, 'project', null, '00000000-0000-0000-0000-0000000000d3'),
+  ('00000000-0000-0000-0000-0000000000c5', 'Essay draft: theme in "The Giver"', 'Two pages, double-spaced.', current_date - 4, current_date + 2, 'homework', null, '00000000-0000-0000-0000-0000000000d2'),
+  ('00000000-0000-0000-0000-0000000000c5', 'Vocabulary test — Unit 5', null, current_date - 6, current_date + 9, 'test', null, '00000000-0000-0000-0000-0000000000d2'),
+  ('00000000-0000-0000-0000-0000000000c8', 'Preterite vs. imperfect exercises', 'Cuaderno pp. 44–45.', current_date - 1, current_date + 4, 'homework', null, '00000000-0000-0000-0000-0000000000d4'),
+  ('00000000-0000-0000-0000-0000000000c8', 'Cultural presentation', 'Pick a Spanish-speaking country; 3-minute talk.', current_date - 2, current_date + 20, 'project', null, '00000000-0000-0000-0000-0000000000d4'),
+  ('00000000-0000-0000-0000-0000000000c2', 'Limits practice set', 'Problems 1–15.', current_date - 1, current_date + 2, 'homework', null, '00000000-0000-0000-0000-0000000000d1'),
+  ('00000000-0000-0000-0000-0000000000c9', 'Python: number-guessing game', 'Push your code to the shared repo.', current_date - 2, current_date + 5, 'project', null, '00000000-0000-0000-0000-0000000000d3');

@@ -1,89 +1,64 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { useApp } from './context/AppContext';
-import Onboarding from './pages/Onboarding';
-import Profile from './pages/Profile';
-import Recommendations from './pages/Recommendations';
-import MyMentoring from './pages/MyMentoring';
-import Points from './pages/Points';
-import Coordinator from './pages/Coordinator';
+import ClassPicker from './pages/ClassPicker';
+import Feed from './pages/Feed';
+import CalendarPage from './pages/CalendarPage';
+import TeacherClasses from './pages/TeacherClasses';
 
 export default function App() {
   const { loading, currentUser, profiles, currentUserId, setCurrentUserId, supabaseConnected } =
     useApp();
 
-  if (loading) {
-    return <div className="center-screen">Loading Yeon…</div>;
-  }
+  if (loading) return <div className="center-screen">Loading Homework Hub…</div>;
 
-  const isCoordinator = currentUser?.role === 'coordinator';
+  const isTeacher = currentUser?.role === 'teacher';
+  const isStudent = currentUser?.role === 'student';
 
   return (
     <div className="app-shell">
       <header className="topbar">
         <div className="brand">
-          <span className="glyph">緣</span>
-          <span className="name">Yeon</span>
-          <span className="tagline">Learning, connected.</span>
+          <span className="glyph">🗓️</span>
+          <span className="name">Homework Hub</span>
         </div>
         <div className="topbar-spacer" />
         <div className="user-switcher">
-          <label htmlFor="user">Viewing as</label>
+          <label htmlFor="user">Signed in as</label>
           <select
             id="user"
             value={currentUserId ?? ''}
             onChange={(e) => setCurrentUserId(e.target.value)}
           >
-            <optgroup label="Coordinator">
-              {profiles
-                .filter((p) => p.role === 'coordinator')
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
+            <optgroup label="Students">
+              {profiles.filter((p) => p.role === 'student').map((p) => (
+                <option key={p.id} value={p.id}>{p.name} · G{p.grade}</option>
+              ))}
             </optgroup>
-            <optgroup label="Mentors">
-              {profiles
-                .filter((p) => p.role === 'mentor')
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} · G{p.grade}
-                  </option>
-                ))}
-            </optgroup>
-            <optgroup label="Mentees">
-              {profiles
-                .filter((p) => p.role === 'mentee')
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} · G{p.grade}
-                  </option>
-                ))}
+            <optgroup label="Teachers">
+              {profiles.filter((p) => p.role === 'teacher').map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
             </optgroup>
           </select>
         </div>
       </header>
 
       <nav className="nav">
-        <NavLink to="/recommendations" className={({ isActive }) => (isActive ? 'active' : '')}>
-          {isCoordinator ? 'Matchmaking' : 'Matches for me'}
-        </NavLink>
-        <NavLink to="/mentoring" className={({ isActive }) => (isActive ? 'active' : '')}>
-          My Mentoring
-        </NavLink>
-        <NavLink to="/points" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Points
-        </NavLink>
-        {isCoordinator && (
-          <NavLink to="/coordinator" className={({ isActive }) => (isActive ? 'active' : '')}>
-            Coordinator
+        {isStudent && (
+          <NavLink to="/classes" className={({ isActive }) => (isActive ? 'active' : '')}>
+            My Classes
           </NavLink>
         )}
-        <NavLink to="/profile" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Profile
+        {isTeacher && (
+          <NavLink to="/teach" className={({ isActive }) => (isActive ? 'active' : '')}>
+            My Classes
+          </NavLink>
+        )}
+        <NavLink to="/homework" className={({ isActive }) => (isActive ? 'active' : '')}>
+          Homework
         </NavLink>
-        <NavLink to="/onboarding" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Join
+        <NavLink to="/calendar" className={({ isActive }) => (isActive ? 'active' : '')}>
+          Calendar
         </NavLink>
       </nav>
 
@@ -97,14 +72,12 @@ export default function App() {
         )}
 
         <Routes>
-          <Route path="/" element={<Navigate to="/recommendations" replace />} />
-          <Route path="/recommendations" element={<Recommendations />} />
-          <Route path="/mentoring" element={<MyMentoring />} />
-          <Route path="/points" element={<Points />} />
-          <Route path="/coordinator" element={<Coordinator />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="*" element={<Navigate to="/recommendations" replace />} />
+          <Route path="/" element={<Navigate to={isTeacher ? '/teach' : '/homework'} replace />} />
+          <Route path="/classes" element={<ClassPicker />} />
+          <Route path="/teach" element={<TeacherClasses />} />
+          <Route path="/homework" element={<Feed />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="*" element={<Navigate to="/homework" replace />} />
         </Routes>
       </main>
     </div>

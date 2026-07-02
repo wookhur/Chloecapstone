@@ -1,101 +1,80 @@
 -- ============================================================================
--- Yeon (緣) — Database schema
--- Relationship-centered peer mentoring matching platform (SIS pilot)
+-- Homework Hub — Database schema
+-- Students pick classes; teachers post homework; everyone sees a feed + calendar.
 --
 -- Run this in the Supabase SQL Editor (Dashboard → SQL Editor → New query),
--- or via the Supabase CLI:  supabase db reset / psql -f supabase/schema.sql
+-- or via psql -f supabase/schema.sql
 -- ============================================================================
 
--- Clean slate (safe to re-run during the pilot) -----------------------------
-drop table if exists sessions cascade;
-drop table if exists matches cascade;
+drop table if exists assignments cascade;
+drop table if exists enrollments cascade;
+drop table if exists classes cascade;
 drop table if exists profiles cascade;
 
--- ---------------------------------------------------------------------------
--- profiles: mentors, mentees, and the coordinator
--- ---------------------------------------------------------------------------
+-- People: students, teachers, admins ----------------------------------------
 create table profiles (
-  id                  uuid primary key default gen_random_uuid(),
-  name                text        not null,
-  role                text        not null check (role in ('mentor', 'mentee', 'coordinator')),
-  grade               int         check (grade between 6 and 13),
-  is_new_student      boolean     not null default false,
-  -- subjects: mentor -> [{ "subject": "Calculus", "strength": 5 }]
-  --           mentee -> [{ "subject": "Calculus", "need": 4 }]
-  subjects            jsonb       not null default '[]'::jsonb,
-  interests           text[]      not null default '{}',
-  -- communication_style: one of 'direct' | 'supportive' | 'structured' | 'easygoing'
-  communication_style text,
-  personality_tags    text[]      not null default '{}',
-  -- availability slots like 'Mon-PM', 'Wed-Eve', 'Sat-AM'
-  availability        text[]      not null default '{}',
-  bio                 text,
-  created_at          timestamptz not null default now()
+  id         uuid primary key default gen_random_uuid(),
+  name       text not null,
+  role       text not null check (role in ('student', 'teacher', 'admin')),
+  grade      int  check (grade between 6 and 13),
+  created_at timestamptz not null default now()
 );
-
 create index profiles_role_idx on profiles (role);
 
--- ---------------------------------------------------------------------------
--- matches: a (mentor, mentee) connection for a subject
--- ---------------------------------------------------------------------------
-create table matches (
-  id                     uuid primary key default gen_random_uuid(),
-  mentor_id              uuid not null references profiles (id) on delete cascade,
-  mentee_id              uuid not null references profiles (id) on delete cascade,
-  subject                text not null,
-  -- suggested -> requested -> active -> ended | rematch
-  status                 text not null default 'suggested'
-                           check (status in ('suggested', 'requested', 'active', 'ended', 'rematch')),
-  -- requested_by tells the My Mentoring view which side needs to accept
-  requested_by           text check (requested_by in ('mentor', 'mentee', 'coordinator')),
-  score                  numeric not null default 0,
-  score_breakdown        jsonb   not null default '{}'::jsonb,
-  coordinator_adjustment int     not null default 0,   -- -10..+10 nudge by the coordinator
-  coordinator_note       text,
-  created_at             timestamptz not null default now(),
-  unique (mentor_id, mentee_id, subject)
+-- The class catalog: a course taught by one teacher for a school year --------
+create table classes (
+  id          uuid primary key default gen_random_uuid(),
+  name        text not null,
+  subject     text not null,
+  grade_level int,
+  teacher_id  uuid not null references profiles (id) on delete cascade,
+  period      text,
+  room        text,
+  school_year text not null,
+  created_at  timestamptz not null default now()
 );
+create index classes_teacher_idx on classes (teacher_id);
 
-create index matches_mentor_idx on matches (mentor_id);
-create index matches_mentee_idx on matches (mentee_id);
-create index matches_status_idx on matches (status);
-
--- ---------------------------------------------------------------------------
--- sessions: a logged mentoring session + relationship check-in
--- ---------------------------------------------------------------------------
-create table sessions (
-  id               uuid primary key default gen_random_uuid(),
-  match_id         uuid not null references matches (id) on delete cascade,
-  session_no       int  not null,
-  date             date not null default current_date,
-  topic            text,
-  duration_min     int  not null default 60,
-  satisfaction     int  check (satisfaction between 1 and 5),
-  -- relationship_fit is the "is this a good fit?" check-in
-  relationship_fit text check (relationship_fit in ('good', 'okay', 'poor')),
-  mentee_growth    boolean not null default false, -- confidence / grade improvement flagged
-  notes            text,
-  created_at       timestamptz not null default now()
+-- Which students take which classes -----------------------------------------
+create table enrollments (
+  id         uuid primary key default gen_random_uuid(),
+  student_id uuid not null references profiles (id) on delete cascade,
+  class_id   uuid not null references classes (id)  on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (student_id, class_id)
 );
+create index enrollments_student_idx on enrollments (student_id);
+create index enrollments_class_idx   on enrollments (class_id);
 
-create index sessions_match_idx on sessions (match_id);
+-- Homework / quizzes / tests / projects posted by teachers ------------------
+create table assignments (
+  id            uuid primary key default gen_random_uuid(),
+  class_id      uuid not null references classes (id) on delete cascade,
+  title         text not null,
+  description   text,
+  assigned_date date not null default current_date,
+  due_date      date not null,
+  type          text not null default 'homework'
+                  check (type in ('homework', 'quiz', 'test', 'project')),
+  link          text,
+  created_by    uuid references profiles (id) on delete set null,
+  created_at    timestamptz not null default now()
+);
+create index assignments_class_idx on assignments (class_id);
+create index assignments_due_idx   on assignments (due_date);
 
 -- ---------------------------------------------------------------------------
 -- Row Level Security
---
--- This pilot runs as a closed, trusted community keyed off the public anon
--- key (no per-user auth yet), so we allow the anon role full access. When the
--- pilot adds Supabase Auth, tighten these policies to per-user rules.
+-- Pilot runs on the public anon key (no per-user auth yet), so anon gets full
+-- access. When Supabase Auth is added, tighten these to per-user rules
+-- (e.g. students edit only their own enrollments; teachers only their classes).
 -- ---------------------------------------------------------------------------
-alter table profiles enable row level security;
-alter table matches  enable row level security;
-alter table sessions enable row level security;
+alter table profiles    enable row level security;
+alter table classes     enable row level security;
+alter table enrollments enable row level security;
+alter table assignments enable row level security;
 
-create policy "pilot full access — profiles" on profiles
-  for all to anon, authenticated using (true) with check (true);
-
-create policy "pilot full access — matches" on matches
-  for all to anon, authenticated using (true) with check (true);
-
-create policy "pilot full access — sessions" on sessions
-  for all to anon, authenticated using (true) with check (true);
+create policy "pilot full access — profiles"    on profiles    for all to anon, authenticated using (true) with check (true);
+create policy "pilot full access — classes"     on classes     for all to anon, authenticated using (true) with check (true);
+create policy "pilot full access — enrollments" on enrollments for all to anon, authenticated using (true) with check (true);
+create policy "pilot full access — assignments" on assignments for all to anon, authenticated using (true) with check (true);

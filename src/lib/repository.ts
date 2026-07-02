@@ -1,129 +1,143 @@
 import { isSupabaseConfigured, supabase } from './supabase';
-import { demoMatches, demoProfiles, demoSessions } from './demoData';
-import type { Match, Profile, Session } from './types';
+import {
+  demoAssignments,
+  demoClasses,
+  demoEnrollments,
+  demoProfiles,
+} from './demoData';
+import type { Assignment, ClassInfo, Enrollment, Profile } from './types';
 
 /**
- * Data access for Yeon. When Supabase is configured every call hits the
+ * Data access for Homework Hub. When Supabase is configured every call hits the
  * database; otherwise it operates on an in-memory copy of the demo data so the
  * UI stays fully interactive during local exploration.
  */
 
-// --- In-memory store (fallback) --------------------------------------------
 const mem = {
   profiles: [...demoProfiles],
-  matches: [...demoMatches],
-  sessions: [...demoSessions],
+  classes: [...demoClasses],
+  enrollments: [...demoEnrollments],
+  assignments: [...demoAssignments],
 };
 
 const uuid = () =>
-  (crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random()}`);
+  crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random()}`;
 
 // --- Reads ------------------------------------------------------------------
 export async function fetchProfiles(): Promise<Profile[]> {
   if (!isSupabaseConfigured) return [...mem.profiles];
-  const { data, error } = await supabase!
-    .from('profiles')
-    .select('*')
-    .order('created_at', { ascending: true });
+  const { data, error } = await supabase!.from('profiles').select('*').order('name');
   if (error) throw error;
   return data as Profile[];
 }
 
-export async function fetchMatches(): Promise<Match[]> {
-  if (!isSupabaseConfigured) return [...mem.matches];
-  const { data, error } = await supabase!.from('matches').select('*');
+export async function fetchClasses(): Promise<ClassInfo[]> {
+  if (!isSupabaseConfigured) return [...mem.classes];
+  const { data, error } = await supabase!.from('classes').select('*').order('name');
   if (error) throw error;
-  return data as Match[];
+  return data as ClassInfo[];
 }
 
-export async function fetchSessions(): Promise<Session[]> {
-  if (!isSupabaseConfigured) return [...mem.sessions];
-  const { data, error } = await supabase!.from('sessions').select('*');
+export async function fetchEnrollments(): Promise<Enrollment[]> {
+  if (!isSupabaseConfigured) return [...mem.enrollments];
+  const { data, error } = await supabase!.from('enrollments').select('*');
   if (error) throw error;
-  return data as Session[];
+  return data as Enrollment[];
 }
 
-// --- Writes -----------------------------------------------------------------
-export async function upsertProfile(
-  profile: Omit<Profile, 'id' | 'created_at'> & { id?: string },
-): Promise<Profile> {
+export async function fetchAssignments(): Promise<Assignment[]> {
+  if (!isSupabaseConfigured) return [...mem.assignments];
+  const { data, error } = await supabase!.from('assignments').select('*');
+  if (error) throw error;
+  return data as Assignment[];
+}
+
+// --- Enrollments (student picks classes) -----------------------------------
+export async function enroll(studentId: string, classId: string): Promise<void> {
   if (!isSupabaseConfigured) {
-    if (profile.id) {
-      const idx = mem.profiles.findIndex((p) => p.id === profile.id);
-      const updated = { ...mem.profiles[idx], ...profile } as Profile;
-      mem.profiles[idx] = updated;
-      return updated;
+    if (!mem.enrollments.some((e) => e.student_id === studentId && e.class_id === classId)) {
+      mem.enrollments.push({
+        id: uuid(),
+        student_id: studentId,
+        class_id: classId,
+        created_at: new Date().toISOString(),
+      });
     }
-    const created: Profile = {
-      ...profile,
-      id: uuid(),
-      created_at: new Date().toISOString(),
-    } as Profile;
-    mem.profiles.push(created);
-    return created;
+    return;
   }
-  const { data, error } = await supabase!
-    .from('profiles')
-    .upsert(profile)
-    .select()
-    .single();
-  if (error) throw error;
-  return data as Profile;
+  const { error } = await supabase!
+    .from('enrollments')
+    .insert({ student_id: studentId, class_id: classId });
+  if (error && error.code !== '23505') throw error; // ignore duplicate
 }
 
-export async function createMatch(
-  match: Omit<Match, 'id' | 'created_at'>,
-): Promise<Match> {
+export async function unenroll(studentId: string, classId: string): Promise<void> {
   if (!isSupabaseConfigured) {
-    const created: Match = { ...match, id: uuid(), created_at: new Date().toISOString() };
-    mem.matches.push(created);
-    return created;
+    mem.enrollments = mem.enrollments.filter(
+      (e) => !(e.student_id === studentId && e.class_id === classId),
+    );
+    return;
   }
-  const { data, error } = await supabase!
-    .from('matches')
-    .insert(match)
-    .select()
-    .single();
+  const { error } = await supabase!
+    .from('enrollments')
+    .delete()
+    .eq('student_id', studentId)
+    .eq('class_id', classId);
   if (error) throw error;
-  return data as Match;
 }
 
-export async function updateMatch(
+// --- Classes (teachers create their own) -----------------------------------
+export async function createClass(
+  cls: Omit<ClassInfo, 'id' | 'created_at'>,
+): Promise<ClassInfo> {
+  if (!isSupabaseConfigured) {
+    const created: ClassInfo = { ...cls, id: uuid(), created_at: new Date().toISOString() };
+    mem.classes.push(created);
+    return created;
+  }
+  const { data, error } = await supabase!.from('classes').insert(cls).select().single();
+  if (error) throw error;
+  return data as ClassInfo;
+}
+
+// --- Assignments (teachers post homework) ----------------------------------
+export async function createAssignment(
+  a: Omit<Assignment, 'id' | 'created_at'>,
+): Promise<Assignment> {
+  if (!isSupabaseConfigured) {
+    const created: Assignment = { ...a, id: uuid(), created_at: new Date().toISOString() };
+    mem.assignments.push(created);
+    return created;
+  }
+  const { data, error } = await supabase!.from('assignments').insert(a).select().single();
+  if (error) throw error;
+  return data as Assignment;
+}
+
+export async function updateAssignment(
   id: string,
-  patch: Partial<Match>,
-): Promise<Match> {
+  patch: Partial<Assignment>,
+): Promise<Assignment> {
   if (!isSupabaseConfigured) {
-    const idx = mem.matches.findIndex((m) => m.id === id);
-    mem.matches[idx] = { ...mem.matches[idx], ...patch };
-    return mem.matches[idx];
+    const idx = mem.assignments.findIndex((a) => a.id === id);
+    mem.assignments[idx] = { ...mem.assignments[idx], ...patch };
+    return mem.assignments[idx];
   }
   const { data, error } = await supabase!
-    .from('matches')
+    .from('assignments')
     .update(patch)
     .eq('id', id)
     .select()
     .single();
   if (error) throw error;
-  return data as Match;
+  return data as Assignment;
 }
 
-export async function createSession(
-  session: Omit<Session, 'id' | 'created_at'>,
-): Promise<Session> {
+export async function deleteAssignment(id: string): Promise<void> {
   if (!isSupabaseConfigured) {
-    const created: Session = {
-      ...session,
-      id: uuid(),
-      created_at: new Date().toISOString(),
-    };
-    mem.sessions.push(created);
-    return created;
+    mem.assignments = mem.assignments.filter((a) => a.id !== id);
+    return;
   }
-  const { data, error } = await supabase!
-    .from('sessions')
-    .insert(session)
-    .select()
-    .single();
+  const { error } = await supabase!.from('assignments').delete().eq('id', id);
   if (error) throw error;
-  return data as Session;
 }

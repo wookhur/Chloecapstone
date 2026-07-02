@@ -1,41 +1,39 @@
-# Yeon · 緣 — Learning, connected.
+# 🗓️ Homework Hub
 
-A **relationship-centered peer mentoring & tutoring matching platform** for
-Seoul International School (SIS). Unlike tutoring tools that pair students on
-subject ability alone, Yeon also weighs *people compatibility* — shared
-interests, personality, and communication style — and keeps a human
-coordinator at the center of every connection.
+A website where students **pick the classes they're taking**, then see **all the
+homework their teachers post** — as a filterable feed (day / week / month / year)
+**and** a unified calendar across every class they're enrolled in.
 
-> 기술이 후보를 추려주면, 마지막 '사람을 연결하는 일'은 코디네이터가 책임집니다.
-> Technology narrows the candidates; a coordinator makes the final, human call.
+## What it does
 
-## Why it's different
+**Students**
+- Browse the class catalog and select the classes they're taking for the year
+- See a **Homework feed** of everything due across those classes, filter by
+  *Today / This week / This month / This year / All upcoming* and by class
+- See a **Calendar** with every assignment laid out by due date, color-coded by subject
 
-- **Relationship-centered matching** — score = subject fit (40) + interest /
-  personality compatibility (35) + time overlap (15) + coordinator judgment (10).
-- **Relationship health** — quick "is this a good fit?" check-ins surface
-  struggling matches early so the coordinator can gently re-match.
-- **Coordinator-in-the-loop** — the coordinator reviews, nudges, and connects.
-- **Points & volunteer hours** — recognition that ties into the school's
-  volunteer-hour and honor-society programs.
+**Teachers**
+- Create the classes they teach
+- Post homework, quizzes, tests, and projects (title, details, due date, optional link)
+- Edit or delete assignments
 
 ## Features
 
 | Area | What it does |
 | --- | --- |
-| Onboarding / Profile | Role select (mentor/mentee), subject, interests, personality, communication style, availability |
-| Matches | Ranked recommendations with a visible score breakdown & shared interests |
-| Request / accept | Mentees request, mentors accept, coordinator can connect directly |
-| Sessions & check-ins | Log sessions with rating + relationship-fit check-in |
-| Points & volunteer hours | Per-person ledger, badges, mentor volunteer-hour totals |
-| Coordinator dashboard | All matches, relationship health, re-matching, ± nudge, CSV school report |
+| Class picker | Students add/remove classes; feed & calendar update to match |
+| Homework feed | Grouped by due date, with day/week/month/year + per-class filters |
+| Calendar | Month grid, subject-colored, click an assignment for details |
+| Teacher tools | Create classes, post/edit/delete assignments |
+| Roles | Student / Teacher (admin reserved for a later phase) |
 
 ## Tech stack
 
 - **React + Vite + TypeScript** front end
 - **Supabase** (Postgres) for data — schema + seed in [`supabase/`](./supabase)
-- Falls back to an in-memory demo dataset when Supabase isn't configured, so
-  the app is fully explorable out of the box.
+- **Netlify** for hosting (config in [`netlify.toml`](./netlify.toml))
+- Falls back to an in-memory demo dataset when Supabase isn't configured, so the
+  app is fully explorable out of the box.
 
 ## Getting started
 
@@ -45,6 +43,7 @@ npm run dev          # http://localhost:5173
 ```
 
 That's enough to explore everything in **demo mode** (data lives in memory).
+Use the "Signed in as" switcher (top-right) to try it as a student or a teacher.
 
 ### Connect Supabase (persistent data)
 
@@ -54,30 +53,35 @@ That's enough to explore everything in **demo mode** (data lives in memory).
 3. Copy your project URL and anon key into a local env file:
    ```bash
    cp .env.example .env.local
-   # then edit .env.local with VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+   # edit .env.local: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
    ```
-4. Restart `npm run dev`. The banner switches from "Demo mode" to live data.
+4. Restart `npm run dev`. The "Demo mode" banner disappears and data is live.
 
-> The pilot RLS policies grant the anon key full access for a closed, trusted
-> cohort. Tighten them once Supabase Auth is added (see comments in `schema.sql`).
+> The pilot RLS policies grant the anon key full access for a closed cohort.
+> Tighten them once Supabase Auth is added (see comments in `schema.sql`).
 
-## How matching works
+## Deploying to Netlify
 
-See [`src/lib/matching.ts`](./src/lib/matching.ts). For each mentee, candidate
-mentors are filtered to those who teach a needed subject at an equal-or-higher
-grade, then scored on the four weighted components above. The coordinator's ±
-nudge feeds directly into the score, so human judgment is part of the algorithm
-— not an override bolted on top.
+Connected to GitHub → Netlify auto-builds on every push to `main`
+(`npm run build` → `dist`). The `netlify.toml` includes an SPA redirect so
+client-side routes like `/calendar` resolve on refresh. To use real data in
+production, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Netlify →
+Site configuration → Environment variables.
 
 ## Project structure
 
 ```
 supabase/        schema.sql + seed.sql
 src/
-  lib/           supabase client, types, matching engine, points rules, repository
-  context/       AppContext — data loading + active-user switcher
-  components/     ProfileForm, RecommendationCard, ScoreBreakdown
-  pages/          Onboarding, Profile, Recommendations, MyMentoring, Points, Coordinator
+  lib/           supabase client, types, dates, subject colors, repository
+  context/       AppContext — data loading + current-user switcher
+  components/     AssignmentCard, Calendar
+  pages/          ClassPicker (student), Feed, CalendarPage, TeacherClasses
 ```
 
-Built as the pilot ("단일 웹앱 → 단계적 확장") described in the Yeon proposal.
+## Roadmap
+
+- **Phase 2:** real login (Supabase Auth / Google), file attachments (Supabase
+  Storage), "mark as done" checklist, admin catalog management, search, reminders
+- **Phase 3:** recurring assignments, export to Google/Apple Calendar (iCal),
+  comments on assignments, dark mode
