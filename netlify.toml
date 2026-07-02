@@ -1,0 +1,16 @@
+# Netlify build & deploy configuration for the Yeon (Vite + React SPA)
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Vite 5 needs a modern Node runtime
+  NODE_VERSION = "20"
+
+# Single-page-app fallback: let React Router handle all routes so that
+# direct navigation / refresh on paths like /coordinator doesn't 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
