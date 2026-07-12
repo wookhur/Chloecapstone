@@ -1,11 +1,38 @@
 import { isSupabaseConfigured, supabase } from './supabase';
 import {
+  demoAnnouncements,
   demoAssignments,
   demoClasses,
+  demoConversations,
+  demoDiscussionPosts,
+  demoDiscussionTopics,
   demoEnrollments,
+  demoFiles,
+  demoMessages,
+  demoModuleItems,
+  demoModules,
+  demoPages,
   demoProfiles,
+  demoQuizQuestions,
+  demoSubmissions,
 } from './demoData';
-import type { Assignment, ClassInfo, Enrollment, Profile } from './types';
+import type {
+  Announcement,
+  Assignment,
+  ClassInfo,
+  Conversation,
+  CourseFile,
+  CourseModule,
+  DiscussionPost,
+  DiscussionTopic,
+  Enrollment,
+  Message,
+  ModuleItem,
+  Profile,
+  QuizQuestion,
+  Submission,
+  WikiPage,
+} from './types';
 
 /**
  * Data access for Homework Hub. When Supabase is configured every call hits the
@@ -18,38 +45,75 @@ const mem = {
   classes: [...demoClasses],
   enrollments: [...demoEnrollments],
   assignments: [...demoAssignments],
+  submissions: [...demoSubmissions],
+  announcements: [...demoAnnouncements],
+  discussionTopics: [...demoDiscussionTopics],
+  discussionPosts: [...demoDiscussionPosts],
+  quizQuestions: [...demoQuizQuestions],
+  modules: [...demoModules],
+  moduleItems: [...demoModuleItems],
+  pages: [...demoPages],
+  files: [...demoFiles],
+  conversations: [...demoConversations],
+  messages: [...demoMessages],
 };
 
 const uuid = () =>
   crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random()}`;
 
+const nowISO = () => new Date().toISOString();
+
+/** Generic table read: demo copy when offline, `select *` when connected. */
+async function fetchTable<T>(memRows: T[], table: string, orderBy?: string): Promise<T[]> {
+  if (!isSupabaseConfigured) return [...memRows];
+  let q = supabase!.from(table).select('*');
+  if (orderBy) q = q.order(orderBy);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data as T[];
+}
+
 // --- Reads ------------------------------------------------------------------
-export async function fetchProfiles(): Promise<Profile[]> {
-  if (!isSupabaseConfigured) return [...mem.profiles];
-  const { data, error } = await supabase!.from('profiles').select('*').order('name');
-  if (error) throw error;
-  return data as Profile[];
-}
+export const fetchProfiles = () => fetchTable<Profile>(mem.profiles, 'profiles', 'name');
+export const fetchClasses = () => fetchTable<ClassInfo>(mem.classes, 'classes', 'name');
+export const fetchEnrollments = () => fetchTable<Enrollment>(mem.enrollments, 'enrollments');
+export const fetchAssignments = () => fetchTable<Assignment>(mem.assignments, 'assignments');
+export const fetchSubmissions = () => fetchTable<Submission>(mem.submissions, 'submissions');
+export const fetchAnnouncements = () =>
+  fetchTable<Announcement>(mem.announcements, 'announcements');
+export const fetchDiscussionTopics = () =>
+  fetchTable<DiscussionTopic>(mem.discussionTopics, 'discussion_topics');
+export const fetchDiscussionPosts = () =>
+  fetchTable<DiscussionPost>(mem.discussionPosts, 'discussion_posts');
+export const fetchQuizQuestions = () =>
+  fetchTable<QuizQuestion>(mem.quizQuestions, 'quiz_questions', 'position');
+export const fetchModules = () => fetchTable<CourseModule>(mem.modules, 'modules', 'position');
+export const fetchModuleItems = () =>
+  fetchTable<ModuleItem>(mem.moduleItems, 'module_items', 'position');
+export const fetchPages = () => fetchTable<WikiPage>(mem.pages, 'pages', 'title');
+export const fetchFiles = () => fetchTable<CourseFile>(mem.files, 'files', 'name');
+export const fetchConversations = () =>
+  fetchTable<Conversation>(mem.conversations, 'conversations');
+export const fetchMessages = () => fetchTable<Message>(mem.messages, 'messages', 'created_at');
 
-export async function fetchClasses(): Promise<ClassInfo[]> {
-  if (!isSupabaseConfigured) return [...mem.classes];
-  const { data, error } = await supabase!.from('classes').select('*').order('name');
+// --- Generic insert helper ---------------------------------------------------
+async function insertRow<T extends { id: string; created_at?: string }>(
+  memRows: T[],
+  table: string,
+  row: Omit<T, 'id' | 'created_at'>,
+): Promise<T> {
+  if (!isSupabaseConfigured) {
+    const created = { ...row, id: uuid(), created_at: nowISO() } as T;
+    memRows.push(created);
+    return created;
+  }
+  const { data, error } = await supabase!
+    .from(table)
+    .insert(row as Record<string, unknown>)
+    .select()
+    .single();
   if (error) throw error;
-  return data as ClassInfo[];
-}
-
-export async function fetchEnrollments(): Promise<Enrollment[]> {
-  if (!isSupabaseConfigured) return [...mem.enrollments];
-  const { data, error } = await supabase!.from('enrollments').select('*');
-  if (error) throw error;
-  return data as Enrollment[];
-}
-
-export async function fetchAssignments(): Promise<Assignment[]> {
-  if (!isSupabaseConfigured) return [...mem.assignments];
-  const { data, error } = await supabase!.from('assignments').select('*');
-  if (error) throw error;
-  return data as Assignment[];
+  return data as T;
 }
 
 // --- Enrollments (student picks classes) -----------------------------------
@@ -60,7 +124,7 @@ export async function enroll(studentId: string, classId: string): Promise<void> 
         id: uuid(),
         student_id: studentId,
         class_id: classId,
-        created_at: new Date().toISOString(),
+        created_at: nowISO(),
       });
     }
     return;
@@ -87,32 +151,28 @@ export async function unenroll(studentId: string, classId: string): Promise<void
 }
 
 // --- Classes (teachers create their own) -----------------------------------
-export async function createClass(
-  cls: Omit<ClassInfo, 'id' | 'created_at'>,
-): Promise<ClassInfo> {
+export const createClass = (cls: Omit<ClassInfo, 'id' | 'created_at'>) =>
+  insertRow<ClassInfo>(mem.classes, 'classes', cls);
+
+export async function updateClass(id: string, patch: Partial<ClassInfo>): Promise<ClassInfo> {
   if (!isSupabaseConfigured) {
-    const created: ClassInfo = { ...cls, id: uuid(), created_at: new Date().toISOString() };
-    mem.classes.push(created);
-    return created;
+    const idx = mem.classes.findIndex((c) => c.id === id);
+    mem.classes[idx] = { ...mem.classes[idx], ...patch };
+    return mem.classes[idx];
   }
-  const { data, error } = await supabase!.from('classes').insert(cls).select().single();
+  const { data, error } = await supabase!
+    .from('classes')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single();
   if (error) throw error;
   return data as ClassInfo;
 }
 
 // --- Assignments (teachers post homework) ----------------------------------
-export async function createAssignment(
-  a: Omit<Assignment, 'id' | 'created_at'>,
-): Promise<Assignment> {
-  if (!isSupabaseConfigured) {
-    const created: Assignment = { ...a, id: uuid(), created_at: new Date().toISOString() };
-    mem.assignments.push(created);
-    return created;
-  }
-  const { data, error } = await supabase!.from('assignments').insert(a).select().single();
-  if (error) throw error;
-  return data as Assignment;
-}
+export const createAssignment = (a: Omit<Assignment, 'id' | 'created_at'>) =>
+  insertRow<Assignment>(mem.assignments, 'assignments', a);
 
 export async function updateAssignment(
   id: string,
@@ -141,3 +201,204 @@ export async function deleteAssignment(id: string): Promise<void> {
   const { error } = await supabase!.from('assignments').delete().eq('id', id);
   if (error) throw error;
 }
+
+// --- Submissions (students turn work in; teachers grade) --------------------
+/** Create or replace the student's submission for an assignment. */
+export async function submitWork(
+  assignmentId: string,
+  studentId: string,
+  work: { body?: string | null; url?: string | null; score?: number | null; graded?: boolean },
+): Promise<Submission> {
+  const stamp = nowISO();
+  const fields = {
+    body: work.body ?? null,
+    url: work.url ?? null,
+    submitted_at: stamp,
+    score: work.score ?? null,
+    graded_at: work.graded ? stamp : null,
+  };
+  if (!isSupabaseConfigured) {
+    const existing = mem.submissions.find(
+      (s) => s.assignment_id === assignmentId && s.student_id === studentId,
+    );
+    if (existing) {
+      Object.assign(existing, fields);
+      return existing;
+    }
+    const created: Submission = {
+      id: uuid(),
+      assignment_id: assignmentId,
+      student_id: studentId,
+      grade_comment: null,
+      created_at: stamp,
+      ...fields,
+    };
+    mem.submissions.push(created);
+    return created;
+  }
+  const { data, error } = await supabase!
+    .from('submissions')
+    .upsert(
+      { assignment_id: assignmentId, student_id: studentId, ...fields },
+      { onConflict: 'assignment_id,student_id' },
+    )
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Submission;
+}
+
+/** Teacher grades a submission (creating a shell row if the student never submitted). */
+export async function gradeSubmission(
+  assignmentId: string,
+  studentId: string,
+  score: number | null,
+  comment: string | null,
+): Promise<Submission> {
+  const stamp = nowISO();
+  if (!isSupabaseConfigured) {
+    let sub = mem.submissions.find(
+      (s) => s.assignment_id === assignmentId && s.student_id === studentId,
+    );
+    if (!sub) {
+      sub = {
+        id: uuid(),
+        assignment_id: assignmentId,
+        student_id: studentId,
+        body: null,
+        url: null,
+        submitted_at: null,
+        score: null,
+        grade_comment: null,
+        graded_at: null,
+        created_at: stamp,
+      };
+      mem.submissions.push(sub);
+    }
+    sub.score = score;
+    sub.grade_comment = comment;
+    sub.graded_at = score == null ? null : stamp;
+    return sub;
+  }
+  const { data, error } = await supabase!
+    .from('submissions')
+    .upsert(
+      {
+        assignment_id: assignmentId,
+        student_id: studentId,
+        score,
+        grade_comment: comment,
+        graded_at: score == null ? null : stamp,
+      },
+      { onConflict: 'assignment_id,student_id' },
+    )
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Submission;
+}
+
+// --- Announcements -----------------------------------------------------------
+export const createAnnouncement = (a: Omit<Announcement, 'id' | 'created_at'>) =>
+  insertRow<Announcement>(mem.announcements, 'announcements', a);
+
+export async function deleteAnnouncement(id: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    mem.announcements = mem.announcements.filter((a) => a.id !== id);
+    return;
+  }
+  const { error } = await supabase!.from('announcements').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// --- Discussions ---------------------------------------------------------------
+export const createDiscussionTopic = (t: Omit<DiscussionTopic, 'id' | 'created_at'>) =>
+  insertRow<DiscussionTopic>(mem.discussionTopics, 'discussion_topics', t);
+
+export const createDiscussionPost = (p: Omit<DiscussionPost, 'id' | 'created_at'>) =>
+  insertRow<DiscussionPost>(mem.discussionPosts, 'discussion_posts', p);
+
+// --- Quiz questions ------------------------------------------------------------
+export async function createQuizQuestion(q: Omit<QuizQuestion, 'id'>): Promise<QuizQuestion> {
+  if (!isSupabaseConfigured) {
+    const created: QuizQuestion = { ...q, id: uuid() };
+    mem.quizQuestions.push(created);
+    return created;
+  }
+  const { data, error } = await supabase!.from('quiz_questions').insert(q).select().single();
+  if (error) throw error;
+  return data as QuizQuestion;
+}
+
+export async function deleteQuizQuestion(id: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    mem.quizQuestions = mem.quizQuestions.filter((q) => q.id !== id);
+    return;
+  }
+  const { error } = await supabase!.from('quiz_questions').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// --- Modules ---------------------------------------------------------------------
+export async function createModule(m: Omit<CourseModule, 'id'>): Promise<CourseModule> {
+  if (!isSupabaseConfigured) {
+    const created: CourseModule = { ...m, id: uuid() };
+    mem.modules.push(created);
+    return created;
+  }
+  const { data, error } = await supabase!.from('modules').insert(m).select().single();
+  if (error) throw error;
+  return data as CourseModule;
+}
+
+export async function createModuleItem(mi: Omit<ModuleItem, 'id'>): Promise<ModuleItem> {
+  if (!isSupabaseConfigured) {
+    const created: ModuleItem = { ...mi, id: uuid() };
+    mem.moduleItems.push(created);
+    return created;
+  }
+  const { data, error } = await supabase!.from('module_items').insert(mi).select().single();
+  if (error) throw error;
+  return data as ModuleItem;
+}
+
+// --- Pages -----------------------------------------------------------------------
+export const createPage = (p: Omit<WikiPage, 'id' | 'created_at'>) =>
+  insertRow<WikiPage>(mem.pages, 'pages', p);
+
+export async function updatePage(id: string, patch: Partial<WikiPage>): Promise<WikiPage> {
+  const withStamp = { ...patch, updated_at: nowISO() };
+  if (!isSupabaseConfigured) {
+    const idx = mem.pages.findIndex((p) => p.id === id);
+    mem.pages[idx] = { ...mem.pages[idx], ...withStamp };
+    return mem.pages[idx];
+  }
+  const { data, error } = await supabase!
+    .from('pages')
+    .update(withStamp)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as WikiPage;
+}
+
+// --- Files (metadata only for now) --------------------------------------------
+export const createFile = (f: Omit<CourseFile, 'id' | 'created_at'>) =>
+  insertRow<CourseFile>(mem.files, 'files', f);
+
+export async function deleteFile(id: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    mem.files = mem.files.filter((f) => f.id !== id);
+    return;
+  }
+  const { error } = await supabase!.from('files').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// --- Inbox -----------------------------------------------------------------------
+export const createConversation = (c: Omit<Conversation, 'id' | 'created_at'>) =>
+  insertRow<Conversation>(mem.conversations, 'conversations', c);
+
+export const createMessage = (m: Omit<Message, 'id' | 'created_at'>) =>
+  insertRow<Message>(mem.messages, 'messages', m);

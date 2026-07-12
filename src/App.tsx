@@ -4,6 +4,19 @@ import ClassPicker from './pages/ClassPicker';
 import Feed from './pages/Feed';
 import CalendarPage from './pages/CalendarPage';
 import TeacherClasses from './pages/TeacherClasses';
+import Dashboard from './pages/Dashboard';
+import CoursesPage from './pages/CoursesPage';
+import Inbox from './pages/Inbox';
+import CourseLayout from './pages/course/CourseLayout';
+
+/** Canvas-style global navigation rail entries. */
+const GLOBAL_NAV = [
+  { to: '/dashboard', glyph: '🏠', label: 'Dashboard' },
+  { to: '/courses', glyph: '📚', label: 'Courses' },
+  { to: '/calendar', glyph: '🗓️', label: 'Calendar' },
+  { to: '/inbox', glyph: '✉️', label: 'Inbox' },
+  { to: '/homework', glyph: '✅', label: 'To Do' },
+];
 
 export default function App() {
   const { loading, currentUser, profiles, currentUserId, setCurrentUserId, supabaseConnected } =
@@ -11,75 +24,79 @@ export default function App() {
 
   if (loading) return <div className="center-screen">Loading Homework Hub…</div>;
 
-  const isTeacher = currentUser?.role === 'teacher';
-  const isStudent = currentUser?.role === 'student';
-
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <div className="brand">
-          <span className="glyph">🗓️</span>
-          <span className="name">Homework Hub</span>
+    <div className="app-shell rail-layout">
+      <aside className="global-rail">
+        <div className="rail-brand" title="Homework Hub">
+          🗓️
         </div>
-        <div className="topbar-spacer" />
-        <div className="user-switcher">
-          <label htmlFor="user">Signed in as</label>
-          <select
-            id="user"
-            value={currentUserId ?? ''}
-            onChange={(e) => setCurrentUserId(e.target.value)}
+        {GLOBAL_NAV.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) => `rail-item ${isActive ? 'active' : ''}`}
           >
-            <optgroup label="Students">
-              {profiles.filter((p) => p.role === 'student').map((p) => (
-                <option key={p.id} value={p.id}>{p.name} · G{p.grade}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Teachers">
-              {profiles.filter((p) => p.role === 'teacher').map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </optgroup>
-          </select>
-        </div>
-      </header>
-
-      <nav className="nav">
-        {isStudent && (
-          <NavLink to="/classes" className={({ isActive }) => (isActive ? 'active' : '')}>
-            My Classes
+            <span className="rail-glyph">{item.glyph}</span>
+            <span className="rail-label">{item.label}</span>
           </NavLink>
-        )}
-        {isTeacher && (
-          <NavLink to="/teach" className={({ isActive }) => (isActive ? 'active' : '')}>
-            My Classes
-          </NavLink>
-        )}
-        <NavLink to="/homework" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Homework
-        </NavLink>
-        <NavLink to="/calendar" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Calendar
-        </NavLink>
-      </nav>
+        ))}
+      </aside>
 
-      <main className="content">
-        {!supabaseConnected && (
-          <div className="banner demo">
-            <span className="dot" />
-            Demo mode — Supabase isn't connected, so changes live in memory only.
-            Add <code>.env.local</code> to use your database.
+      <div className="rail-main">
+        <header className="topbar">
+          <div className="brand">
+            <span className="name">Homework Hub</span>
+            <span className="chip" style={{ marginLeft: '0.5rem' }}>
+              {currentUser?.role ?? '—'}
+            </span>
           </div>
-        )}
+          <div className="topbar-spacer" />
+          <div className="user-switcher">
+            <label htmlFor="user">Signed in as</label>
+            <select
+              id="user"
+              value={currentUserId ?? ''}
+              onChange={(e) => setCurrentUserId(e.target.value)}
+            >
+              <optgroup label="Students">
+                {profiles.filter((p) => p.role === 'student').map((p) => (
+                  <option key={p.id} value={p.id}>{p.name} · G{p.grade}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Teachers">
+                {profiles.filter((p) => p.role === 'teacher').map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+        </header>
 
-        <Routes>
-          <Route path="/" element={<Navigate to={isTeacher ? '/teach' : '/homework'} replace />} />
-          <Route path="/classes" element={<ClassPicker />} />
-          <Route path="/teach" element={<TeacherClasses />} />
-          <Route path="/homework" element={<Feed />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="*" element={<Navigate to="/homework" replace />} />
-        </Routes>
-      </main>
+        <main className="content">
+          {!supabaseConnected && (
+            <div className="banner demo">
+              <span className="dot" />
+              Demo mode — Supabase isn't connected, so changes live in memory only.
+              Add <code>.env.local</code> to use your database.
+            </div>
+          )}
+
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/courses" element={<CoursesPage />} />
+            <Route path="/courses/browse" element={<ClassPicker />} />
+            <Route path="/courses/manage" element={<TeacherClasses />} />
+            <Route path="/courses/:classId/*" element={<CourseLayout />} />
+            <Route path="/classes" element={<Navigate to="/courses/browse" replace />} />
+            <Route path="/teach" element={<Navigate to="/courses/manage" replace />} />
+            <Route path="/homework" element={<Feed />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/inbox" element={<Inbox />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 }

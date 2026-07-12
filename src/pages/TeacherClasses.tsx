@@ -90,6 +90,7 @@ function NewClassForm({
         period,
         room: room.trim() || null,
         school_year: SCHOOL_YEAR,
+        syllabus: null,
       });
       await onCreated();
     } finally {
@@ -245,6 +246,9 @@ function AssignmentForm({
           due_date: dueDate,
           type,
           link: link.trim() || null,
+          points_possible: 10,
+          submission_kind: type === 'quiz' || type === 'test' ? 'quiz' : 'text',
+          published: true,
           created_by: teacherId,
         });
       }

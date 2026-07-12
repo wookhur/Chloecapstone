@@ -9,7 +9,23 @@ import {
 } from 'react';
 import * as repo from '../lib/repository';
 import { isSupabaseConfigured } from '../lib/supabase';
-import type { Assignment, ClassInfo, Enrollment, Profile } from '../lib/types';
+import type {
+  Announcement,
+  Assignment,
+  ClassInfo,
+  Conversation,
+  CourseFile,
+  CourseModule,
+  DiscussionPost,
+  DiscussionTopic,
+  Enrollment,
+  Message,
+  ModuleItem,
+  Profile,
+  QuizQuestion,
+  Submission,
+  WikiPage,
+} from '../lib/types';
 
 interface AppState {
   loading: boolean;
@@ -19,6 +35,17 @@ interface AppState {
   classes: ClassInfo[];
   enrollments: Enrollment[];
   assignments: Assignment[];
+  submissions: Submission[];
+  announcements: Announcement[];
+  discussionTopics: DiscussionTopic[];
+  discussionPosts: DiscussionPost[];
+  quizQuestions: QuizQuestion[];
+  modules: CourseModule[];
+  moduleItems: ModuleItem[];
+  pages: WikiPage[];
+  files: CourseFile[];
+  conversations: Conversation[];
+  messages: Message[];
   currentUserId: string | null;
   currentUser: Profile | null;
   setCurrentUserId: (id: string | null) => void;
@@ -27,6 +54,10 @@ interface AppState {
   classById: (id: string) => ClassInfo | undefined;
   profileById: (id: string) => Profile | undefined;
   myClassIds: string[];
+  /** Enrolled student ids for a class (sorted by name). */
+  rosterFor: (classId: string) => Profile[];
+  /** The current user's submission for an assignment, if any. */
+  mySubmission: (assignmentId: string) => Submission | undefined;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -39,6 +70,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [discussionTopics, setDiscussionTopics] = useState<DiscussionTopic[]>([]);
+  const [discussionPosts, setDiscussionPosts] = useState<DiscussionPost[]>([]);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+  const [modules, setModules] = useState<CourseModule[]>([]);
+  const [moduleItems, setModuleItems] = useState<ModuleItem[]>([]);
+  const [pages, setPages] = useState<WikiPage[]>([]);
+  const [files, setFiles] = useState<CourseFile[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [currentUserId, setCurrentUserIdState] = useState<string | null>(
     () => localStorage.getItem(STORAGE_KEY),
   );
@@ -52,16 +94,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setError(null);
     try {
-      const [p, c, e, a] = await Promise.all([
+      const [p, c, e, a, sub, an, dt, dp, qq, mo, mi, pg, fi, cv, ms] = await Promise.all([
         repo.fetchProfiles(),
         repo.fetchClasses(),
         repo.fetchEnrollments(),
         repo.fetchAssignments(),
+        repo.fetchSubmissions(),
+        repo.fetchAnnouncements(),
+        repo.fetchDiscussionTopics(),
+        repo.fetchDiscussionPosts(),
+        repo.fetchQuizQuestions(),
+        repo.fetchModules(),
+        repo.fetchModuleItems(),
+        repo.fetchPages(),
+        repo.fetchFiles(),
+        repo.fetchConversations(),
+        repo.fetchMessages(),
       ]);
       setProfiles(p);
       setClasses(c);
       setEnrollments(e);
       setAssignments(a);
+      setSubmissions(sub);
+      setAnnouncements(an);
+      setDiscussionTopics(dt);
+      setDiscussionPosts(dp);
+      setQuizQuestions(qq);
+      setModules(mo);
+      setModuleItems(mi);
+      setPages(pg);
+      setFiles(fi);
+      setConversations(cv);
+      setMessages(ms);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
@@ -107,6 +171,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .map((e) => e.class_id);
   }, [currentUser, classes, enrollments]);
 
+  const rosterFor = useCallback(
+    (classId: string) =>
+      enrollments
+        .filter((e) => e.class_id === classId)
+        .map((e) => profiles.find((p) => p.id === e.student_id))
+        .filter((p): p is Profile => Boolean(p))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [enrollments, profiles],
+  );
+
+  const mySubmission = useCallback(
+    (assignmentId: string) =>
+      submissions.find(
+        (s) => s.assignment_id === assignmentId && s.student_id === currentUserId,
+      ),
+    [submissions, currentUserId],
+  );
+
   const value: AppState = {
     loading,
     error,
@@ -115,6 +197,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     classes,
     enrollments,
     assignments,
+    submissions,
+    announcements,
+    discussionTopics,
+    discussionPosts,
+    quizQuestions,
+    modules,
+    moduleItems,
+    pages,
+    files,
+    conversations,
+    messages,
     currentUserId,
     currentUser,
     setCurrentUserId,
@@ -122,6 +215,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     classById,
     profileById,
     myClassIds,
+    rosterFor,
+    mySubmission,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

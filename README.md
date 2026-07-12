@@ -1,31 +1,44 @@
 # 🗓️ Homework Hub
 
-A website where students **pick the classes they're taking**, then see **all the
-homework their teachers post** — as a filterable feed (day / week / month / year)
-**and** a unified calendar across every class they're enrolled in.
+A **Canvas-style LMS** for school: students pick their classes, see everything
+due in one feed and calendar, submit work online, take auto-graded quizzes and
+check their grades — while teachers post assignments, grade in a SpeedGrader,
+run a full gradebook, and manage announcements, discussions, modules, pages
+and files per course.
 
 ## What it does
 
-**Students**
-- Browse the class catalog and select the classes they're taking for the year
-- See a **Homework feed** of everything due across those classes, filter by
-  *Today / This week / This month / This year / All upcoming* and by class
-- See a **Calendar** with every assignment laid out by due date, color-coded by subject
+**Everyone**
+- **Dashboard** — color-coded course cards (with your current grade) plus a
+  To-Do sidebar (students: work due; teachers: submissions to grade)
+- **Global navigation rail** — Dashboard · Courses · Calendar · Inbox · To Do
+- **Calendar** — every assignment across your courses, color-coded by subject
+- **Inbox** — compose and reply to private conversations
 
-**Teachers**
-- Create the classes they teach
-- Post homework, quizzes, tests, and projects (title, details, due date, optional link)
-- Edit or delete assignments
+**Inside every course** (Canvas-style course menu)
 
-## Features
-
-| Area | What it does |
+| Tab | What it does |
 | --- | --- |
-| Class picker | Students add/remove classes; feed & calendar update to match |
-| Homework feed | Grouped by due date, with day/week/month/year + per-class filters |
-| Calendar | Month grid, subject-colored, click an assignment for details |
-| Teacher tools | Create classes, post/edit/delete assignments |
-| Roles | Student / Teacher (admin reserved for a later phase) |
+| Home | Recent announcements, upcoming work, active discussions |
+| Announcements | Teacher posts class-wide notices |
+| Assignments | Upcoming/past list with points & status; detail page with **online submission** (text entry / website URL) |
+| Discussions | Threaded topics — anyone can start one and reply |
+| Grades | Students: score list + total (letter grade). Teachers: full **Gradebook grid** with click-to-edit cells |
+| People | Course roster |
+| Pages | Wiki-style course content (teacher-editable) |
+| Files | Course file list (metadata now; storage in a later phase) |
+| Syllabus | Course policies + auto-generated course summary table |
+| Quizzes | **Online quizzes with auto-grading** — teachers build multiple-choice questions, students get one attempt and an instant score |
+| Modules | Ordered units mixing pages, assignments, and external links |
+
+**Teachers also get**
+- **SpeedGrader** — step through the roster per assignment, view each
+  submission, enter a score + feedback comment
+- Assignment builder with points, due date and submission type
+- Class creation and course-content management on every tab
+
+**Submission statuses** work like Canvas: *Not submitted · Submitted · Late ·
+Missing · Graded*, and course grades roll up to a percent + letter grade.
 
 ## Tech stack
 
@@ -43,7 +56,9 @@ npm run dev          # http://localhost:5173
 ```
 
 That's enough to explore everything in **demo mode** (data lives in memory).
-Use the "Signed in as" switcher (top-right) to try it as a student or a teacher.
+Use the "Signed in as" switcher (top-right) to try it as a student or a teacher
+— e.g. Mina (student) and Ms. Anderson (teacher) share the Algebra II course,
+which is fully populated: submissions, grades, a quiz, modules, pages and more.
 
 ### Connect Supabase (persistent data)
 
@@ -71,17 +86,21 @@ Site configuration → Environment variables.
 ## Project structure
 
 ```
-supabase/        schema.sql + seed.sql
+supabase/        schema.sql + seed.sql (15 tables)
 src/
-  lib/           supabase client, types, dates, subject colors, repository
+  lib/           supabase client, types, dates, grades math, subject colors, repository
   context/       AppContext — data loading + current-user switcher
-  components/     AssignmentCard, Calendar
-  pages/          ClassPicker (student), Feed, CalendarPage, TeacherClasses
+  components/    AssignmentCard, Calendar
+  pages/         Dashboard, CoursesPage, Inbox, Feed, CalendarPage,
+                 ClassPicker (student), TeacherClasses (teacher)
+  pages/course/  CourseLayout + tabs: Home, Announcements, Assignments,
+                 AssignmentDetail, SpeedGrader, Discussions, Grades/Gradebook,
+                 Quizzes, QuizTake, Modules, Pages, People, Files, Syllabus
 ```
 
 ## Roadmap
 
 - **Phase 2:** real login (Supabase Auth / Google), file attachments (Supabase
-  Storage), "mark as done" checklist, admin catalog management, search, reminders
-- **Phase 3:** recurring assignments, export to Google/Apple Calendar (iCal),
-  comments on assignments, dark mode
+  Storage), rubrics, quiz question banks & timers, notifications
+- **Phase 3:** weighted grading groups, export to Google/Apple Calendar (iCal),
+  parent/observer accounts, dark mode
