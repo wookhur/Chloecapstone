@@ -21,8 +21,9 @@ import type {
   Enrollment,
   Message,
   ModuleItem,
+  PracticeQuestion,
+  PracticeQuiz,
   Profile,
-  QuizQuestion,
   Submission,
   WikiPage,
 } from '../lib/types';
@@ -39,7 +40,8 @@ interface AppState {
   announcements: Announcement[];
   discussionTopics: DiscussionTopic[];
   discussionPosts: DiscussionPost[];
-  quizQuestions: QuizQuestion[];
+  practiceQuizzes: PracticeQuiz[];
+  practiceQuestions: PracticeQuestion[];
   modules: CourseModule[];
   moduleItems: ModuleItem[];
   pages: WikiPage[];
@@ -74,7 +76,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [discussionTopics, setDiscussionTopics] = useState<DiscussionTopic[]>([]);
   const [discussionPosts, setDiscussionPosts] = useState<DiscussionPost[]>([]);
-  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+  const [practiceQuizzes, setPracticeQuizzes] = useState<PracticeQuiz[]>([]);
+  const [practiceQuestions, setPracticeQuestions] = useState<PracticeQuestion[]>([]);
   const [modules, setModules] = useState<CourseModule[]>([]);
   const [moduleItems, setModuleItems] = useState<ModuleItem[]>([]);
   const [pages, setPages] = useState<WikiPage[]>([]);
@@ -94,7 +97,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setError(null);
     try {
-      const [p, c, e, a, sub, an, dt, dp, qq, mo, mi, pg, fi, cv, ms] = await Promise.all([
+      const [p, c, e, a, sub, an, dt, dp, pq, pqq, mo, mi, pg, fi, cv, ms] = await Promise.all([
         repo.fetchProfiles(),
         repo.fetchClasses(),
         repo.fetchEnrollments(),
@@ -103,7 +106,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         repo.fetchAnnouncements(),
         repo.fetchDiscussionTopics(),
         repo.fetchDiscussionPosts(),
-        repo.fetchQuizQuestions(),
+        repo.fetchPracticeQuizzes(),
+        repo.fetchPracticeQuestions(),
         repo.fetchModules(),
         repo.fetchModuleItems(),
         repo.fetchPages(),
@@ -119,7 +123,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setAnnouncements(an);
       setDiscussionTopics(dt);
       setDiscussionPosts(dp);
-      setQuizQuestions(qq);
+      setPracticeQuizzes(pq);
+      setPracticeQuestions(pqq);
       setModules(mo);
       setModuleItems(mi);
       setPages(pg);
@@ -201,7 +206,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     announcements,
     discussionTopics,
     discussionPosts,
-    quizQuestions,
+    practiceQuizzes,
+    practiceQuestions,
     modules,
     moduleItems,
     pages,

@@ -79,16 +79,27 @@ insert into submissions (assignment_id, student_id, body, submitted_at, score, g
   ('00000000-0000-0000-0000-00000000ab01', '00000000-0000-0000-0000-0000000000e4', 'Problems 1–20 attached. I used the quadratic formula for 15–20.', now() - interval '2 hours', null, null, null),
   ('00000000-0000-0000-0000-00000000ab05', '00000000-0000-0000-0000-0000000000e1', 'Draft: In "The Giver", memory functions as both burden and gift…', now() - interval '3 hours', null, null, null);
 
--- Quiz questions ------------------------------------------------------------------
-insert into quiz_questions (assignment_id, position, question, choices, correct_index, points) values
-  ('00000000-0000-0000-0000-00000000ab02', 1, 'What are the roots of x² − 5x + 6 = 0?', array['x = 2, 3', 'x = −2, −3', 'x = 1, 6', 'x = −1, −6'], 0, 2),
-  ('00000000-0000-0000-0000-00000000ab02', 2, 'The discriminant of ax² + bx + c is…', array['b² − 4ac', 'b² + 4ac', '−b ± 2ac', '4ac − b²'], 0, 2),
-  ('00000000-0000-0000-0000-00000000ab02', 3, 'If the discriminant is negative, the equation has…', array['two real roots', 'one real root', 'no real roots', 'infinitely many roots'], 2, 2),
-  ('00000000-0000-0000-0000-00000000ab02', 4, 'Factor: x² − 9', array['(x − 3)(x − 3)', '(x + 3)(x − 3)', '(x + 9)(x − 1)', 'prime'], 1, 2),
-  ('00000000-0000-0000-0000-00000000ab02', 5, 'The vertex of y = (x − 2)² + 5 is…', array['(−2, 5)', '(2, −5)', '(2, 5)', '(5, 2)'], 2, 2),
-  ('00000000-0000-0000-0000-00000000ab06', 1, '"Ubiquitous" most nearly means…', array['rare', 'everywhere', 'ancient', 'transparent'], 1, 5),
-  ('00000000-0000-0000-0000-00000000ab06', 2, '"Candid" most nearly means…', array['sweet', 'hidden', 'honest', 'nervous'], 2, 5),
-  ('00000000-0000-0000-0000-00000000ab06', 3, '"Ephemeral" most nearly means…', array['short-lived', 'heavenly', 'glowing', 'repeated'], 0, 5);
+-- Practice quizzes (Quizlet-style, made by students) --------------------------------
+insert into practice_quizzes (id, class_id, author_id, title, description, created_at) values
+  ('00000000-0000-0000-0000-00000000fb01', '00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000e1', 'Quadratics self-check', 'Made this while studying for Unit 4 — good luck!', now() - interval '2 days'),
+  ('00000000-0000-0000-0000-00000000fb02', '00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000e4', 'Factoring speed round', 'Quick factoring practice.', now() - interval '1 day'),
+  ('00000000-0000-0000-0000-00000000fb03', '00000000-0000-0000-0000-0000000000c3', '00000000-0000-0000-0000-0000000000e3', 'Cell organelles flashcards', 'Know your organelles for the quiz.', now() - interval '1 day'),
+  ('00000000-0000-0000-0000-00000000fb04', '00000000-0000-0000-0000-0000000000c5', '00000000-0000-0000-0000-0000000000e4', 'Unit 5 vocab practice', null, now() - interval '3 days');
+
+insert into practice_questions (quiz_id, position, question, choices, correct_index) values
+  ('00000000-0000-0000-0000-00000000fb01', 1, 'What are the roots of x² − 5x + 6 = 0?', array['x = 2, 3', 'x = −2, −3', 'x = 1, 6', 'x = −1, −6'], 0),
+  ('00000000-0000-0000-0000-00000000fb01', 2, 'The discriminant of ax² + bx + c is…', array['b² − 4ac', 'b² + 4ac', '−b ± 2ac', '4ac − b²'], 0),
+  ('00000000-0000-0000-0000-00000000fb01', 3, 'If the discriminant is negative, the equation has…', array['two real roots', 'one real root', 'no real roots', 'infinitely many roots'], 2),
+  ('00000000-0000-0000-0000-00000000fb01', 4, 'The vertex of y = (x − 2)² + 5 is…', array['(−2, 5)', '(2, −5)', '(2, 5)', '(5, 2)'], 2),
+  ('00000000-0000-0000-0000-00000000fb02', 1, 'Factor: x² − 9', array['(x − 3)(x − 3)', '(x + 3)(x − 3)', '(x + 9)(x − 1)', 'prime'], 1),
+  ('00000000-0000-0000-0000-00000000fb02', 2, 'Factor: x² + 5x + 6', array['(x + 2)(x + 3)', '(x + 1)(x + 6)', '(x − 2)(x − 3)', '(x + 5)(x + 1)'], 0),
+  ('00000000-0000-0000-0000-00000000fb02', 3, 'Factor: x² − 4x', array['x(x − 4)', '(x − 2)(x + 2)', 'x(x + 4)', '4(x − 1)'], 0),
+  ('00000000-0000-0000-0000-00000000fb03', 1, 'Which organelle makes ATP?', array['Nucleus', 'Ribosome', 'Mitochondrion', 'Vacuole'], 2),
+  ('00000000-0000-0000-0000-00000000fb03', 2, 'Where are proteins built?', array['Ribosome', 'Lysosome', 'Chloroplast', 'Cell wall'], 0),
+  ('00000000-0000-0000-0000-00000000fb03', 3, 'Photosynthesis happens in the…', array['Mitochondrion', 'Chloroplast', 'Nucleus', 'Membrane'], 1),
+  ('00000000-0000-0000-0000-00000000fb04', 1, '"Ubiquitous" most nearly means…', array['rare', 'everywhere', 'ancient', 'transparent'], 1),
+  ('00000000-0000-0000-0000-00000000fb04', 2, '"Candid" most nearly means…', array['sweet', 'hidden', 'honest', 'nervous'], 2),
+  ('00000000-0000-0000-0000-00000000fb04', 3, '"Ephemeral" most nearly means…', array['short-lived', 'heavenly', 'glowing', 'repeated'], 0);
 
 -- Announcements ---------------------------------------------------------------------
 insert into announcements (class_id, author_id, title, body, created_at) values

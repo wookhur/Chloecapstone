@@ -60,7 +60,7 @@ export default function CourseHome({ cls }: { cls: ClassInfo }) {
               <li key={a.id} className="list-row">
                 <Link to={`../assignments/${a.id}`} style={{ fontWeight: 600 }}>{a.title}</Link>
                 <span className="muted" style={{ fontSize: '0.8rem' }}>
-                  {a.points_possible} pts · {dueLabel(a.due_date)}
+                  {dueLabel(a.due_date)}
                 </span>
               </li>
             ))}

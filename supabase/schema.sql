@@ -13,7 +13,8 @@ drop table if exists files cascade;
 drop table if exists pages cascade;
 drop table if exists module_items cascade;
 drop table if exists modules cascade;
-drop table if exists quiz_questions cascade;
+drop table if exists practice_questions cascade;
+drop table if exists practice_quizzes cascade;
 drop table if exists discussion_posts cascade;
 drop table if exists discussion_topics cascade;
 drop table if exists announcements cascade;
@@ -128,17 +129,26 @@ create table discussion_posts (
 );
 create index discussion_posts_topic_idx on discussion_posts (topic_id);
 
--- Auto-graded multiple-choice questions for quiz-type assignments -----------------
-create table quiz_questions (
+-- Quizlet-style practice quizzes: student-made, ungraded self-check ----------------
+create table practice_quizzes (
+  id          uuid primary key default gen_random_uuid(),
+  class_id    uuid not null references classes (id) on delete cascade,
+  author_id   uuid not null references profiles (id) on delete cascade,
+  title       text not null,
+  description text,
+  created_at  timestamptz not null default now()
+);
+create index practice_quizzes_class_idx on practice_quizzes (class_id);
+
+create table practice_questions (
   id            uuid primary key default gen_random_uuid(),
-  assignment_id uuid not null references assignments (id) on delete cascade,
+  quiz_id       uuid not null references practice_quizzes (id) on delete cascade,
   position      int  not null default 1,
   question      text not null,
   choices       text[] not null,
-  correct_index int  not null default 0,
-  points        numeric not null default 1
+  correct_index int  not null default 0
 );
-create index quiz_questions_assignment_idx on quiz_questions (assignment_id);
+create index practice_questions_quiz_idx on practice_questions (quiz_id);
 
 -- Course modules: ordered units of pages / assignments / links --------------------
 create table modules (
@@ -210,7 +220,8 @@ declare t text;
 begin
   foreach t in array array[
     'profiles', 'classes', 'enrollments', 'assignments', 'submissions',
-    'announcements', 'discussion_topics', 'discussion_posts', 'quiz_questions',
+    'announcements', 'discussion_topics', 'discussion_posts',
+    'practice_quizzes', 'practice_questions',
     'modules', 'module_items', 'pages', 'files', 'conversations', 'messages'
   ]
   loop

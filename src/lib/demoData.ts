@@ -11,8 +11,9 @@ import {
   type Enrollment,
   type Message,
   type ModuleItem,
+  type PracticeQuestion,
+  type PracticeQuiz,
   type Profile,
-  type QuizQuestion,
   type Submission,
   type WikiPage,
 } from './types';
@@ -155,17 +156,32 @@ export const demoDiscussionPosts: DiscussionPost[] = [
   { id: 'dp5', topic_id: 'dt3', author_id: 's-zoe', body: 'Dystopia. "We really have to protect people from wrong choices" shows they gave up freedom.', created_at: ts(-3, 15) },
 ];
 
-export const demoQuizQuestions: QuizQuestion[] = [
-  // Unit 4 quiz (a2, Algebra II) — 10 points
-  { id: 'q1', assignment_id: 'a2', position: 1, question: 'What are the roots of x² − 5x + 6 = 0?', choices: ['x = 2, 3', 'x = −2, −3', 'x = 1, 6', 'x = −1, −6'], correct_index: 0, points: 2 },
-  { id: 'q2', assignment_id: 'a2', position: 2, question: 'The discriminant of ax² + bx + c is…', choices: ['b² − 4ac', 'b² + 4ac', '−b ± 2ac', '4ac − b²'], correct_index: 0, points: 2 },
-  { id: 'q3', assignment_id: 'a2', position: 3, question: 'If the discriminant is negative, the equation has…', choices: ['two real roots', 'one real root', 'no real roots', 'infinitely many roots'], correct_index: 2, points: 2 },
-  { id: 'q4', assignment_id: 'a2', position: 4, question: 'Factor: x² − 9', choices: ['(x − 3)(x − 3)', '(x + 3)(x − 3)', '(x + 9)(x − 1)', 'prime'], correct_index: 1, points: 2 },
-  { id: 'q5', assignment_id: 'a2', position: 5, question: 'The vertex of y = (x − 2)² + 5 is…', choices: ['(−2, 5)', '(2, −5)', '(2, 5)', '(5, 2)'], correct_index: 2, points: 2 },
-  // Vocabulary test (a6, English 10) — 15 points
-  { id: 'q6', assignment_id: 'a6', position: 1, question: '"Ubiquitous" most nearly means…', choices: ['rare', 'everywhere', 'ancient', 'transparent'], correct_index: 1, points: 5 },
-  { id: 'q7', assignment_id: 'a6', position: 2, question: '"Candid" most nearly means…', choices: ['sweet', 'hidden', 'honest', 'nervous'], correct_index: 2, points: 5 },
-  { id: 'q8', assignment_id: 'a6', position: 3, question: '"Ephemeral" most nearly means…', choices: ['short-lived', 'heavenly', 'glowing', 'repeated'], correct_index: 0, points: 5 },
+// Quizlet-style practice quizzes made by students for their classmates.
+export const demoPracticeQuizzes: PracticeQuiz[] = [
+  { id: 'pq1', class_id: 'c-alg2', author_id: 's-mina', title: 'Quadratics self-check', description: 'Made this while studying for Unit 4 — good luck!', created_at: ts(-2, 19) },
+  { id: 'pq2', class_id: 'c-alg2', author_id: 's-zoe', title: 'Factoring speed round', description: 'Quick factoring practice.', created_at: ts(-1, 20) },
+  { id: 'pq3', class_id: 'c-bio', author_id: 's-leo', title: 'Cell organelles flashcards', description: 'Know your organelles for the quiz.', created_at: ts(-1, 18) },
+  { id: 'pq4', class_id: 'c-eng', author_id: 's-zoe', title: 'Unit 5 vocab practice', description: null, created_at: ts(-3, 17) },
+];
+
+export const demoPracticeQuestions: PracticeQuestion[] = [
+  // pq1 — Quadratics self-check (Mina)
+  { id: 'pqq1', quiz_id: 'pq1', position: 1, question: 'What are the roots of x² − 5x + 6 = 0?', choices: ['x = 2, 3', 'x = −2, −3', 'x = 1, 6', 'x = −1, −6'], correct_index: 0 },
+  { id: 'pqq2', quiz_id: 'pq1', position: 2, question: 'The discriminant of ax² + bx + c is…', choices: ['b² − 4ac', 'b² + 4ac', '−b ± 2ac', '4ac − b²'], correct_index: 0 },
+  { id: 'pqq3', quiz_id: 'pq1', position: 3, question: 'If the discriminant is negative, the equation has…', choices: ['two real roots', 'one real root', 'no real roots', 'infinitely many roots'], correct_index: 2 },
+  { id: 'pqq4', quiz_id: 'pq1', position: 4, question: 'The vertex of y = (x − 2)² + 5 is…', choices: ['(−2, 5)', '(2, −5)', '(2, 5)', '(5, 2)'], correct_index: 2 },
+  // pq2 — Factoring speed round (Zoe)
+  { id: 'pqq5', quiz_id: 'pq2', position: 1, question: 'Factor: x² − 9', choices: ['(x − 3)(x − 3)', '(x + 3)(x − 3)', '(x + 9)(x − 1)', 'prime'], correct_index: 1 },
+  { id: 'pqq6', quiz_id: 'pq2', position: 2, question: 'Factor: x² + 5x + 6', choices: ['(x + 2)(x + 3)', '(x + 1)(x + 6)', '(x − 2)(x − 3)', '(x + 5)(x + 1)'], correct_index: 0 },
+  { id: 'pqq7', quiz_id: 'pq2', position: 3, question: 'Factor: x² − 4x', choices: ['x(x − 4)', '(x − 2)(x + 2)', 'x(x + 4)', '4(x − 1)'], correct_index: 0 },
+  // pq3 — Cell organelles (Leo)
+  { id: 'pqq8', quiz_id: 'pq3', position: 1, question: 'Which organelle makes ATP?', choices: ['Nucleus', 'Ribosome', 'Mitochondrion', 'Vacuole'], correct_index: 2 },
+  { id: 'pqq9', quiz_id: 'pq3', position: 2, question: 'Where are proteins built?', choices: ['Ribosome', 'Lysosome', 'Chloroplast', 'Cell wall'], correct_index: 0 },
+  { id: 'pqq10', quiz_id: 'pq3', position: 3, question: 'Photosynthesis happens in the…', choices: ['Mitochondrion', 'Chloroplast', 'Nucleus', 'Membrane'], correct_index: 1 },
+  // pq4 — Vocab (Zoe)
+  { id: 'pqq11', quiz_id: 'pq4', position: 1, question: '"Ubiquitous" most nearly means…', choices: ['rare', 'everywhere', 'ancient', 'transparent'], correct_index: 1 },
+  { id: 'pqq12', quiz_id: 'pq4', position: 2, question: '"Candid" most nearly means…', choices: ['sweet', 'hidden', 'honest', 'nervous'], correct_index: 2 },
+  { id: 'pqq13', quiz_id: 'pq4', position: 3, question: '"Ephemeral" most nearly means…', choices: ['short-lived', 'heavenly', 'glowing', 'repeated'], correct_index: 0 },
 ];
 
 export const demoModules: CourseModule[] = [

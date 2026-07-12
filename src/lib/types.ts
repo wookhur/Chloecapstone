@@ -98,15 +98,27 @@ export interface DiscussionPost {
   created_at: string;
 }
 
-/** Auto-graded multiple-choice question attached to a quiz/test assignment. */
-export interface QuizQuestion {
+/**
+ * Quizlet-style practice quiz: made by a student (or teacher) for a course, so
+ * classmates can practice. Not graded — just self-check practice.
+ */
+export interface PracticeQuiz {
   id: string;
-  assignment_id: string;
+  class_id: string;
+  author_id: string;
+  title: string;
+  description: string | null;
+  created_at: string;
+}
+
+/** A multiple-choice question inside a practice quiz. */
+export interface PracticeQuestion {
+  id: string;
+  quiz_id: string;
   position: number;
   question: string;
   choices: string[];
   correct_index: number;
-  points: number;
 }
 
 export interface CourseModule {

@@ -391,3 +391,68 @@ thead .sticky-col { background: var(--surface-2); }
 .total-grade strong { font-size: 1.25rem; color: var(--accent); margin-right: 4px; }
 .assignment-row .chip { white-space: nowrap; }
 .discussion-post { border-left: 3px solid var(--line); }
+
+/* ===========================================================================
+   v2 — practice quizzes + mobile-friendly To Do
+   ===========================================================================*/
+
+/* Practice quiz cards (Quizlet-style) --------------------------------------*/
+.quiz-card-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.quiz-card { display: flex; flex-direction: column; justify-content: space-between; }
+.builder-choice { flex: 1 1 44%; margin-bottom: 0.5rem; }
+
+/* Practice feedback on answers */
+.quiz-choice.correct { border-color: var(--accent); background: #e2f4ea; font-weight: 600; }
+.quiz-choice.incorrect { border-color: var(--danger); background: #fbe3e1; }
+.quiz-choice .mark { margin-left: auto; font-weight: 700; }
+.quiz-choice.correct .mark { color: var(--accent); }
+.quiz-choice.incorrect .mark { color: var(--danger); }
+.quiz-choice input:disabled { cursor: default; }
+
+.practice-scoreboard {
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  border-left: 4px solid var(--brand); margin-bottom: 1rem;
+}
+
+/* Mobile-friendly To Do & toolbars -----------------------------------------*/
+@media (max-width: 640px) {
+  /* Stack the homework/To-Do toolbar and let filter chips scroll */
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar .toggle-group { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  .toolbar .toggle { flex: 0 0 auto; }
+  .toolbar .select { width: 100%; }
+
+  /* Feed cards go full width, comfortable tap targets */
+  .grid.cols-2 { grid-template-columns: 1fr; }
+
+  /* Page padding tightens on small screens */
+  .content { padding: 1.1rem 0.9rem 3rem; }
+  .page-head h1 { font-size: 1.3rem; }
+}
+
+/* Dashboard To-Do: show it first on mobile, drop the sticky behaviour --------*/
+@media (max-width: 900px) {
+  .dashboard-layout { display: flex; flex-direction: column-reverse; }
+  .todo-panel { position: static; top: auto; }
+  .todo-list a { padding: 0.35rem 0; }
+  .todo-title { flex: 1 1 auto; }
+  .todo-meta { margin-left: auto; }
+}
+
+/* Global nav rail becomes a bottom tab bar on phones ------------------------*/
+@media (max-width: 640px) {
+  .rail-layout { flex-direction: column; }
+  .global-rail {
+    order: 2; flex-direction: row; width: 100%; height: auto;
+    position: fixed; bottom: 0; left: 0; top: auto; z-index: 30;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    justify-content: space-around;
+  }
+  .rail-brand { display: none; }
+  .rail-item { flex: 1; border-left: none; border-top: 3px solid transparent; padding: 0.5rem 0.15rem; }
+  .rail-item.active { border-left: none; border-top-color: var(--brand); }
+  .rail-glyph { font-size: 1.25rem; }
+  .rail-label { font-size: 0.6rem; }
+  .rail-main { order: 1; padding-bottom: 4.5rem; }
+  .course-nav { position: static; }
+}

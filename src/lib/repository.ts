@@ -12,8 +12,9 @@ import {
   demoModuleItems,
   demoModules,
   demoPages,
+  demoPracticeQuestions,
+  demoPracticeQuizzes,
   demoProfiles,
-  demoQuizQuestions,
   demoSubmissions,
 } from './demoData';
 import type {
@@ -28,8 +29,9 @@ import type {
   Enrollment,
   Message,
   ModuleItem,
+  PracticeQuestion,
+  PracticeQuiz,
   Profile,
-  QuizQuestion,
   Submission,
   WikiPage,
 } from './types';
@@ -49,7 +51,8 @@ const mem = {
   announcements: [...demoAnnouncements],
   discussionTopics: [...demoDiscussionTopics],
   discussionPosts: [...demoDiscussionPosts],
-  quizQuestions: [...demoQuizQuestions],
+  practiceQuizzes: [...demoPracticeQuizzes],
+  practiceQuestions: [...demoPracticeQuestions],
   modules: [...demoModules],
   moduleItems: [...demoModuleItems],
   pages: [...demoPages],
@@ -85,8 +88,10 @@ export const fetchDiscussionTopics = () =>
   fetchTable<DiscussionTopic>(mem.discussionTopics, 'discussion_topics');
 export const fetchDiscussionPosts = () =>
   fetchTable<DiscussionPost>(mem.discussionPosts, 'discussion_posts');
-export const fetchQuizQuestions = () =>
-  fetchTable<QuizQuestion>(mem.quizQuestions, 'quiz_questions', 'position');
+export const fetchPracticeQuizzes = () =>
+  fetchTable<PracticeQuiz>(mem.practiceQuizzes, 'practice_quizzes');
+export const fetchPracticeQuestions = () =>
+  fetchTable<PracticeQuestion>(mem.practiceQuestions, 'practice_questions', 'position');
 export const fetchModules = () => fetchTable<CourseModule>(mem.modules, 'modules', 'position');
 export const fetchModuleItems = () =>
   fetchTable<ModuleItem>(mem.moduleItems, 'module_items', 'position');
@@ -318,24 +323,43 @@ export const createDiscussionTopic = (t: Omit<DiscussionTopic, 'id' | 'created_a
 export const createDiscussionPost = (p: Omit<DiscussionPost, 'id' | 'created_at'>) =>
   insertRow<DiscussionPost>(mem.discussionPosts, 'discussion_posts', p);
 
-// --- Quiz questions ------------------------------------------------------------
-export async function createQuizQuestion(q: Omit<QuizQuestion, 'id'>): Promise<QuizQuestion> {
-  if (!isSupabaseConfigured) {
-    const created: QuizQuestion = { ...q, id: uuid() };
-    mem.quizQuestions.push(created);
-    return created;
-  }
-  const { data, error } = await supabase!.from('quiz_questions').insert(q).select().single();
-  if (error) throw error;
-  return data as QuizQuestion;
-}
+// --- Practice quizzes (Quizlet-style, student-made) -----------------------------
+export const createPracticeQuiz = (q: Omit<PracticeQuiz, 'id' | 'created_at'>) =>
+  insertRow<PracticeQuiz>(mem.practiceQuizzes, 'practice_quizzes', q);
 
-export async function deleteQuizQuestion(id: string): Promise<void> {
+export async function deletePracticeQuiz(id: string): Promise<void> {
   if (!isSupabaseConfigured) {
-    mem.quizQuestions = mem.quizQuestions.filter((q) => q.id !== id);
+    mem.practiceQuizzes = mem.practiceQuizzes.filter((q) => q.id !== id);
+    mem.practiceQuestions = mem.practiceQuestions.filter((q) => q.quiz_id !== id);
     return;
   }
-  const { error } = await supabase!.from('quiz_questions').delete().eq('id', id);
+  const { error } = await supabase!.from('practice_quizzes').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function createPracticeQuestion(
+  q: Omit<PracticeQuestion, 'id'>,
+): Promise<PracticeQuestion> {
+  if (!isSupabaseConfigured) {
+    const created: PracticeQuestion = { ...q, id: uuid() };
+    mem.practiceQuestions.push(created);
+    return created;
+  }
+  const { data, error } = await supabase!
+    .from('practice_questions')
+    .insert(q)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as PracticeQuestion;
+}
+
+export async function deletePracticeQuestion(id: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    mem.practiceQuestions = mem.practiceQuestions.filter((q) => q.id !== id);
+    return;
+  }
+  const { error } = await supabase!.from('practice_questions').delete().eq('id', id);
   if (error) throw error;
 }
 

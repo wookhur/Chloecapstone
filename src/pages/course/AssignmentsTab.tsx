@@ -2,14 +2,12 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { dueLabel, today } from '../../lib/dates';
-import { STATUS_LABELS, submissionStatus } from '../../lib/grades';
 import * as repo from '../../lib/repository';
 import {
   ASSIGNMENT_TYPES,
   type Assignment,
   type AssignmentType,
   type ClassInfo,
-  type SubmissionKind,
 } from '../../lib/types';
 
 const TYPE_EMOJI: Record<Assignment['type'], string> = {
@@ -19,12 +17,12 @@ const TYPE_EMOJI: Record<Assignment['type'], string> = {
   project: '📦',
 };
 
+/** Assignment listings for a course (informational — no online submission). */
 export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
-  const { currentUser, assignments, mySubmission, refresh } = useApp();
+  const { currentUser, assignments, refresh } = useApp();
   const [showForm, setShowForm] = useState(false);
 
   const isCourseTeacher = currentUser?.id === cls.teacher_id;
-  const isStudent = currentUser?.role === 'student';
 
   const { upcoming, past } = useMemo(() => {
     const list = assignments
@@ -38,7 +36,7 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
   }, [assignments, cls.id]);
 
   const renderRow = (a: Assignment) => {
-    const status = isStudent ? submissionStatus(a, mySubmission(a.id)) : null;
+    const overdue = a.due_date < today();
     return (
       <li key={a.id} className="list-row assignment-row">
         <div>
@@ -46,20 +44,11 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
           <Link to={`../assignments/${a.id}`} style={{ fontWeight: 600 }}>
             {a.title}
           </Link>
-          <div className="muted" style={{ fontSize: '0.78rem', marginTop: 2 }}>
-            {dueLabel(a.due_date)} · {a.points_possible} pts
+          <div className={`muted ${overdue ? '' : ''}`} style={{ fontSize: '0.78rem', marginTop: 2 }}>
+            {dueLabel(a.due_date)}
           </div>
         </div>
-        <div className="inline" style={{ gap: '0.4rem' }}>
-          {status && (
-            <span className={`chip status-${status}`}>{STATUS_LABELS[status]}</span>
-          )}
-          {isCourseTeacher && (
-            <Link to={`../assignments/${a.id}/speedgrader`} className="btn ghost small">
-              SpeedGrader
-            </Link>
-          )}
-        </div>
+        <span className="chip" style={{ textTransform: 'capitalize' }}>{a.type}</span>
       </li>
     );
   };
@@ -121,8 +110,7 @@ function NewAssignmentForm({
   const [description, setDescription] = useState('');
   const [type, setType] = useState<AssignmentType>('homework');
   const [dueDate, setDueDate] = useState(today());
-  const [points, setPoints] = useState(10);
-  const [kind, setKind] = useState<SubmissionKind>('text');
+  const [link, setLink] = useState('');
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
@@ -136,9 +124,9 @@ function NewAssignmentForm({
         assigned_date: today(),
         due_date: dueDate,
         type,
-        link: null,
-        points_possible: points,
-        submission_kind: kind,
+        link: link.trim() || null,
+        points_possible: 0,
+        submission_kind: 'none',
         published: true,
         created_by: teacherId,
       });
@@ -167,33 +155,17 @@ function NewAssignmentForm({
           <label>Due date</label>
           <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         </div>
-        <div className="field" style={{ flex: '0 0 90px' }}>
-          <label>Points</label>
-          <input
-            type="number"
-            min={0}
-            value={points}
-            onChange={(e) => setPoints(Number(e.target.value))}
-          />
-        </div>
-        <div className="field" style={{ flex: '0 0 170px' }}>
-          <label>Submission</label>
-          <select value={kind} onChange={(e) => setKind(e.target.value as SubmissionKind)}>
-            <option value="text">Text entry</option>
-            <option value="url">Website URL</option>
-            <option value="quiz">Online quiz</option>
-            <option value="none">On paper / none</option>
-          </select>
-        </div>
       </div>
       <div className="field">
-        <label>Instructions</label>
+        <label>Instructions <span className="hint">(optional)</span></label>
         <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
+      <div className="field">
+        <label>Resource link <span className="hint">(optional)</span></label>
+        <input value={link} placeholder="https://…" onChange={(e) => setLink(e.target.value)} />
+      </div>
       <div className="row-between">
-        <span className="muted" style={{ fontSize: '0.8rem' }}>
-          Quiz-type assignments get questions on the Quizzes tab.
-        </span>
+        <span />
         <button className="btn small" disabled={!title.trim() || busy} onClick={submit}>
           {busy ? 'Saving…' : 'Create assignment'}
         </button>

@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { dueLabel, today } from '../lib/dates';
-import { courseGrade, formatPercent, letterGrade } from '../lib/grades';
 import { subjectColor } from '../lib/subjectColor';
 
 export default function Dashboard() {
@@ -12,7 +11,6 @@ export default function Dashboard() {
     profileById,
     myClassIds,
     assignments,
-    submissions,
     announcements,
   } = useApp();
 
@@ -27,30 +25,14 @@ export default function Dashboard() {
     [myClassIds, classById],
   );
 
-  // To Do: students see unsubmitted work due today or later; teachers see
-  // submissions waiting for a grade in their classes.
+  // To Do: upcoming assignments across the courses you're in / teach.
   const todo = useMemo(() => {
     const mine = new Set(myClassIds);
-    if (isTeacher) {
-      return submissions
-        .filter((s) => s.submitted_at && !s.graded_at)
-        .map((s) => ({ sub: s, assignment: assignments.find((a) => a.id === s.assignment_id) }))
-        .filter((x) => x.assignment && mine.has(x.assignment.class_id))
-        .sort((a, b) => (a.sub.submitted_at ?? '').localeCompare(b.sub.submitted_at ?? ''))
-        .slice(0, 8);
-    }
     return assignments
       .filter((a) => mine.has(a.class_id) && a.due_date >= today())
-      .filter(
-        (a) =>
-          !submissions.some(
-            (s) => s.assignment_id === a.id && s.student_id === currentUser?.id && s.submitted_at,
-          ),
-      )
       .sort((a, b) => a.due_date.localeCompare(b.due_date))
-      .slice(0, 8)
-      .map((a) => ({ assignment: a, sub: null }));
-  }, [assignments, submissions, myClassIds, isTeacher, currentUser]);
+      .slice(0, 8);
+  }, [assignments, myClassIds]);
 
   const recentAnnouncements = useMemo(() => {
     const mine = new Set(myClassIds);
@@ -90,10 +72,6 @@ export default function Dashboard() {
               {myClasses.map((c) => {
                 const color = subjectColor(c.subject);
                 const teacher = profileById(c.teacher_id);
-                const classAssignments = assignments.filter((a) => a.class_id === c.id);
-                const grade = !isTeacher
-                  ? courseGrade(classAssignments, submissions, currentUser.id)
-                  : null;
                 return (
                   <Link key={c.id} to={`/courses/${c.id}`} className="course-card">
                     <div className="course-card-hero" style={{ background: color }} />
@@ -103,17 +81,12 @@ export default function Dashboard() {
                         {c.subject} · {c.period} · Room {c.room ?? '—'}
                       </p>
                       <p className="sub">{teacher?.name}</p>
-                      {grade && (
-                        <span className="chip grade-chip">
-                          {letterGrade(grade.percent)} · {formatPercent(grade.percent)}
-                        </span>
-                      )}
                     </div>
                     <div className="course-card-icons">
                       <span title="Announcements">📣</span>
                       <span title="Assignments">📝</span>
                       <span title="Discussions">💬</span>
-                      <span title="Files">📁</span>
+                      <span title="Practice quizzes">📚</span>
                     </div>
                   </Link>
                 );
@@ -156,36 +129,25 @@ export default function Dashboard() {
         </div>
 
         <aside className="todo-panel">
-          <h2>{isTeacher ? 'To grade' : 'To do'}</h2>
+          <h2>Coming up</h2>
           {todo.length === 0 ? (
             <p className="muted" style={{ fontSize: '0.85rem' }}>
-              Nothing here. 🎉
+              Nothing due soon. 🎉
             </p>
           ) : (
             <ul className="todo-list">
-              {todo.map(({ assignment, sub }) =>
-                assignment ? (
-                  <li key={sub ? sub.id : assignment.id}>
-                    <Link to={`/courses/${assignment.class_id}/assignments/${assignment.id}`}>
-                      <span
-                        className="feed-date-dot"
-                        style={{
-                          background: subjectColor(classById(assignment.class_id)?.subject ?? ''),
-                        }}
-                      />
-                      <span className="todo-title">
-                        {isTeacher && sub
-                          ? `Grade: ${assignment.title} — ${profileById(sub.student_id)?.name ?? '?'}`
-                          : assignment.title}
-                      </span>
-                      <span className="todo-meta">
-                        {assignment.points_possible} pts
-                        {!isTeacher && ` · ${dueLabel(assignment.due_date)}`}
-                      </span>
-                    </Link>
-                  </li>
-                ) : null,
-              )}
+              {todo.map((a) => (
+                <li key={a.id}>
+                  <Link to={`/courses/${a.class_id}/assignments/${a.id}`}>
+                    <span
+                      className="feed-date-dot"
+                      style={{ background: subjectColor(classById(a.class_id)?.subject ?? '') }}
+                    />
+                    <span className="todo-title">{a.title}</span>
+                    <span className="todo-meta">{dueLabel(a.due_date)}</span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           )}
           <div className="divider" />

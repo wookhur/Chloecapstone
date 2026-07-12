@@ -52,7 +52,7 @@ export default function ModulesTab({ cls }: { cls: ClassInfo }) {
         <Link to={`../assignments/${a.id}`} className="module-link">
           📝 {a.title}
           <span className="muted" style={{ fontSize: '0.76rem' }}>
-            {a.points_possible} pts · {dueLabel(a.due_date)}
+            {dueLabel(a.due_date)}
           </span>
         </Link>
       );
@@ -61,9 +61,10 @@ export default function ModulesTab({ cls }: { cls: ClassInfo }) {
       const p = pages.find((x) => x.id === item.ref_id);
       if (!p) return null;
       return (
-        <Link to={`../pages/${p.id}`} className="module-link">
+        <div className="module-link" style={{ cursor: 'default' }}>
           📃 {p.title}
-        </Link>
+          <span className="muted" style={{ fontSize: '0.76rem' }}>{p.body.slice(0, 60)}…</span>
+        </div>
       );
     }
     // external link
