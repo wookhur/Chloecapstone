@@ -26,22 +26,28 @@ export default function CoursesPage() {
         <span className="muted">
           {myClasses.length} course{myClasses.length === 1 ? '' : 's'}
         </span>
-        {isTeacher ? (
-          <Link to="/courses/manage" className="btn small">
-            Manage classes & homework
+        <div className="inline" style={{ gap: '0.4rem' }}>
+          <Link to="/courses/import" className="btn small secondary">
+            🎓 Import from Google Classroom
           </Link>
-        ) : (
-          <Link to="/courses/browse" className="btn small">
-            + Browse all courses
-          </Link>
-        )}
+          {isTeacher ? (
+            <Link to="/courses/manage" className="btn small">
+              Manage classes & homework
+            </Link>
+          ) : (
+            <Link to="/courses/browse" className="btn small">
+              + Browse all courses
+            </Link>
+          )}
+        </div>
       </div>
 
       {myClasses.length === 0 ? (
         <div className="empty">
           {isTeacher
             ? 'You don\'t teach any classes yet.'
-            : 'You aren\'t enrolled in any courses yet.'}
+            : 'You aren\'t enrolled in any courses yet.'}{' '}
+          <Link to="/courses/import">Import from Google Classroom →</Link>
         </div>
       ) : (
         <table className="data-table">

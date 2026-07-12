@@ -134,6 +134,10 @@ export async function unenroll(studentId: string, classId: string): Promise<void
   if (error) throw error;
 }
 
+// --- Profiles (e.g. a teacher created while importing) ----------------------
+export const createProfile = (p: Omit<Profile, 'id' | 'created_at'>) =>
+  insertRow<Profile>(mem.profiles, 'profiles', p);
+
 // --- Classes (teachers create their own) -----------------------------------
 export const createClass = (cls: Omit<ClassInfo, 'id' | 'created_at'>) =>
   insertRow<ClassInfo>(mem.classes, 'classes', cls);

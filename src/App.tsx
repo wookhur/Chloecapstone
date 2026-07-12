@@ -7,6 +7,7 @@ import TeacherClasses from './pages/TeacherClasses';
 import Dashboard from './pages/Dashboard';
 import CoursesPage from './pages/CoursesPage';
 import Discussions from './pages/Discussions';
+import ImportClassroom from './pages/ImportClassroom';
 import CourseLayout from './pages/course/CourseLayout';
 
 /** Canvas-style global navigation rail entries. */
@@ -87,6 +88,7 @@ export default function App() {
             <Route path="/courses" element={<CoursesPage />} />
             <Route path="/courses/browse" element={<ClassPicker />} />
             <Route path="/courses/manage" element={<TeacherClasses />} />
+            <Route path="/courses/import" element={<ImportClassroom />} />
             <Route path="/courses/:classId/*" element={<CourseLayout />} />
             <Route path="/classes" element={<Navigate to="/courses/browse" replace />} />
             <Route path="/teach" element={<Navigate to="/courses/manage" replace />} />

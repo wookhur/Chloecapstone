@@ -18,6 +18,9 @@ staying organized rather than grading.
 - **Discussions** — a hub across all your courses: pick a class, **search by
   keyword**, **sort by date**, and jump into any thread to reply
 - **To Do** — everything due, filterable by day/week/month and by class
+- **Import from Google Classroom** — pull your courses, coursework (with due
+  dates), and announcements in read-only (with a built-in demo when no Google
+  credentials are set)
 
 **Inside every course**
 
@@ -70,6 +73,30 @@ practice quizzes, and Mina's personal calendar events.
 > The pilot RLS policies grant the anon key full access for a closed cohort.
 > Tighten them once Supabase Auth is added (see comments in `schema.sql`).
 
+### Connect Google Classroom (read-only import)
+
+**Courses → 🎓 Import from Google Classroom** pulls your Classroom courses,
+their coursework (with due dates), and announcements into Homework Hub. With no
+credentials it runs a built-in **demo import** using sample data, so the whole
+flow works out of the box.
+
+To connect a real account:
+
+1. In [Google Cloud Console](https://console.cloud.google.com), create a project
+   and **enable the "Google Classroom API"**.
+2. Create an **OAuth 2.0 Client ID** (type: *Web application*) and add your site
+   to the authorized JavaScript origins (e.g. `http://localhost:5173`).
+3. Put the client ID in `.env.local`:
+   ```bash
+   VITE_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   ```
+4. Restart. "Connect" now opens the real Google consent screen and imports your
+   own courses (read-only scopes — nothing is changed in Google Classroom).
+
+> Import is one-way and read-only. On a managed school Google Workspace, an
+> admin may need to allow the app before students/teachers can grant access;
+> sensitive scopes work for up to 100 test users before Google app verification.
+
 ## Deploying to Netlify
 
 Connected to GitHub → Netlify auto-builds on every push to `main`
@@ -83,11 +110,11 @@ Site configuration → Environment variables.
 ```
 supabase/        schema.sql + seed.sql
 src/
-  lib/           supabase client, types, dates, subject colors, repository
+  lib/           supabase client, googleClassroom, types, dates, subject colors, repository
   context/       AppContext — data loading + current-user switcher
   components/    AssignmentCard, Calendar (assignments + personal events)
-  pages/         Dashboard, CoursesPage, Discussions (global hub), Feed,
-                 CalendarPage, ClassPicker (student), TeacherClasses (teacher)
+  pages/         Dashboard, CoursesPage, ImportClassroom, Discussions (global hub),
+                 Feed, CalendarPage, ClassPicker (student), TeacherClasses (teacher)
   pages/course/  CourseLayout + tabs: Home, Announcements, Assignments,
                  AssignmentDetail, Discussions, Quizzes (practice), QuizTake,
                  People, Files

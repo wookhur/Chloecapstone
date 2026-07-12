@@ -503,3 +503,16 @@ thead .sticky-col { background: var(--surface-2); }
   /* touch devices can't hover — keep the add affordance visible */
   .calendar-add { opacity: 0.5; }
 }
+
+/* ===========================================================================
+   v4 — Google Classroom import
+   ===========================================================================*/
+.gc-connect { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.gc-logo {
+  width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center;
+  font-size: 1.6rem; background: var(--brand-soft); flex: 0 0 auto;
+}
+.gc-course { display: flex; gap: 0.7rem; align-items: flex-start; cursor: pointer; }
+.gc-course input { margin-top: 0.2rem; width: auto; accent-color: var(--brand); }
+.gc-course.picked { outline: 2px solid var(--brand); outline-offset: -2px; }
+.gc-course input:disabled { opacity: 0.5; }
