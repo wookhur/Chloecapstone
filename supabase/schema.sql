@@ -1,24 +1,19 @@
 -- ============================================================================
 -- Homework Hub — Database schema
--- A Canvas-style LMS: classes, assignments with submissions & grades,
--- announcements, discussions, quizzes, modules, pages, files, and inbox.
+-- A homework/course hub: classes, assignments, announcements, class
+-- discussions, student-made practice quizzes, files, and a personal calendar.
 --
 -- Run this in the Supabase SQL Editor (Dashboard → SQL Editor → New query),
 -- or via psql -f supabase/schema.sql
 -- ============================================================================
 
-drop table if exists messages cascade;
-drop table if exists conversations cascade;
+drop table if exists calendar_events cascade;
 drop table if exists files cascade;
-drop table if exists pages cascade;
-drop table if exists module_items cascade;
-drop table if exists modules cascade;
 drop table if exists practice_questions cascade;
 drop table if exists practice_quizzes cascade;
 drop table if exists discussion_posts cascade;
 drop table if exists discussion_topics cascade;
 drop table if exists announcements cascade;
-drop table if exists submissions cascade;
 drop table if exists assignments cascade;
 drop table if exists enrollments cascade;
 drop table if exists classes cascade;
@@ -71,8 +66,8 @@ create table assignments (
   type            text not null default 'homework'
                     check (type in ('homework', 'quiz', 'test', 'project')),
   link            text,
-  points_possible numeric not null default 10,
-  submission_kind text not null default 'text'
+  points_possible numeric not null default 0,
+  submission_kind text not null default 'none'
                     check (submission_kind in ('text', 'url', 'none', 'quiz')),
   published       boolean not null default true,
   created_by      uuid references profiles (id) on delete set null,
@@ -80,23 +75,6 @@ create table assignments (
 );
 create index assignments_class_idx on assignments (class_id);
 create index assignments_due_idx   on assignments (due_date);
-
--- Student submissions + grades (one row per student per assignment) ----------
-create table submissions (
-  id            uuid primary key default gen_random_uuid(),
-  assignment_id uuid not null references assignments (id) on delete cascade,
-  student_id    uuid not null references profiles (id) on delete cascade,
-  body          text,           -- text entry, or JSON quiz answers
-  url           text,           -- website-URL submissions
-  submitted_at  timestamptz,
-  score         numeric,
-  grade_comment text,
-  graded_at     timestamptz,
-  created_at    timestamptz not null default now(),
-  unique (assignment_id, student_id)
-);
-create index submissions_assignment_idx on submissions (assignment_id);
-create index submissions_student_idx    on submissions (student_id);
 
 -- Class-wide announcements from the teacher -----------------------------------
 create table announcements (
@@ -150,37 +128,6 @@ create table practice_questions (
 );
 create index practice_questions_quiz_idx on practice_questions (quiz_id);
 
--- Course modules: ordered units of pages / assignments / links --------------------
-create table modules (
-  id       uuid primary key default gen_random_uuid(),
-  class_id uuid not null references classes (id) on delete cascade,
-  name     text not null,
-  position int  not null default 1
-);
-create index modules_class_idx on modules (class_id);
-
-create table module_items (
-  id        uuid primary key default gen_random_uuid(),
-  module_id uuid not null references modules (id) on delete cascade,
-  position  int  not null default 1,
-  kind      text not null check (kind in ('assignment', 'page', 'link', 'header')),
-  ref_id    uuid,           -- assignment or page id (kind-dependent)
-  title     text not null default '',
-  url       text
-);
-create index module_items_module_idx on module_items (module_id);
-
--- Wiki-style course content pages ----------------------------------------------------
-create table pages (
-  id         uuid primary key default gen_random_uuid(),
-  class_id   uuid not null references classes (id) on delete cascade,
-  title      text not null,
-  body       text not null,
-  updated_at timestamptz not null default now(),
-  created_at timestamptz not null default now()
-);
-create index pages_class_idx on pages (class_id);
-
 -- Course files (metadata only; storage buckets come in a later phase) ----------------
 create table files (
   id          uuid primary key default gen_random_uuid(),
@@ -192,22 +139,18 @@ create table files (
 );
 create index files_class_idx on files (class_id);
 
--- Inbox: conversations + messages ------------------------------------------------------
-create table conversations (
-  id              uuid primary key default gen_random_uuid(),
-  subject         text not null,
-  participant_ids uuid[] not null,
-  created_at      timestamptz not null default now()
+-- Personal calendar events (hand-added by a user, beyond course assignments) ---------
+create table calendar_events (
+  id         uuid primary key default gen_random_uuid(),
+  owner_id   uuid not null references profiles (id) on delete cascade,
+  title      text not null,
+  date       date not null,
+  category   text not null default 'event'
+               check (category in ('event', 'exam', 'reminder', 'personal', 'meeting')),
+  note       text,
+  created_at timestamptz not null default now()
 );
-
-create table messages (
-  id              uuid primary key default gen_random_uuid(),
-  conversation_id uuid not null references conversations (id) on delete cascade,
-  sender_id       uuid not null references profiles (id) on delete cascade,
-  body            text not null,
-  created_at      timestamptz not null default now()
-);
-create index messages_conversation_idx on messages (conversation_id);
+create index calendar_events_owner_idx on calendar_events (owner_id);
 
 -- ---------------------------------------------------------------------------
 -- Row Level Security
@@ -219,10 +162,9 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'profiles', 'classes', 'enrollments', 'assignments', 'submissions',
+    'profiles', 'classes', 'enrollments', 'assignments',
     'announcements', 'discussion_topics', 'discussion_posts',
-    'practice_quizzes', 'practice_questions',
-    'modules', 'module_items', 'pages', 'files', 'conversations', 'messages'
+    'practice_quizzes', 'practice_questions', 'files', 'calendar_events'
   ]
   loop
     execute format('alter table %I enable row level security', t);

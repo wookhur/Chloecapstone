@@ -12,20 +12,15 @@ import { isSupabaseConfigured } from '../lib/supabase';
 import type {
   Announcement,
   Assignment,
+  CalendarEvent,
   ClassInfo,
-  Conversation,
   CourseFile,
-  CourseModule,
   DiscussionPost,
   DiscussionTopic,
   Enrollment,
-  Message,
-  ModuleItem,
   PracticeQuestion,
   PracticeQuiz,
   Profile,
-  Submission,
-  WikiPage,
 } from '../lib/types';
 
 interface AppState {
@@ -36,18 +31,13 @@ interface AppState {
   classes: ClassInfo[];
   enrollments: Enrollment[];
   assignments: Assignment[];
-  submissions: Submission[];
   announcements: Announcement[];
   discussionTopics: DiscussionTopic[];
   discussionPosts: DiscussionPost[];
   practiceQuizzes: PracticeQuiz[];
   practiceQuestions: PracticeQuestion[];
-  modules: CourseModule[];
-  moduleItems: ModuleItem[];
-  pages: WikiPage[];
   files: CourseFile[];
-  conversations: Conversation[];
-  messages: Message[];
+  calendarEvents: CalendarEvent[];
   currentUserId: string | null;
   currentUser: Profile | null;
   setCurrentUserId: (id: string | null) => void;
@@ -58,8 +48,6 @@ interface AppState {
   myClassIds: string[];
   /** Enrolled student ids for a class (sorted by name). */
   rosterFor: (classId: string) => Profile[];
-  /** The current user's submission for an assignment, if any. */
-  mySubmission: (assignmentId: string) => Submission | undefined;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -72,18 +60,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [discussionTopics, setDiscussionTopics] = useState<DiscussionTopic[]>([]);
   const [discussionPosts, setDiscussionPosts] = useState<DiscussionPost[]>([]);
   const [practiceQuizzes, setPracticeQuizzes] = useState<PracticeQuiz[]>([]);
   const [practiceQuestions, setPracticeQuestions] = useState<PracticeQuestion[]>([]);
-  const [modules, setModules] = useState<CourseModule[]>([]);
-  const [moduleItems, setModuleItems] = useState<ModuleItem[]>([]);
-  const [pages, setPages] = useState<WikiPage[]>([]);
   const [files, setFiles] = useState<CourseFile[]>([]);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [currentUserId, setCurrentUserIdState] = useState<string | null>(
     () => localStorage.getItem(STORAGE_KEY),
   );
@@ -97,40 +80,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setError(null);
     try {
-      const [p, c, e, a, sub, an, dt, dp, pq, pqq, mo, mi, pg, fi, cv, ms] = await Promise.all([
+      const [p, c, e, a, an, dt, dp, pq, pqq, fi, ce] = await Promise.all([
         repo.fetchProfiles(),
         repo.fetchClasses(),
         repo.fetchEnrollments(),
         repo.fetchAssignments(),
-        repo.fetchSubmissions(),
         repo.fetchAnnouncements(),
         repo.fetchDiscussionTopics(),
         repo.fetchDiscussionPosts(),
         repo.fetchPracticeQuizzes(),
         repo.fetchPracticeQuestions(),
-        repo.fetchModules(),
-        repo.fetchModuleItems(),
-        repo.fetchPages(),
         repo.fetchFiles(),
-        repo.fetchConversations(),
-        repo.fetchMessages(),
+        repo.fetchCalendarEvents(),
       ]);
       setProfiles(p);
       setClasses(c);
       setEnrollments(e);
       setAssignments(a);
-      setSubmissions(sub);
       setAnnouncements(an);
       setDiscussionTopics(dt);
       setDiscussionPosts(dp);
       setPracticeQuizzes(pq);
       setPracticeQuestions(pqq);
-      setModules(mo);
-      setModuleItems(mi);
-      setPages(pg);
       setFiles(fi);
-      setConversations(cv);
-      setMessages(ms);
+      setCalendarEvents(ce);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
@@ -186,14 +159,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [enrollments, profiles],
   );
 
-  const mySubmission = useCallback(
-    (assignmentId: string) =>
-      submissions.find(
-        (s) => s.assignment_id === assignmentId && s.student_id === currentUserId,
-      ),
-    [submissions, currentUserId],
-  );
-
   const value: AppState = {
     loading,
     error,
@@ -202,18 +167,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     classes,
     enrollments,
     assignments,
-    submissions,
     announcements,
     discussionTopics,
     discussionPosts,
     practiceQuizzes,
     practiceQuestions,
-    modules,
-    moduleItems,
-    pages,
     files,
-    conversations,
-    messages,
+    calendarEvents,
     currentUserId,
     currentUser,
     setCurrentUserId,
@@ -222,7 +182,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     profileById,
     myClassIds,
     rosterFor,
-    mySubmission,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

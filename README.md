@@ -1,44 +1,38 @@
 # 🗓️ Homework Hub
 
-A **Canvas-style LMS** for school: students pick their classes, see everything
-due in one feed and calendar, submit work online, take auto-graded quizzes and
-check their grades — while teachers post assignments, grade in a SpeedGrader,
-run a full gradebook, and manage announcements, discussions, modules, pages
-and files per course.
+A homework & course hub for school. Students pick their classes and see
+everything due in one place — a feed and a personal calendar — talk with each
+class in discussions, and study with practice quizzes classmates make. It sits
+alongside the school's grade system (e.g. PowerSchool), so it focuses on
+staying organized rather than grading.
 
 ## What it does
 
 **Everyone**
-- **Dashboard** — color-coded course cards (with your current grade) plus a
-  To-Do sidebar (students: work due; teachers: submissions to grade)
-- **Global navigation rail** — Dashboard · Courses · Calendar · Inbox · To Do
-- **Calendar** — every assignment across your courses, color-coded by subject
-- **Inbox** — compose and reply to private conversations
+- **Dashboard** — color-coded course cards plus a "Coming up" list of upcoming
+  work (shown first on mobile)
+- **Global navigation rail** — Dashboard · Courses · Calendar · Discussions ·
+  To Do (a bottom tab bar on phones)
+- **Calendar** — course assignments **plus events you add by hand** (exams,
+  reminders, meetings, personal) — click any day's **+** to add one
+- **Discussions** — a hub across all your courses: pick a class, **search by
+  keyword**, **sort by date**, and jump into any thread to reply
+- **To Do** — everything due, filterable by day/week/month and by class
 
-**Inside every course** (Canvas-style course menu)
+**Inside every course**
 
 | Tab | What it does |
 | --- | --- |
 | Home | Recent announcements, upcoming work, active discussions |
 | Announcements | Teacher posts class-wide notices |
-| Assignments | Upcoming/past list with points & status; detail page with **online submission** (text entry / website URL) |
+| Assignments | Upcoming/past list; a detail page with instructions and resource links (read-only — this isn't a submission portal) |
 | Discussions | Threaded topics — anyone can start one and reply |
-| Grades | Students: score list + total (letter grade). Teachers: full **Gradebook grid** with click-to-edit cells |
+| Practice Quizzes | **Quizlet-style, student-made** — any student builds a multiple-choice quiz; classmates practice with instant feedback, a score, and unlimited retries (never graded) |
 | People | Course roster |
-| Pages | Wiki-style course content (teacher-editable) |
 | Files | Course file list (metadata now; storage in a later phase) |
-| Syllabus | Course policies + auto-generated course summary table |
-| Quizzes | **Online quizzes with auto-grading** — teachers build multiple-choice questions, students get one attempt and an instant score |
-| Modules | Ordered units mixing pages, assignments, and external links |
 
-**Teachers also get**
-- **SpeedGrader** — step through the roster per assignment, view each
-  submission, enter a score + feedback comment
-- Assignment builder with points, due date and submission type
-- Class creation and course-content management on every tab
-
-**Submission statuses** work like Canvas: *Not submitted · Submitted · Late ·
-Missing · Graded*, and course grades roll up to a percent + letter grade.
+Assignments are informational (the school's system of record handles grades),
+so there's no online submission or grading here.
 
 ## Tech stack
 
@@ -58,7 +52,8 @@ npm run dev          # http://localhost:5173
 That's enough to explore everything in **demo mode** (data lives in memory).
 Use the "Signed in as" switcher (top-right) to try it as a student or a teacher
 — e.g. Mina (student) and Ms. Anderson (teacher) share the Algebra II course,
-which is fully populated: submissions, grades, a quiz, modules, pages and more.
+which is fully populated: assignments, announcements, discussions, student-made
+practice quizzes, and Mina's personal calendar events.
 
 ### Connect Supabase (persistent data)
 
@@ -86,16 +81,16 @@ Site configuration → Environment variables.
 ## Project structure
 
 ```
-supabase/        schema.sql + seed.sql (15 tables)
+supabase/        schema.sql + seed.sql
 src/
-  lib/           supabase client, types, dates, grades math, subject colors, repository
+  lib/           supabase client, types, dates, subject colors, repository
   context/       AppContext — data loading + current-user switcher
-  components/    AssignmentCard, Calendar
-  pages/         Dashboard, CoursesPage, Inbox, Feed, CalendarPage,
-                 ClassPicker (student), TeacherClasses (teacher)
+  components/    AssignmentCard, Calendar (assignments + personal events)
+  pages/         Dashboard, CoursesPage, Discussions (global hub), Feed,
+                 CalendarPage, ClassPicker (student), TeacherClasses (teacher)
   pages/course/  CourseLayout + tabs: Home, Announcements, Assignments,
-                 AssignmentDetail, SpeedGrader, Discussions, Grades/Gradebook,
-                 Quizzes, QuizTake, Modules, Pages, People, Files, Syllabus
+                 AssignmentDetail, Discussions, Quizzes (practice), QuizTake,
+                 People, Files
 ```
 
 ## Roadmap

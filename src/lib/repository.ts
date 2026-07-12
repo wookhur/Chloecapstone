@@ -2,38 +2,28 @@ import { isSupabaseConfigured, supabase } from './supabase';
 import {
   demoAnnouncements,
   demoAssignments,
+  demoCalendarEvents,
   demoClasses,
-  demoConversations,
   demoDiscussionPosts,
   demoDiscussionTopics,
   demoEnrollments,
   demoFiles,
-  demoMessages,
-  demoModuleItems,
-  demoModules,
-  demoPages,
   demoPracticeQuestions,
   demoPracticeQuizzes,
   demoProfiles,
-  demoSubmissions,
 } from './demoData';
 import type {
   Announcement,
   Assignment,
+  CalendarEvent,
   ClassInfo,
-  Conversation,
   CourseFile,
-  CourseModule,
   DiscussionPost,
   DiscussionTopic,
   Enrollment,
-  Message,
-  ModuleItem,
   PracticeQuestion,
   PracticeQuiz,
   Profile,
-  Submission,
-  WikiPage,
 } from './types';
 
 /**
@@ -47,18 +37,13 @@ const mem = {
   classes: [...demoClasses],
   enrollments: [...demoEnrollments],
   assignments: [...demoAssignments],
-  submissions: [...demoSubmissions],
   announcements: [...demoAnnouncements],
   discussionTopics: [...demoDiscussionTopics],
   discussionPosts: [...demoDiscussionPosts],
   practiceQuizzes: [...demoPracticeQuizzes],
   practiceQuestions: [...demoPracticeQuestions],
-  modules: [...demoModules],
-  moduleItems: [...demoModuleItems],
-  pages: [...demoPages],
   files: [...demoFiles],
-  conversations: [...demoConversations],
-  messages: [...demoMessages],
+  calendarEvents: [...demoCalendarEvents],
 };
 
 const uuid = () =>
@@ -81,7 +66,6 @@ export const fetchProfiles = () => fetchTable<Profile>(mem.profiles, 'profiles',
 export const fetchClasses = () => fetchTable<ClassInfo>(mem.classes, 'classes', 'name');
 export const fetchEnrollments = () => fetchTable<Enrollment>(mem.enrollments, 'enrollments');
 export const fetchAssignments = () => fetchTable<Assignment>(mem.assignments, 'assignments');
-export const fetchSubmissions = () => fetchTable<Submission>(mem.submissions, 'submissions');
 export const fetchAnnouncements = () =>
   fetchTable<Announcement>(mem.announcements, 'announcements');
 export const fetchDiscussionTopics = () =>
@@ -92,14 +76,9 @@ export const fetchPracticeQuizzes = () =>
   fetchTable<PracticeQuiz>(mem.practiceQuizzes, 'practice_quizzes');
 export const fetchPracticeQuestions = () =>
   fetchTable<PracticeQuestion>(mem.practiceQuestions, 'practice_questions', 'position');
-export const fetchModules = () => fetchTable<CourseModule>(mem.modules, 'modules', 'position');
-export const fetchModuleItems = () =>
-  fetchTable<ModuleItem>(mem.moduleItems, 'module_items', 'position');
-export const fetchPages = () => fetchTable<WikiPage>(mem.pages, 'pages', 'title');
 export const fetchFiles = () => fetchTable<CourseFile>(mem.files, 'files', 'name');
-export const fetchConversations = () =>
-  fetchTable<Conversation>(mem.conversations, 'conversations');
-export const fetchMessages = () => fetchTable<Message>(mem.messages, 'messages', 'created_at');
+export const fetchCalendarEvents = () =>
+  fetchTable<CalendarEvent>(mem.calendarEvents, 'calendar_events', 'date');
 
 // --- Generic insert helper ---------------------------------------------------
 async function insertRow<T extends { id: string; created_at?: string }>(
@@ -159,22 +138,6 @@ export async function unenroll(studentId: string, classId: string): Promise<void
 export const createClass = (cls: Omit<ClassInfo, 'id' | 'created_at'>) =>
   insertRow<ClassInfo>(mem.classes, 'classes', cls);
 
-export async function updateClass(id: string, patch: Partial<ClassInfo>): Promise<ClassInfo> {
-  if (!isSupabaseConfigured) {
-    const idx = mem.classes.findIndex((c) => c.id === id);
-    mem.classes[idx] = { ...mem.classes[idx], ...patch };
-    return mem.classes[idx];
-  }
-  const { data, error } = await supabase!
-    .from('classes')
-    .update(patch)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data as ClassInfo;
-}
-
 // --- Assignments (teachers post homework) ----------------------------------
 export const createAssignment = (a: Omit<Assignment, 'id' | 'created_at'>) =>
   insertRow<Assignment>(mem.assignments, 'assignments', a);
@@ -205,102 +168,6 @@ export async function deleteAssignment(id: string): Promise<void> {
   }
   const { error } = await supabase!.from('assignments').delete().eq('id', id);
   if (error) throw error;
-}
-
-// --- Submissions (students turn work in; teachers grade) --------------------
-/** Create or replace the student's submission for an assignment. */
-export async function submitWork(
-  assignmentId: string,
-  studentId: string,
-  work: { body?: string | null; url?: string | null; score?: number | null; graded?: boolean },
-): Promise<Submission> {
-  const stamp = nowISO();
-  const fields = {
-    body: work.body ?? null,
-    url: work.url ?? null,
-    submitted_at: stamp,
-    score: work.score ?? null,
-    graded_at: work.graded ? stamp : null,
-  };
-  if (!isSupabaseConfigured) {
-    const existing = mem.submissions.find(
-      (s) => s.assignment_id === assignmentId && s.student_id === studentId,
-    );
-    if (existing) {
-      Object.assign(existing, fields);
-      return existing;
-    }
-    const created: Submission = {
-      id: uuid(),
-      assignment_id: assignmentId,
-      student_id: studentId,
-      grade_comment: null,
-      created_at: stamp,
-      ...fields,
-    };
-    mem.submissions.push(created);
-    return created;
-  }
-  const { data, error } = await supabase!
-    .from('submissions')
-    .upsert(
-      { assignment_id: assignmentId, student_id: studentId, ...fields },
-      { onConflict: 'assignment_id,student_id' },
-    )
-    .select()
-    .single();
-  if (error) throw error;
-  return data as Submission;
-}
-
-/** Teacher grades a submission (creating a shell row if the student never submitted). */
-export async function gradeSubmission(
-  assignmentId: string,
-  studentId: string,
-  score: number | null,
-  comment: string | null,
-): Promise<Submission> {
-  const stamp = nowISO();
-  if (!isSupabaseConfigured) {
-    let sub = mem.submissions.find(
-      (s) => s.assignment_id === assignmentId && s.student_id === studentId,
-    );
-    if (!sub) {
-      sub = {
-        id: uuid(),
-        assignment_id: assignmentId,
-        student_id: studentId,
-        body: null,
-        url: null,
-        submitted_at: null,
-        score: null,
-        grade_comment: null,
-        graded_at: null,
-        created_at: stamp,
-      };
-      mem.submissions.push(sub);
-    }
-    sub.score = score;
-    sub.grade_comment = comment;
-    sub.graded_at = score == null ? null : stamp;
-    return sub;
-  }
-  const { data, error } = await supabase!
-    .from('submissions')
-    .upsert(
-      {
-        assignment_id: assignmentId,
-        student_id: studentId,
-        score,
-        grade_comment: comment,
-        graded_at: score == null ? null : stamp,
-      },
-      { onConflict: 'assignment_id,student_id' },
-    )
-    .select()
-    .single();
-  if (error) throw error;
-  return data as Submission;
 }
 
 // --- Announcements -----------------------------------------------------------
@@ -363,50 +230,6 @@ export async function deletePracticeQuestion(id: string): Promise<void> {
   if (error) throw error;
 }
 
-// --- Modules ---------------------------------------------------------------------
-export async function createModule(m: Omit<CourseModule, 'id'>): Promise<CourseModule> {
-  if (!isSupabaseConfigured) {
-    const created: CourseModule = { ...m, id: uuid() };
-    mem.modules.push(created);
-    return created;
-  }
-  const { data, error } = await supabase!.from('modules').insert(m).select().single();
-  if (error) throw error;
-  return data as CourseModule;
-}
-
-export async function createModuleItem(mi: Omit<ModuleItem, 'id'>): Promise<ModuleItem> {
-  if (!isSupabaseConfigured) {
-    const created: ModuleItem = { ...mi, id: uuid() };
-    mem.moduleItems.push(created);
-    return created;
-  }
-  const { data, error } = await supabase!.from('module_items').insert(mi).select().single();
-  if (error) throw error;
-  return data as ModuleItem;
-}
-
-// --- Pages -----------------------------------------------------------------------
-export const createPage = (p: Omit<WikiPage, 'id' | 'created_at'>) =>
-  insertRow<WikiPage>(mem.pages, 'pages', p);
-
-export async function updatePage(id: string, patch: Partial<WikiPage>): Promise<WikiPage> {
-  const withStamp = { ...patch, updated_at: nowISO() };
-  if (!isSupabaseConfigured) {
-    const idx = mem.pages.findIndex((p) => p.id === id);
-    mem.pages[idx] = { ...mem.pages[idx], ...withStamp };
-    return mem.pages[idx];
-  }
-  const { data, error } = await supabase!
-    .from('pages')
-    .update(withStamp)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data as WikiPage;
-}
-
 // --- Files (metadata only for now) --------------------------------------------
 export const createFile = (f: Omit<CourseFile, 'id' | 'created_at'>) =>
   insertRow<CourseFile>(mem.files, 'files', f);
@@ -420,9 +243,15 @@ export async function deleteFile(id: string): Promise<void> {
   if (error) throw error;
 }
 
-// --- Inbox -----------------------------------------------------------------------
-export const createConversation = (c: Omit<Conversation, 'id' | 'created_at'>) =>
-  insertRow<Conversation>(mem.conversations, 'conversations', c);
+// --- Calendar events (personal, hand-added) -----------------------------------
+export const createCalendarEvent = (e: Omit<CalendarEvent, 'id' | 'created_at'>) =>
+  insertRow<CalendarEvent>(mem.calendarEvents, 'calendar_events', e);
 
-export const createMessage = (m: Omit<Message, 'id' | 'created_at'>) =>
-  insertRow<Message>(mem.messages, 'messages', m);
+export async function deleteCalendarEvent(id: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    mem.calendarEvents = mem.calendarEvents.filter((e) => e.id !== id);
+    return;
+  }
+  const { error } = await supabase!.from('calendar_events').delete().eq('id', id);
+  if (error) throw error;
+}

@@ -3,30 +3,54 @@ import {
   MONTH_NAMES,
   WEEKDAY_NAMES,
   monthGrid,
-  parseISO,
 } from '../lib/dates';
 import { subjectColor } from '../lib/subjectColor';
-import type { Assignment, ClassInfo } from '../lib/types';
+import {
+  CALENDAR_CATEGORIES,
+  type Assignment,
+  type CalendarEvent,
+  type ClassInfo,
+} from '../lib/types';
 
 interface Props {
   assignments: Assignment[];
+  events: CalendarEvent[];
   classById: (id: string) => ClassInfo | undefined;
   onSelectAssignment?: (a: Assignment) => void;
+  onSelectEvent?: (e: CalendarEvent) => void;
+  /** Called when a day cell's "+" is clicked, to add an event on that date. */
+  onAddOnDate?: (iso: string) => void;
 }
 
-/** A month calendar that dots each day with the assignments due on it. */
-export default function Calendar({ assignments, classById, onSelectAssignment }: Props) {
+const categoryStyle = (cat: CalendarEvent['category']) =>
+  CALENDAR_CATEGORIES.find((c) => c.key === cat) ?? CALENDAR_CATEGORIES[0];
+
+/** A month calendar that shows assignments due and hand-added events per day. */
+export default function Calendar({
+  assignments,
+  events,
+  classById,
+  onSelectAssignment,
+  onSelectEvent,
+  onAddOnDate,
+}: Props) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
 
   const cells = monthGrid(year, month);
 
-  const byDay = new Map<string, Assignment[]>();
+  const assignmentsByDay = new Map<string, Assignment[]>();
   for (const a of assignments) {
-    const list = byDay.get(a.due_date) ?? [];
+    const list = assignmentsByDay.get(a.due_date) ?? [];
     list.push(a);
-    byDay.set(a.due_date, list);
+    assignmentsByDay.set(a.due_date, list);
+  }
+  const eventsByDay = new Map<string, CalendarEvent[]>();
+  for (const e of events) {
+    const list = eventsByDay.get(e.date) ?? [];
+    list.push(e);
+    eventsByDay.set(e.date, list);
   }
 
   const step = (delta: number) => {
@@ -35,11 +59,19 @@ export default function Calendar({ assignments, classById, onSelectAssignment }:
     setMonth(d.getMonth());
   };
 
+  const goToday = () => {
+    setYear(today.getFullYear());
+    setMonth(today.getMonth());
+  };
+
   return (
     <div className="calendar">
       <div className="calendar-head">
         <button className="btn ghost small" onClick={() => step(-1)}>‹ Prev</button>
-        <h2>{MONTH_NAMES[month]} {year}</h2>
+        <div className="inline" style={{ gap: '0.5rem' }}>
+          <h2>{MONTH_NAMES[month]} {year}</h2>
+          <button className="btn secondary small" onClick={goToday}>Today</button>
+        </div>
         <button className="btn ghost small" onClick={() => step(1)}>Next ›</button>
       </div>
 
@@ -48,15 +80,28 @@ export default function Calendar({ assignments, classById, onSelectAssignment }:
           <div className="calendar-weekday" key={w}>{w}</div>
         ))}
         {cells.map((cell) => {
-          const items = byDay.get(cell.iso) ?? [];
+          const dayAssignments = assignmentsByDay.get(cell.iso) ?? [];
+          const dayEvents = eventsByDay.get(cell.iso) ?? [];
+          const total = dayAssignments.length + dayEvents.length;
           return (
             <div
               key={cell.iso}
               className={`calendar-cell${cell.inMonth ? '' : ' muted-cell'}${cell.isToday ? ' today' : ''}`}
             >
-              <span className="calendar-date">{cell.date.getDate()}</span>
+              <div className="calendar-cell-head">
+                <span className="calendar-date">{cell.date.getDate()}</span>
+                {onAddOnDate && cell.inMonth && (
+                  <button
+                    className="calendar-add"
+                    title="Add an event on this day"
+                    onClick={() => onAddOnDate(cell.iso)}
+                  >
+                    +
+                  </button>
+                )}
+              </div>
               <div className="calendar-items">
-                {items.slice(0, 3).map((a) => {
+                {dayAssignments.slice(0, 2).map((a) => {
                   const cls = classById(a.class_id);
                   const color = cls ? subjectColor(cls.subject) : '#6f655b';
                   return (
@@ -71,18 +116,29 @@ export default function Calendar({ assignments, classById, onSelectAssignment }:
                     </button>
                   );
                 })}
-                {items.length > 3 && (
-                  <span className="calendar-more">+{items.length - 3} more</span>
-                )}
+                {dayEvents.slice(0, 3).map((e) => {
+                  const s = categoryStyle(e.category);
+                  return (
+                    <button
+                      key={e.id}
+                      className="calendar-item"
+                      style={{ background: `${s.color}1a`, color: s.color, borderColor: `${s.color}55` }}
+                      title={`${e.title} (${s.label})`}
+                      onClick={() => onSelectEvent?.(e)}
+                    >
+                      {s.emoji} {e.title}
+                    </button>
+                  );
+                })}
+                {total > 5 && <span className="calendar-more">+{total - 5} more</span>}
               </div>
             </div>
           );
         })}
       </div>
       <p className="muted" style={{ fontSize: '0.78rem', marginTop: '0.5rem' }}>
-        Showing assignments due, colored by subject.
-        {' '}Today is {MONTH_NAMES[today.getMonth()].slice(0, 3)} {today.getDate()},{' '}
-        {parseISO(new Date().toISOString().slice(0, 10)).getFullYear()}.
+        Subject-colored items are course assignments; the rest are events you added.
+        Click the <strong>+</strong> on any day to add one.
       </p>
     </div>
   );

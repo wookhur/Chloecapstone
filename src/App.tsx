@@ -6,7 +6,7 @@ import CalendarPage from './pages/CalendarPage';
 import TeacherClasses from './pages/TeacherClasses';
 import Dashboard from './pages/Dashboard';
 import CoursesPage from './pages/CoursesPage';
-import Inbox from './pages/Inbox';
+import Discussions from './pages/Discussions';
 import CourseLayout from './pages/course/CourseLayout';
 
 /** Canvas-style global navigation rail entries. */
@@ -14,7 +14,7 @@ const GLOBAL_NAV = [
   { to: '/dashboard', glyph: '🏠', label: 'Dashboard' },
   { to: '/courses', glyph: '📚', label: 'Courses' },
   { to: '/calendar', glyph: '🗓️', label: 'Calendar' },
-  { to: '/inbox', glyph: '✉️', label: 'Inbox' },
+  { to: '/discussions', glyph: '💬', label: 'Discussions' },
   { to: '/homework', glyph: '✅', label: 'To Do' },
 ];
 
@@ -92,7 +92,8 @@ export default function App() {
             <Route path="/teach" element={<Navigate to="/courses/manage" replace />} />
             <Route path="/homework" element={<Feed />} />
             <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/inbox" element={<Inbox />} />
+            <Route path="/discussions" element={<Discussions />} />
+            <Route path="/inbox" element={<Navigate to="/discussions" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>

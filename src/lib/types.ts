@@ -20,7 +20,7 @@ export interface ClassInfo {
   period: string | null;
   room: string | null;
   school_year: string;
-  syllabus: string | null; // rich course description shown on the Syllabus tab
+  syllabus: string | null;
   created_at: string;
 }
 
@@ -50,25 +50,11 @@ export interface Assignment {
   assigned_date: string; // ISO date (YYYY-MM-DD)
   due_date: string; // ISO date (YYYY-MM-DD)
   type: AssignmentType;
-  link: string | null; // optional resource link (files come in a later phase)
+  link: string | null;
   points_possible: number;
-  submission_kind: SubmissionKind; // how students turn work in
+  submission_kind: SubmissionKind;
   published: boolean;
   created_by: string;
-  created_at: string;
-}
-
-/** A student's submission for an assignment (one per student per assignment). */
-export interface Submission {
-  id: string;
-  assignment_id: string;
-  student_id: string;
-  body: string | null; // text entry (or JSON answers for quizzes)
-  url: string | null; // website-URL submissions
-  submitted_at: string | null;
-  score: number | null;
-  grade_comment: string | null;
-  graded_at: string | null;
   created_at: string;
 }
 
@@ -121,34 +107,6 @@ export interface PracticeQuestion {
   correct_index: number;
 }
 
-export interface CourseModule {
-  id: string;
-  class_id: string;
-  name: string;
-  position: number;
-}
-
-export type ModuleItemKind = 'assignment' | 'page' | 'link' | 'header';
-
-export interface ModuleItem {
-  id: string;
-  module_id: string;
-  position: number;
-  kind: ModuleItemKind;
-  ref_id: string | null; // assignment id or page id
-  title: string; // used for header / link items
-  url: string | null; // external link items
-}
-
-export interface WikiPage {
-  id: string;
-  class_id: string;
-  title: string;
-  body: string;
-  updated_at: string;
-  created_at: string;
-}
-
 /** File metadata only — actual storage comes in a later phase. */
 export interface CourseFile {
   id: string;
@@ -159,18 +117,34 @@ export interface CourseFile {
   created_at: string;
 }
 
-export interface Conversation {
-  id: string;
-  subject: string;
-  participant_ids: string[];
-  created_at: string;
-}
+/** A personal calendar entry the user adds by hand (beyond course assignments). */
+export type CalendarEventCategory =
+  | 'event'
+  | 'exam'
+  | 'reminder'
+  | 'personal'
+  | 'meeting';
 
-export interface Message {
+export const CALENDAR_CATEGORIES: {
+  key: CalendarEventCategory;
+  label: string;
+  emoji: string;
+  color: string;
+}[] = [
+  { key: 'event', label: 'Event', emoji: '📌', color: '#3b6fd4' },
+  { key: 'exam', label: 'Exam', emoji: '🧪', color: '#d24b45' },
+  { key: 'reminder', label: 'Reminder', emoji: '⏰', color: '#a9772a' },
+  { key: 'personal', label: 'Personal', emoji: '⭐', color: '#8a53c4' },
+  { key: 'meeting', label: 'Meeting', emoji: '👥', color: '#2a8ea9' },
+];
+
+export interface CalendarEvent {
   id: string;
-  conversation_id: string;
-  sender_id: string;
-  body: string;
+  owner_id: string;
+  title: string;
+  date: string; // YYYY-MM-DD
+  category: CalendarEventCategory;
+  note: string | null;
   created_at: string;
 }
 

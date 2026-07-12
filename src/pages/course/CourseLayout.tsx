@@ -8,7 +8,6 @@ import AssignmentDetail from './AssignmentDetail';
 import DiscussionsTab from './DiscussionsTab';
 import QuizzesTab from './QuizzesTab';
 import QuizTake from './QuizTake';
-import ModulesTab from './ModulesTab';
 import PeopleTab from './PeopleTab';
 import FilesTab from './FilesTab';
 
@@ -20,7 +19,6 @@ const COURSE_NAV = [
   { to: 'quizzes', label: 'Practice Quizzes' },
   { to: 'people', label: 'People' },
   { to: 'files', label: 'Files' },
-  { to: 'modules', label: 'Modules' },
 ];
 
 /** Canvas course shell: course header + left course menu + tab content. */
@@ -77,7 +75,6 @@ export default function CourseLayout() {
             <Route path="files" element={<FilesTab cls={cls} />} />
             <Route path="quizzes" element={<QuizzesTab cls={cls} />} />
             <Route path="quizzes/:quizId/practice" element={<QuizTake cls={cls} />} />
-            <Route path="modules" element={<ModulesTab cls={cls} />} />
             <Route path="*" element={<Navigate to="home" replace />} />
           </Routes>
         </div>
