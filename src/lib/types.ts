@@ -1,6 +1,6 @@
 // Shared types — mirror the columns defined in supabase/schema.sql.
 
-export type Role = 'student' | 'teacher' | 'admin';
+export type Role = 'student' | 'teacher' | 'admin' | 'counselor';
 
 export interface Profile {
   id: string;
@@ -117,13 +117,14 @@ export interface CourseFile {
   created_at: string;
 }
 
-/** A personal calendar entry the user adds by hand (beyond course assignments). */
+/** A calendar entry added by hand (personal, or a counselor meeting for a student). */
 export type CalendarEventCategory =
   | 'event'
   | 'exam'
   | 'reminder'
   | 'personal'
-  | 'meeting';
+  | 'meeting'
+  | 'counseling';
 
 export const CALENDAR_CATEGORIES: {
   key: CalendarEventCategory;
@@ -136,15 +137,17 @@ export const CALENDAR_CATEGORIES: {
   { key: 'reminder', label: 'Reminder', emoji: '⏰', color: '#a9772a' },
   { key: 'personal', label: 'Personal', emoji: '⭐', color: '#8a53c4' },
   { key: 'meeting', label: 'Meeting', emoji: '👥', color: '#2a8ea9' },
+  { key: 'counseling', label: 'Counseling', emoji: '🧭', color: '#0e8a7d' },
 ];
 
 export interface CalendarEvent {
   id: string;
-  owner_id: string;
+  owner_id: string; // whose calendar it shows on
   title: string;
   date: string; // YYYY-MM-DD
   category: CalendarEventCategory;
   note: string | null;
+  created_by: string | null; // who added it (a counselor, or the owner themselves)
   created_at: string;
 }
 

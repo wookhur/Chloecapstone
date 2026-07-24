@@ -23,7 +23,7 @@ drop table if exists profiles cascade;
 create table profiles (
   id         uuid primary key default gen_random_uuid(),
   name       text not null,
-  role       text not null check (role in ('student', 'teacher', 'admin')),
+  role       text not null check (role in ('student', 'teacher', 'admin', 'counselor')),
   grade      int  check (grade between 6 and 13),
   created_at timestamptz not null default now()
 );
@@ -139,18 +139,21 @@ create table files (
 );
 create index files_class_idx on files (class_id);
 
--- Personal calendar events (hand-added by a user, beyond course assignments) ---------
+-- Calendar events: hand-added by a user, or a counselor meeting for a student.
+-- owner_id is whose calendar it shows on; created_by is who added it.
 create table calendar_events (
   id         uuid primary key default gen_random_uuid(),
   owner_id   uuid not null references profiles (id) on delete cascade,
   title      text not null,
   date       date not null,
   category   text not null default 'event'
-               check (category in ('event', 'exam', 'reminder', 'personal', 'meeting')),
+               check (category in ('event', 'exam', 'reminder', 'personal', 'meeting', 'counseling')),
   note       text,
+  created_by uuid references profiles (id) on delete set null,
   created_at timestamptz not null default now()
 );
 create index calendar_events_owner_idx on calendar_events (owner_id);
+create index calendar_events_creator_idx on calendar_events (created_by);
 
 -- ---------------------------------------------------------------------------
 -- Row Level Security

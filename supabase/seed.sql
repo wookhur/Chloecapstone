@@ -16,6 +16,7 @@ insert into profiles (id, name, role, grade) values
   ('00000000-0000-0000-0000-0000000000e2', 'Jay (Student)',  'student', 11),
   ('00000000-0000-0000-0000-0000000000e3', 'Leo (Student)',  'student', 10),
   ('00000000-0000-0000-0000-0000000000e4', 'Zoe (Student)',  'student', 10),
+  ('00000000-0000-0000-0000-0000000000b1', 'Ms. Rivera (Counselor)', 'counselor', null),
   ('00000000-0000-0000-0000-0000000000a1', 'School Office', 'admin', null);
 
 -- Class catalog -------------------------------------------------------------
@@ -119,9 +120,11 @@ insert into files (class_id, name, size_kb, uploaded_by) values
   ('00000000-0000-0000-0000-0000000000c3', 'cell-diagram-labeled.png', 1024, '00000000-0000-0000-0000-0000000000d3'),
   ('00000000-0000-0000-0000-0000000000c5', 'giver-discussion-questions.docx', 88, '00000000-0000-0000-0000-0000000000d2');
 
--- Personal calendar events (Mina's, added by hand) ---------------------------------------
-insert into calendar_events (owner_id, title, date, category, note) values
-  ('00000000-0000-0000-0000-0000000000e1', 'Dentist appointment', current_date + 1, 'personal', '3:30pm — leave right after school'),
-  ('00000000-0000-0000-0000-0000000000e1', 'Study group (library)', current_date + 2, 'meeting', 'Unit 4 quiz review with Leo & Zoe'),
-  ('00000000-0000-0000-0000-0000000000e1', 'Soccer practice', current_date + 3, 'event', null),
-  ('00000000-0000-0000-0000-0000000000e1', 'Turn in permission slip', current_date, 'reminder', 'For the museum field trip');
+-- Calendar events: students' own entries + counseling meetings Ms. Rivera set --------------
+insert into calendar_events (owner_id, title, date, category, note, created_by) values
+  ('00000000-0000-0000-0000-0000000000e1', 'Dentist appointment', current_date + 1, 'personal', '3:30pm — leave right after school', '00000000-0000-0000-0000-0000000000e1'),
+  ('00000000-0000-0000-0000-0000000000e1', 'Study group (library)', current_date + 2, 'meeting', 'Unit 4 quiz review with Leo & Zoe', '00000000-0000-0000-0000-0000000000e1'),
+  ('00000000-0000-0000-0000-0000000000e1', 'Soccer practice', current_date + 3, 'event', null, '00000000-0000-0000-0000-0000000000e1'),
+  ('00000000-0000-0000-0000-0000000000e1', 'Turn in permission slip', current_date, 'reminder', 'For the museum field trip', '00000000-0000-0000-0000-0000000000e1'),
+  ('00000000-0000-0000-0000-0000000000e1', 'Counselor check-in — Ms. Rivera', current_date + 5, 'counseling', 'College application timeline. Room 102, 11:15am.', '00000000-0000-0000-0000-0000000000b1'),
+  ('00000000-0000-0000-0000-0000000000e3', 'Counselor check-in — Ms. Rivera', current_date + 4, 'counseling', 'Course selection for next year.', '00000000-0000-0000-0000-0000000000b1');

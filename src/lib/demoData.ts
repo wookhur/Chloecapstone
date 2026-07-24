@@ -43,6 +43,8 @@ export const demoProfiles: Profile[] = [
   { id: 's-jay', name: 'Jay (Student)', role: 'student', grade: 11, created_at: now },
   { id: 's-leo', name: 'Leo (Student)', role: 'student', grade: 10, created_at: now },
   { id: 's-zoe', name: 'Zoe (Student)', role: 'student', grade: 10, created_at: now },
+  // Counselor
+  { id: 'co-rivera', name: 'Ms. Rivera (Counselor)', role: 'counselor', grade: null, created_at: now },
   // Admin
   { id: 'a-office', name: 'School Office', role: 'admin', grade: null, created_at: now },
 ];
@@ -159,10 +161,13 @@ export const demoFiles: CourseFile[] = [
   { id: 'f5', class_id: 'c-eng', name: 'giver-discussion-questions.docx', size_kb: 88, uploaded_by: 't-brooks', created_at: ts(-4) },
 ];
 
-// Personal calendar entries added by hand (Mina, the default demo student).
+// Calendar entries: Mina's own events, plus a counseling meeting Ms. Rivera
+// scheduled onto Mina's calendar.
 export const demoCalendarEvents: CalendarEvent[] = [
-  { id: 'ce1', owner_id: 's-mina', title: 'Dentist appointment', date: iso(1), category: 'personal', note: '3:30pm — leave right after school', created_at: now },
-  { id: 'ce2', owner_id: 's-mina', title: 'Study group (library)', date: iso(2), category: 'meeting', note: 'Unit 4 quiz review with Leo & Zoe', created_at: now },
-  { id: 'ce3', owner_id: 's-mina', title: 'Soccer practice', date: iso(3), category: 'event', note: null, created_at: now },
-  { id: 'ce4', owner_id: 's-mina', title: 'Turn in permission slip', date: iso(0), category: 'reminder', note: 'For the museum field trip', created_at: now },
+  { id: 'ce1', owner_id: 's-mina', title: 'Dentist appointment', date: iso(1), category: 'personal', note: '3:30pm — leave right after school', created_by: 's-mina', created_at: now },
+  { id: 'ce2', owner_id: 's-mina', title: 'Study group (library)', date: iso(2), category: 'meeting', note: 'Unit 4 quiz review with Leo & Zoe', created_by: 's-mina', created_at: now },
+  { id: 'ce3', owner_id: 's-mina', title: 'Soccer practice', date: iso(3), category: 'event', note: null, created_by: 's-mina', created_at: now },
+  { id: 'ce4', owner_id: 's-mina', title: 'Turn in permission slip', date: iso(0), category: 'reminder', note: 'For the museum field trip', created_by: 's-mina', created_at: now },
+  { id: 'ce5', owner_id: 's-mina', title: 'Counselor check-in — Ms. Rivera', date: iso(5), category: 'counseling', note: 'College application timeline. Room 102, 11:15am.', created_by: 'co-rivera', created_at: now },
+  { id: 'ce6', owner_id: 's-leo', title: 'Counselor check-in — Ms. Rivera', date: iso(4), category: 'counseling', note: 'Course selection for next year.', created_by: 'co-rivera', created_at: now },
 ];

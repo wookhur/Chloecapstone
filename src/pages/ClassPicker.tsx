@@ -9,6 +9,14 @@ export default function ClassPicker() {
   const [subjectFilter, setSubjectFilter] = useState<string>('all');
   const [busy, setBusy] = useState<string | null>(null);
 
+  const visible = useMemo(
+    () =>
+      classes
+        .filter((c) => subjectFilter === 'all' || c.subject === subjectFilter)
+        .sort((a, b) => a.subject.localeCompare(b.subject) || a.name.localeCompare(b.name)),
+    [classes, subjectFilter],
+  );
+
   if (!currentUser) return <div className="empty">Select a user to begin.</div>;
   if (currentUser.role !== 'student') {
     return (
@@ -20,14 +28,6 @@ export default function ClassPicker() {
 
   const myClassIds = new Set(
     enrollments.filter((e) => e.student_id === currentUser.id).map((e) => e.class_id),
-  );
-
-  const visible = useMemo(
-    () =>
-      classes
-        .filter((c) => subjectFilter === 'all' || c.subject === subjectFilter)
-        .sort((a, b) => a.subject.localeCompare(b.subject) || a.name.localeCompare(b.name)),
-    [classes, subjectFilter],
   );
 
   const toggle = async (classId: string) => {

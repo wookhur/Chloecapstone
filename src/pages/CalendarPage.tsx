@@ -5,6 +5,7 @@ import Calendar from '../components/Calendar';
 import AssignmentCard from '../components/AssignmentCard';
 import * as repo from '../lib/repository';
 import { today } from '../lib/dates';
+import { subjectColor } from '../lib/subjectColor';
 import {
   CALENDAR_CATEGORIES,
   type Assignment,
@@ -18,18 +19,26 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formDate, setFormDate] = useState(today());
-
-  if (!currentUser) return <div className="empty">Select a user to begin.</div>;
+  const [courseFilter, setCourseFilter] = useState<string>('all');
 
   const mine = useMemo(() => {
     const set = new Set(myClassIds);
-    return assignments.filter((a) => set.has(a.class_id));
-  }, [assignments, myClassIds]);
+    return assignments
+      .filter((a) => set.has(a.class_id))
+      .filter((a) => courseFilter === 'all' || a.class_id === courseFilter);
+  }, [assignments, myClassIds, courseFilter]);
 
   const myEvents = useMemo(
-    () => calendarEvents.filter((e) => e.owner_id === currentUser.id),
-    [calendarEvents, currentUser.id],
+    () => calendarEvents.filter((e) => e.owner_id === currentUser?.id),
+    [calendarEvents, currentUser?.id],
   );
+
+  if (!currentUser) return <div className="empty">Select a user to begin.</div>;
+
+  const myCourses = myClassIds
+    .map((id) => classById(id))
+    .filter((c): c is NonNullable<typeof c> => Boolean(c))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const openAddForm = (iso: string) => {
     setFormDate(iso);
@@ -69,6 +78,34 @@ export default function CalendarPage() {
         />
       )}
 
+      {myCourses.length > 0 && (
+        <div className="cal-legend">
+          <button
+            className={`legend-chip ${courseFilter === 'all' ? 'on' : ''}`}
+            onClick={() => setCourseFilter('all')}
+          >
+            All my courses
+          </button>
+          {myCourses.map((c) => {
+            const color = subjectColor(c.subject);
+            const active = courseFilter === c.id;
+            return (
+              <button
+                key={c.id}
+                className={`legend-chip ${active ? 'on' : ''}`}
+                style={active
+                  ? { background: color, borderColor: color, color: '#fff' }
+                  : { borderColor: `${color}66`, color }}
+                onClick={() => setCourseFilter(active ? 'all' : c.id)}
+              >
+                <span className="legend-dot" style={{ background: active ? '#fff' : color }} />
+                {c.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {myClassIds.length === 0 && myEvents.length === 0 ? (
         <div className="empty">
           Nothing on your calendar yet. Add an event above
@@ -106,6 +143,7 @@ export default function CalendarPage() {
           </div>
           <EventCard
             event={selectedEvent}
+            canDelete={!selectedEvent.created_by || selectedEvent.created_by === currentUser.id}
             onDelete={async () => {
               await repo.deleteCalendarEvent(selectedEvent.id);
               setSelectedEvent(null);
@@ -118,8 +156,21 @@ export default function CalendarPage() {
   );
 }
 
-function EventCard({ event, onDelete }: { event: CalendarEvent; onDelete: () => Promise<void> }) {
+function EventCard({
+  event,
+  canDelete,
+  onDelete,
+}: {
+  event: CalendarEvent;
+  canDelete: boolean;
+  onDelete: () => Promise<void>;
+}) {
+  const { profileById, currentUser } = useApp();
   const cat = CALENDAR_CATEGORIES.find((c) => c.key === event.category) ?? CALENDAR_CATEGORIES[0];
+  const scheduledByName =
+    event.created_by && event.created_by !== currentUser?.id
+      ? profileById(event.created_by)?.name ?? null
+      : null;
   return (
     <div className="card" style={{ borderLeft: `4px solid ${cat.color}` }}>
       <div className="row-between">
@@ -136,9 +187,14 @@ function EventCard({ event, onDelete }: { event: CalendarEvent; onDelete: () => 
             })}
           </p>
         </div>
-        <button className="btn danger small" onClick={onDelete}>Delete</button>
+        {canDelete && <button className="btn danger small" onClick={onDelete}>Delete</button>}
       </div>
       {event.note && <p className="sub" style={{ marginTop: '0.6rem' }}>{event.note}</p>}
+      {scheduledByName && (
+        <p className="muted" style={{ fontSize: '0.78rem', marginTop: '0.5rem' }}>
+          🧭 Scheduled by {scheduledByName}
+        </p>
+      )}
     </div>
   );
 }
@@ -168,6 +224,7 @@ function EventForm({
         date,
         category,
         note: note.trim() || null,
+        created_by: ownerId, // personal event — added by the owner
       });
       await onDone();
     } finally {
@@ -193,7 +250,7 @@ function EventForm({
         <div className="field" style={{ flex: '0 0 150px' }}>
           <label>Type</label>
           <select value={category} onChange={(e) => setCategory(e.target.value as CalendarEventCategory)}>
-            {CALENDAR_CATEGORIES.map((c) => (
+            {CALENDAR_CATEGORIES.filter((c) => c.key !== 'counseling').map((c) => (
               <option key={c.key} value={c.key}>{c.emoji} {c.label}</option>
             ))}
           </select>

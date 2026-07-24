@@ -18,14 +18,6 @@ export default function Feed() {
   const [timeframe, setTimeframe] = useState<Timeframe>('week');
   const [classFilter, setClassFilter] = useState<string>('all');
 
-  if (!currentUser) return <div className="empty">Select a user to begin.</div>;
-
-  const myClasses = myClassIds
-    .map((id) => classById(id))
-    .filter((c): c is NonNullable<typeof c> => Boolean(c));
-
-  const isStudent = currentUser.role === 'student';
-
   const filtered = useMemo(() => {
     const classSet = new Set(myClassIds);
     return assignments
@@ -45,6 +37,14 @@ export default function Feed() {
     }
     return [...map.entries()];
   }, [filtered]);
+
+  if (!currentUser) return <div className="empty">Select a user to begin.</div>;
+
+  const myClasses = myClassIds
+    .map((id) => classById(id))
+    .filter((c): c is NonNullable<typeof c> => Boolean(c));
+
+  const isStudent = currentUser.role === 'student';
 
   if (myClassIds.length === 0) {
     return (
@@ -76,6 +76,17 @@ export default function Feed() {
             : 'Assignments across the classes you teach.'}
         </p>
       </div>
+
+      {isStudent && (
+        <div className="callout subtle-callout">
+          <span className="callout-icon">📄</span>
+          <div>
+            Got <strong>paper homework</strong> that isn't listed here? Ask your teacher
+            to post its due date in Homework Hub — accurate dates keep everyone on track
+            and give you one place to see what's due.
+          </div>
+        </div>
+      )}
 
       <div className="toolbar">
         <div className="toggle-group">

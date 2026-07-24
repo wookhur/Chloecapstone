@@ -8,15 +8,20 @@ import Dashboard from './pages/Dashboard';
 import CoursesPage from './pages/CoursesPage';
 import Discussions from './pages/Discussions';
 import ImportClassroom from './pages/ImportClassroom';
+import Counselor from './pages/Counselor';
 import CourseLayout from './pages/course/CourseLayout';
 
-/** Canvas-style global navigation rail entries. */
-const GLOBAL_NAV = [
+const STUDENT_TEACHER_NAV = [
   { to: '/dashboard', glyph: '🏠', label: 'Dashboard' },
   { to: '/courses', glyph: '📚', label: 'Courses' },
   { to: '/calendar', glyph: '🗓️', label: 'Calendar' },
   { to: '/discussions', glyph: '💬', label: 'Discussions' },
   { to: '/homework', glyph: '✅', label: 'To Do' },
+];
+
+const COUNSELOR_NAV = [
+  { to: '/counselor', glyph: '🧭', label: 'Counselor' },
+  { to: '/calendar', glyph: '🗓️', label: 'Calendar' },
 ];
 
 export default function App() {
@@ -25,13 +30,16 @@ export default function App() {
 
   if (loading) return <div className="center-screen">Loading Homework Hub…</div>;
 
+  const isCounselor = currentUser?.role === 'counselor';
+  const nav = isCounselor ? COUNSELOR_NAV : STUDENT_TEACHER_NAV;
+
   return (
     <div className="app-shell rail-layout">
       <aside className="global-rail">
         <div className="rail-brand" title="Homework Hub">
           🗓️
         </div>
-        {GLOBAL_NAV.map((item) => (
+        {nav.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
@@ -69,6 +77,11 @@ export default function App() {
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </optgroup>
+              <optgroup label="Counselors">
+                {profiles.filter((p) => p.role === 'counselor').map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </optgroup>
             </select>
           </div>
         </header>
@@ -83,7 +96,11 @@ export default function App() {
           )}
 
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route
+              path="/"
+              element={<Navigate to={isCounselor ? '/counselor' : '/dashboard'} replace />}
+            />
+            <Route path="/counselor" element={<Counselor />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/courses" element={<CoursesPage />} />
             <Route path="/courses/browse" element={<ClassPicker />} />
@@ -96,7 +113,10 @@ export default function App() {
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/discussions" element={<Discussions />} />
             <Route path="/inbox" element={<Navigate to="/discussions" replace />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route
+              path="*"
+              element={<Navigate to={isCounselor ? '/counselor' : '/dashboard'} replace />}
+            />
           </Routes>
         </main>
       </div>

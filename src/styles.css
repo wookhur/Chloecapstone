@@ -516,3 +516,26 @@ thead .sticky-col { background: var(--surface-2); }
 .gc-course input { margin-top: 0.2rem; width: auto; accent-color: var(--brand); }
 .gc-course.picked { outline: 2px solid var(--brand); outline-offset: -2px; }
 .gc-course input:disabled { opacity: 0.5; }
+
+/* ===========================================================================
+   v5 — callouts, calendar legend, counselor
+   ===========================================================================*/
+.callout {
+  display: flex; gap: 0.7rem; align-items: flex-start;
+  background: #eef4ff; border: 1px solid #cfe0fb; border-left: 4px solid var(--brand);
+  border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; font-size: 0.9rem;
+}
+.callout .callout-icon { font-size: 1.1rem; line-height: 1.4; }
+.callout p { color: var(--ink-soft); font-size: 0.86rem; }
+.subtle-callout { background: var(--surface-2); border-color: var(--line); border-left-color: var(--accent); }
+
+/* Calendar course legend / filter */
+.cal-legend { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+.legend-chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.8rem; padding: 0.3rem 0.65rem; border-radius: 99px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft);
+}
+.legend-chip:hover { color: var(--ink); }
+.legend-chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }

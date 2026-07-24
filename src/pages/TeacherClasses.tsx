@@ -31,6 +31,18 @@ export default function TeacherClasses() {
         <p>Create your classes and post homework for {SCHOOL_YEAR}.</p>
       </div>
 
+      <div className="callout">
+        <span className="callout-icon">💡</span>
+        <div>
+          <strong>Post a due date for every assignment — even paper handouts.</strong>
+          <p style={{ margin: '4px 0 0' }}>
+            When the due date lives here, students turn work in on time, so you grade
+            each assignment <em>once</em> instead of chasing late makeups — and the
+            posted date is a clear, shared record everyone can point to.
+          </p>
+        </div>
+      </div>
+
       <div className="row-between" style={{ marginBottom: '1rem' }}>
         <span className="muted">{myClasses.length} class{myClasses.length === 1 ? '' : 'es'}</span>
         <button className="btn small" onClick={() => setShowNewClass((v) => !v)}>
