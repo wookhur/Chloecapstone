@@ -1,0 +1,139 @@
+import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
+import { useApp } from './context/AppContext';
+import ClassPicker from './pages/ClassPicker';
+import Feed from './pages/Feed';
+import CalendarPage from './pages/CalendarPage';
+import TeacherClasses from './pages/TeacherClasses';
+import Dashboard from './pages/Dashboard';
+import CoursesPage from './pages/CoursesPage';
+import Discussions from './pages/Discussions';
+import ImportClassroom from './pages/ImportClassroom';
+import Counselor from './pages/Counselor';
+import CourseLayout from './pages/course/CourseLayout';
+
+const STUDENT_TEACHER_NAV = [
+  { to: '/dashboard', glyph: '🏠', label: 'Dashboard' },
+  { to: '/courses', glyph: '📚', label: 'Courses' },
+  { to: '/calendar', glyph: '🗓️', label: 'Calendar' },
+  { to: '/discussions', glyph: '💬', label: 'Discussions' },
+  { to: '/homework', glyph: '✅', label: 'To Do' },
+];
+
+const COUNSELOR_NAV = [
+  { to: '/counselor', glyph: '🧭', label: 'Counselor' },
+  { to: '/calendar', glyph: '🗓️', label: 'Calendar' },
+];
+
+export default function App() {
+  const {
+    loading,
+    error,
+    currentUser,
+    profiles,
+    currentUserId,
+    setCurrentUserId,
+    supabaseConnected,
+  } = useApp();
+
+  if (loading) return <div className="center-screen">Loading Homework Hub…</div>;
+
+  const isCounselor = currentUser?.role === 'counselor';
+  const nav = isCounselor ? COUNSELOR_NAV : STUDENT_TEACHER_NAV;
+
+  return (
+    <div className="app-shell rail-layout">
+      <aside className="global-rail">
+        <div className="rail-brand" title="Homework Hub">
+          🗓️
+        </div>
+        {nav.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) => `rail-item ${isActive ? 'active' : ''}`}
+          >
+            <span className="rail-glyph">{item.glyph}</span>
+            <span className="rail-label">{item.label}</span>
+          </NavLink>
+        ))}
+      </aside>
+
+      <div className="rail-main">
+        <header className="topbar">
+          <div className="brand">
+            <span className="name">Homework Hub</span>
+            <span className="chip" style={{ marginLeft: '0.5rem' }}>
+              {currentUser?.role ?? '—'}
+            </span>
+          </div>
+          <div className="topbar-spacer" />
+          <div className="user-switcher">
+            <label htmlFor="user">Signed in as</label>
+            <select
+              id="user"
+              value={currentUserId ?? ''}
+              onChange={(e) => setCurrentUserId(e.target.value)}
+            >
+              <optgroup label="Students">
+                {profiles.filter((p) => p.role === 'student').map((p) => (
+                  <option key={p.id} value={p.id}>{p.name} · G{p.grade}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Teachers">
+                {profiles.filter((p) => p.role === 'teacher').map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Counselors">
+                {profiles.filter((p) => p.role === 'counselor').map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+        </header>
+
+        <main className="content">
+          {error && (
+            <div className="banner error" role="alert">
+              <span className="dot" />
+              Couldn't load your data: {error}
+            </div>
+          )}
+
+          {!supabaseConnected && (
+            <div className="banner demo">
+              <span className="dot" />
+              Demo mode — Supabase isn't connected, so changes live in memory only.
+              Add <code>.env.local</code> to use your database.
+            </div>
+          )}
+
+          <Routes>
+            <Route
+              path="/"
+              element={<Navigate to={isCounselor ? '/counselor' : '/dashboard'} replace />}
+            />
+            <Route path="/counselor" element={<Counselor />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/courses" element={<CoursesPage />} />
+            <Route path="/courses/browse" element={<ClassPicker />} />
+            <Route path="/courses/manage" element={<TeacherClasses />} />
+            <Route path="/courses/import" element={<ImportClassroom />} />
+            <Route path="/courses/:classId/*" element={<CourseLayout />} />
+            <Route path="/classes" element={<Navigate to="/courses/browse" replace />} />
+            <Route path="/teach" element={<Navigate to="/courses/manage" replace />} />
+            <Route path="/homework" element={<Feed />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/discussions" element={<Discussions />} />
+            <Route path="/inbox" element={<Navigate to="/discussions" replace />} />
+            <Route
+              path="*"
+              element={<Navigate to={isCounselor ? '/counselor' : '/dashboard'} replace />}
+            />
+          </Routes>
+        </main>
+      </div>
+    </div>
+  );
+}
