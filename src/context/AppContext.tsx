@@ -52,6 +52,8 @@ interface AppState {
 
 const AppContext = createContext<AppState | null>(null);
 const STORAGE_KEY = 'hwhub.currentUserId';
+/** Student the seed data fills out, used as the default persona on first load. */
+const DEMO_PERSONA = 'Mina';
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -117,11 +119,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })();
   }, [refresh]);
 
-  // Default to a student for the demo.
+  // Default to the demo persona who actually has content. Picking "the first
+  // student" would depend on row order, which differs between demo mode
+  // (declaration order) and Supabase (ordered by name) — landing the user on an
+  // empty dashboard.
   useEffect(() => {
     if (!currentUserId && profiles.length > 0) {
-      const student = profiles.find((p) => p.role === 'student');
-      setCurrentUserId(student?.id ?? profiles[0].id);
+      const students = profiles.filter((p) => p.role === 'student');
+      const seeded = students.find((p) => p.name.startsWith(DEMO_PERSONA));
+      setCurrentUserId(seeded?.id ?? students[0]?.id ?? profiles[0].id);
     }
   }, [profiles, currentUserId, setCurrentUserId]);
 

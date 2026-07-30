@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import * as repo from '../lib/repository';
 import { subjectColor } from '../lib/subjectColor';
 import type { DiscussionTopic } from '../lib/types';
+import { displayName, initial } from '../lib/names';
 
 type SortOrder = 'new' | 'old';
 
@@ -21,7 +22,9 @@ export default function Discussions() {
     myClassIds,
   } = useApp();
 
-  const [classFilter, setClassFilter] = useState<string>('all');
+  const [rawClassFilter, setClassFilter] = useState<string>('all');
+  // Don't keep filtering by a course the current user isn't in.
+  const classFilter = myClassIds.includes(rawClassFilter) ? rawClassFilter : 'all';
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortOrder>('new');
   const [openTopicId, setOpenTopicId] = useState<string | null>(null);
@@ -77,6 +80,7 @@ export default function Discussions() {
       <div className="disc-toolbar">
         <select
           className="select"
+          aria-label="Filter by course"
           value={classFilter}
           onChange={(e) => setClassFilter(e.target.value)}
         >
@@ -87,9 +91,11 @@ export default function Discussions() {
         </select>
 
         <div className="search-wrap">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon" aria-hidden="true">🔍</span>
           <input
             className="search-input"
+            type="search"
+            aria-label="Search discussions by keyword"
             value={query}
             placeholder="Search discussions by keyword…"
             onChange={(e) => setQuery(e.target.value)}
@@ -103,6 +109,7 @@ export default function Discussions() {
 
         <select
           className="select"
+          aria-label="Sort discussions by date"
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOrder)}
         >
@@ -110,7 +117,10 @@ export default function Discussions() {
           <option value="old">Oldest first</option>
         </select>
 
-        <button className="btn small" onClick={() => setShowNew((v) => !v)}>
+        <button
+          className={`btn small ${showNew ? "secondary" : ""}`}
+          onClick={() => setShowNew((v) => !v)}
+        >
           {showNew ? 'Cancel' : '+ New'}
         </button>
       </div>
@@ -143,10 +153,11 @@ export default function Discussions() {
                 <button className="disc-row-main" onClick={() => setOpenTopicId(t.id)}>
                   <span className="disc-title">💬 {t.title}</span>
                   <span className="disc-meta">
-                    <span className="chip" style={{ background: `${color}1a`, color, borderColor: `${color}55` }}>
+                    <span className="subject-chip">
+                      <span className="legend-dot" style={{ background: color }} />
                       {cls?.name ?? 'Course'}
                     </span>{' '}
-                    {profileById(t.author_id)?.name.replace(/ \(Student\)$/, '')} ·{' '}
+                    {displayName(profileById(t.author_id))} ·{' '}
                     {new Date(t.created_at).toLocaleDateString(undefined, {
                       month: 'short',
                       day: 'numeric',
@@ -208,7 +219,7 @@ function NewTopicForm({
       <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div className="field" style={{ flex: '0 0 220px' }}>
           <label>Course</label>
-          <select value={classId} onChange={(e) => setClassId(e.target.value)}>
+          <select aria-label="Course" value={classId} onChange={(e) => setClassId(e.target.value)}>
             {classes.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
@@ -216,12 +227,12 @@ function NewTopicForm({
         </div>
         <div className="field" style={{ flex: '1 1 240px' }}>
           <label>Topic title</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} />
+          <input aria-label="Topic title" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
       </div>
       <div className="field">
         <label>Prompt</label>
-        <textarea value={body} onChange={(e) => setBody(e.target.value)} />
+        <textarea aria-label="Prompt" value={body} onChange={(e) => setBody(e.target.value)} />
       </div>
       <div className="row-between">
         <span />
@@ -277,8 +288,8 @@ function Thread({ topic, onBack }: { topic: DiscussionTopic; onBack: () => void 
 
       <div className="card" style={{ margin: '0.75rem 0 1.25rem' }}>
         <div className="inline" style={{ gap: '0.5rem', marginBottom: '0.4rem' }}>
-          <span className="avatar">{author?.name.charAt(0) ?? '?'}</span>
-          <strong>{author?.name.replace(/ \(Student\)$/, '')}</strong>
+          <span className="avatar">{initial(author)}</span>
+          <strong>{displayName(author)}</strong>
           {author?.role === 'teacher' && <span className="chip">Teacher</span>}
         </div>
         <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{topic.body}</p>
@@ -293,10 +304,10 @@ function Thread({ topic, onBack }: { topic: DiscussionTopic; onBack: () => void 
           return (
             <div key={p.id} className="card subtle discussion-post">
               <div className="inline" style={{ gap: '0.5rem', marginBottom: '0.3rem' }}>
-                <span className="avatar">{who?.name.charAt(0) ?? '?'}</span>
-                <strong>{who?.name.replace(/ \(Student\)$/, '')}</strong>
+                <span className="avatar">{initial(who)}</span>
+                <strong>{displayName(who)}</strong>
                 {who?.role === 'teacher' && <span className="chip">Teacher</span>}
-                <span className="muted" style={{ fontSize: '0.75rem' }}>
+                <span className="meta">
                   {new Date(p.created_at).toLocaleString(undefined, {
                     month: 'short',
                     day: 'numeric',
@@ -315,7 +326,7 @@ function Thread({ topic, onBack }: { topic: DiscussionTopic; onBack: () => void 
         <div className="field">
           <label>Reply</label>
           <textarea
-            value={reply}
+aria-label="Reply"             value={reply}
             placeholder="Add to the discussion…"
             onChange={(e) => setReply(e.target.value)}
           />

@@ -45,7 +45,10 @@ export default function TeacherClasses() {
 
       <div className="row-between" style={{ marginBottom: '1rem' }}>
         <span className="muted">{myClasses.length} class{myClasses.length === 1 ? '' : 'es'}</span>
-        <button className="btn small" onClick={() => setShowNewClass((v) => !v)}>
+        <button
+          className={`btn small ${showNewClass ? "secondary" : ""}`}
+          onClick={() => setShowNewClass((v) => !v)}
+        >
           {showNewClass ? 'Cancel' : '+ Add a class'}
         </button>
       </div>
@@ -102,7 +105,6 @@ function NewClassForm({
         period,
         room: room.trim() || null,
         school_year: SCHOOL_YEAR,
-        syllabus: null,
       });
       await onCreated();
     } finally {
@@ -115,27 +117,27 @@ function NewClassForm({
       <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div className="field" style={{ flex: '1 1 200px' }}>
           <label>Class name</label>
-          <input type="text" value={name} placeholder="e.g. Algebra II" onChange={(e) => setName(e.target.value)} />
+          <input aria-label="Class name" type="text" value={name} placeholder="e.g. Algebra II" onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="field" style={{ flex: '0 0 160px' }}>
           <label>Subject</label>
-          <select value={subject} onChange={(e) => setSubject(e.target.value)}>
+          <select aria-label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)}>
             {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         <div className="field" style={{ flex: '0 0 100px' }}>
           <label>Grade</label>
-          <select value={grade} onChange={(e) => setGrade(Number(e.target.value))}>
+          <select aria-label="Grade" value={grade} onChange={(e) => setGrade(Number(e.target.value))}>
             {[9, 10, 11, 12].map((g) => <option key={g} value={g}>{g}</option>)}
           </select>
         </div>
         <div className="field" style={{ flex: '0 0 90px' }}>
           <label>Period</label>
-          <input type="text" value={period} onChange={(e) => setPeriod(e.target.value)} />
+          <input aria-label="Period" type="text" value={period} onChange={(e) => setPeriod(e.target.value)} />
         </div>
         <div className="field" style={{ flex: '0 0 110px' }}>
           <label>Room</label>
-          <input type="text" value={room} onChange={(e) => setRoom(e.target.value)} />
+          <input aria-label="Room" type="text" value={room} onChange={(e) => setRoom(e.target.value)} />
         </div>
       </div>
       <div className="row-between">
@@ -170,6 +172,7 @@ function ClassBlock({
 
   const remove = async (id: string) => {
     await repo.deleteAssignment(id);
+    if (editing?.id === id) setEditing(null); // don't leave a form editing a deleted row
     await onChanged();
   };
 
@@ -191,7 +194,10 @@ function ClassBlock({
       </div>
 
       {(posting || editing) && (
+        // key: remount the form when the target changes, so its initial state is
+        // re-read. Without it, editing A then B would save A's values onto B.
         <AssignmentForm
+          key={editing?.id ?? 'new'}
           classId={cls.id}
           teacherId={teacherId}
           existing={editing}
@@ -201,7 +207,7 @@ function ClassBlock({
 
       <div className="divider" />
       {sorted.length === 0 ? (
-        <p className="muted" style={{ fontSize: '0.85rem' }}>No homework posted yet.</p>
+        <p className="meta">No homework posted yet.</p>
       ) : (
         <div className="grid cols-2">
           {sorted.map((a) => (
@@ -258,9 +264,6 @@ function AssignmentForm({
           due_date: dueDate,
           type,
           link: link.trim() || null,
-          points_possible: 10,
-          submission_kind: type === 'quiz' || type === 'test' ? 'quiz' : 'text',
-          published: true,
           created_by: teacherId,
         });
       }
@@ -275,11 +278,11 @@ function AssignmentForm({
       <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div className="field" style={{ flex: '1 1 240px' }}>
           <label>Title</label>
-          <input type="text" value={title} placeholder="e.g. Chapter 4 worksheet" onChange={(e) => setTitle(e.target.value)} />
+          <input aria-label="Title" type="text" value={title} placeholder="e.g. Chapter 4 worksheet" onChange={(e) => setTitle(e.target.value)} />
         </div>
         <div className="field" style={{ flex: '0 0 150px' }}>
           <label>Type</label>
-          <select value={type} onChange={(e) => setType(e.target.value as AssignmentType)}>
+          <select aria-label="Type" value={type} onChange={(e) => setType(e.target.value as AssignmentType)}>
             {ASSIGNMENT_TYPES.map((t) => (
               <option key={t} value={t} style={{ textTransform: 'capitalize' }}>{t}</option>
             ))}
@@ -287,16 +290,16 @@ function AssignmentForm({
         </div>
         <div className="field" style={{ flex: '0 0 170px' }}>
           <label>Due date</label>
-          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <input aria-label="Due date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         </div>
       </div>
       <div className="field">
         <label>Details <span className="hint">(optional)</span></label>
-        <textarea value={description} placeholder="Instructions, page numbers, etc." onChange={(e) => setDescription(e.target.value)} />
+        <textarea aria-label="Details" value={description} placeholder="Instructions, page numbers, etc." onChange={(e) => setDescription(e.target.value)} />
       </div>
       <div className="field">
         <label>Resource link <span className="hint">(optional)</span></label>
-        <input type="text" value={link} placeholder="https://…" onChange={(e) => setLink(e.target.value)} />
+        <input aria-label="Resource link" type="text" value={link} placeholder="https://…" onChange={(e) => setLink(e.target.value)} />
       </div>
       <div className="row-between">
         <span className="muted" style={{ fontSize: '0.8rem' }}>

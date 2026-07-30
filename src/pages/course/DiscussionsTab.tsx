@@ -3,14 +3,25 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import * as repo from '../../lib/repository';
 import type { ClassInfo } from '../../lib/types';
+import { displayName, initial } from '../../lib/names';
 
 /** Discussions: topic list, or a single thread when :topicId is present. */
-export default function DiscussionsTab({ cls }: { cls: ClassInfo }) {
+export default function DiscussionsTab({
+  cls,
+  canPost,
+}: {
+  cls: ClassInfo;
+  canPost: boolean;
+}) {
   const { topicId } = useParams<{ topicId: string }>();
-  return topicId ? <TopicThread cls={cls} topicId={topicId} /> : <TopicList cls={cls} />;
+  return topicId ? (
+    <TopicThread cls={cls} topicId={topicId} canPost={canPost} />
+  ) : (
+    <TopicList cls={cls} canPost={canPost} />
+  );
 }
 
-function TopicList({ cls }: { cls: ClassInfo }) {
+function TopicList({ cls, canPost }: { cls: ClassInfo; canPost: boolean }) {
   const { currentUser, discussionTopics, discussionPosts, profileById, refresh } = useApp();
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
@@ -42,21 +53,26 @@ function TopicList({ cls }: { cls: ClassInfo }) {
   return (
     <div>
       <div className="row-between" style={{ marginBottom: '1rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Discussions</h2>
-        <button className="btn small" onClick={() => setShowForm((v) => !v)}>
-          {showForm ? 'Cancel' : '+ Discussion'}
-        </button>
+        <h2 className="section-title">Discussions</h2>
+        {canPost && (
+          <button
+            className={`btn small ${showForm ? 'secondary' : ''}`}
+            onClick={() => setShowForm((v) => !v)}
+          >
+            {showForm ? 'Cancel' : '+ Discussion'}
+          </button>
+        )}
       </div>
 
       {showForm && (
         <div className="card" style={{ marginBottom: '1rem' }}>
           <div className="field">
             <label>Topic title</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} />
+            <input aria-label="Topic title" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div className="field">
             <label>Prompt</label>
-            <textarea value={body} onChange={(e) => setBody(e.target.value)} />
+            <textarea aria-label="Prompt" value={body} onChange={(e) => setBody(e.target.value)} />
           </div>
           <div className="row-between">
             <span />
@@ -79,8 +95,8 @@ function TopicList({ cls }: { cls: ClassInfo }) {
                   <Link to={`../discussions/${t.id}`} style={{ fontWeight: 600 }}>
                     💬 {t.title}
                   </Link>
-                  <div className="muted" style={{ fontSize: '0.78rem', marginTop: 2 }}>
-                    {profileById(t.author_id)?.name} ·{' '}
+                  <div className="meta" style={{ marginTop: 2 }}>
+                    {displayName(profileById(t.author_id))} ·{' '}
                     {new Date(t.created_at).toLocaleDateString(undefined, {
                       month: 'short',
                       day: 'numeric',
@@ -97,7 +113,15 @@ function TopicList({ cls }: { cls: ClassInfo }) {
   );
 }
 
-function TopicThread({ cls, topicId }: { cls: ClassInfo; topicId: string }) {
+function TopicThread({
+  cls,
+  topicId,
+  canPost,
+}: {
+  cls: ClassInfo;
+  topicId: string;
+  canPost: boolean;
+}) {
   const { currentUser, discussionTopics, discussionPosts, profileById, refresh } = useApp();
   const [reply, setReply] = useState('');
   const [busy, setBusy] = useState(false);
@@ -129,15 +153,15 @@ function TopicThread({ cls, topicId }: { cls: ClassInfo; topicId: string }) {
 
   return (
     <div>
-      <Link to="../discussions" className="muted" style={{ fontSize: '0.82rem' }}>
+      <Link to="../discussions" className="meta">
         ← All discussions
       </Link>
       <h2 style={{ margin: '0.5rem 0 0.25rem' }}>💬 {topic.title}</h2>
 
       <div className="card" style={{ margin: '0.75rem 0 1.25rem' }}>
         <div className="inline" style={{ gap: '0.5rem', marginBottom: '0.4rem' }}>
-          <span className="avatar">{author?.name.charAt(0) ?? '?'}</span>
-          <strong>{author?.name}</strong>
+          <span className="avatar">{initial(author)}</span>
+          <strong>{displayName(author)}</strong>
           {author?.role === 'teacher' && <span className="chip">Teacher</span>}
         </div>
         <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{topic.body}</p>
@@ -152,10 +176,10 @@ function TopicThread({ cls, topicId }: { cls: ClassInfo; topicId: string }) {
           return (
             <div key={p.id} className="card subtle discussion-post">
               <div className="inline" style={{ gap: '0.5rem', marginBottom: '0.3rem' }}>
-                <span className="avatar">{who?.name.charAt(0) ?? '?'}</span>
-                <strong>{who?.name.replace(/ \(Student\)$/, '')}</strong>
+                <span className="avatar">{initial(who)}</span>
+                <strong>{displayName(who)}</strong>
                 {who?.role === 'teacher' && <span className="chip">Teacher</span>}
-                <span className="muted" style={{ fontSize: '0.75rem' }}>
+                <span className="meta">
                   {new Date(p.created_at).toLocaleString(undefined, {
                     month: 'short',
                     day: 'numeric',
@@ -170,22 +194,29 @@ function TopicThread({ cls, topicId }: { cls: ClassInfo; topicId: string }) {
         })}
       </div>
 
-      <div className="card" style={{ marginTop: '1rem' }}>
-        <div className="field">
-          <label>Reply</label>
-          <textarea
-            value={reply}
-            placeholder="Add to the discussion…"
-            onChange={(e) => setReply(e.target.value)}
-          />
+      {canPost ? (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <div className="field">
+            <label htmlFor={`reply-${topic.id}`}>Reply</label>
+            <textarea
+              id={`reply-${topic.id}`}
+              value={reply}
+              placeholder="Add to the discussion…"
+              onChange={(e) => setReply(e.target.value)}
+            />
+          </div>
+          <div className="row-between">
+            <span />
+            <button className="btn small" disabled={!reply.trim() || busy} onClick={post}>
+              {busy ? 'Posting…' : 'Post reply'}
+            </button>
+          </div>
         </div>
-        <div className="row-between">
-          <span />
-          <button className="btn small" disabled={!reply.trim() || busy} onClick={post}>
-            {busy ? 'Posting…' : 'Post reply'}
-          </button>
-        </div>
-      </div>
+      ) : (
+        <p className="meta" style={{ marginTop: '1rem' }}>
+          You're reading this course as a visitor — join the course to reply.
+        </p>
+      )}
     </div>
   );
 }

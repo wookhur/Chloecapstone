@@ -39,7 +39,6 @@ create table classes (
   period      text,
   room        text,
   school_year text not null,
-  syllabus    text,
   created_at  timestamptz not null default now()
 );
 create index classes_teacher_idx on classes (teacher_id);
@@ -66,10 +65,6 @@ create table assignments (
   type            text not null default 'homework'
                     check (type in ('homework', 'quiz', 'test', 'project')),
   link            text,
-  points_possible numeric not null default 0,
-  submission_kind text not null default 'none'
-                    check (submission_kind in ('text', 'url', 'none', 'quiz')),
-  published       boolean not null default true,
   created_by      uuid references profiles (id) on delete set null,
   created_at      timestamptz not null default now()
 );
@@ -127,6 +122,7 @@ create table practice_questions (
   correct_index int  not null default 0
 );
 create index practice_questions_quiz_idx on practice_questions (quiz_id);
+create unique index practice_questions_order_idx on practice_questions (quiz_id, position);
 
 -- Course files (metadata only; storage buckets come in a later phase) ----------------
 create table files (
@@ -159,7 +155,7 @@ create index calendar_events_creator_idx on calendar_events (created_by);
 -- Row Level Security
 -- Pilot runs on the public anon key (no per-user auth yet), so anon gets full
 -- access. When Supabase Auth is added, tighten these to per-user rules
--- (e.g. students edit only their own submissions; teachers only their classes).
+-- (e.g. students edit only their own posts; teachers only their classes).
 -- ---------------------------------------------------------------------------
 do $$
 declare t text;

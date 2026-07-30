@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import * as repo from '../../lib/repository';
 import type { ClassInfo } from '../../lib/types';
+import { displayName } from '../../lib/names';
 
 const FILE_ICONS: [RegExp, string][] = [
   [/\.pdf$/i, '📕'],
@@ -45,7 +46,7 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
 
   return (
     <div>
-      <h2 style={{ margin: '0 0 1rem', fontSize: '1.1rem' }}>Files</h2>
+      <h2 className="section-title" style={{ marginBottom: "1rem" }}>Files</h2>
 
       {isCourseTeacher && (
         <div className="card subtle" style={{ marginBottom: '1rem' }}>
@@ -53,6 +54,7 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
             <div className="field" style={{ flex: 1, marginBottom: 0 }}>
               <input
                 value={name}
+                aria-label="File name"
                 placeholder="filename.pdf — real uploads come with storage in a later phase"
                 onChange={(e) => setName(e.target.value)}
               />
@@ -67,6 +69,7 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
       {list.length === 0 ? (
         <div className="empty">No files yet.</div>
       ) : (
+        <div className="table-scroll">
         <table className="data-table">
           <thead>
             <tr>
@@ -84,7 +87,7 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
                   {iconFor(f.name)} <strong>{f.name}</strong>
                 </td>
                 <td>{formatSize(f.size_kb)}</td>
-                <td>{profileById(f.uploaded_by)?.name}</td>
+                <td>{displayName(profileById(f.uploaded_by))}</td>
                 <td>
                   {new Date(f.created_at).toLocaleDateString(undefined, {
                     month: 'short',
@@ -94,7 +97,7 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
                 {isCourseTeacher && (
                   <td>
                     <button
-                      className="btn ghost small"
+                      className="btn danger small"
                       onClick={async () => {
                         await repo.deleteFile(f.id);
                         await refresh();
@@ -108,6 +111,7 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

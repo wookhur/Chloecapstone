@@ -3,6 +3,7 @@ import {
   MONTH_NAMES,
   WEEKDAY_NAMES,
   monthGrid,
+  parseISO,
 } from '../lib/dates';
 import { subjectColor } from '../lib/subjectColor';
 import {
@@ -22,8 +23,19 @@ interface Props {
   onAddOnDate?: (iso: string) => void;
 }
 
+/** How many of each kind a day cell shows before collapsing behind "+N more". */
+const MAX_ASSIGNMENTS = 2;
+const MAX_EVENTS = 3;
+
 const categoryStyle = (cat: CalendarEvent['category']) =>
   CALENDAR_CATEGORIES.find((c) => c.key === cat) ?? CALENDAR_CATEGORIES[0];
+
+const longDate = (iso: string) =>
+  parseISO(iso).toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
 
 /** A month calendar that shows assignments due and hand-added events per day. */
 export default function Calendar({
@@ -37,6 +49,8 @@ export default function Calendar({
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
+  /** Day whose full item list is expanded (set by clicking "+N more"). */
+  const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
   const cells = monthGrid(year, month);
 
@@ -57,11 +71,13 @@ export default function Calendar({
     const d = new Date(year, month + delta, 1);
     setYear(d.getFullYear());
     setMonth(d.getMonth());
+    setExpandedDay(null);
   };
 
   const goToday = () => {
     setYear(today.getFullYear());
     setMonth(today.getMonth());
+    setExpandedDay(null);
   };
 
   return (
@@ -82,7 +98,18 @@ export default function Calendar({
         {cells.map((cell) => {
           const dayAssignments = assignmentsByDay.get(cell.iso) ?? [];
           const dayEvents = eventsByDay.get(cell.iso) ?? [];
-          const total = dayAssignments.length + dayEvents.length;
+          const expanded = expandedDay === cell.iso;
+          // Each list has its own cap, so count what is actually rendered.
+          const shownAssignments = expanded
+            ? dayAssignments
+            : dayAssignments.slice(0, MAX_ASSIGNMENTS);
+          const shownEvents = expanded ? dayEvents : dayEvents.slice(0, MAX_EVENTS);
+          const hidden =
+            dayAssignments.length +
+            dayEvents.length -
+            shownAssignments.length -
+            shownEvents.length;
+
           return (
             <div
               key={cell.iso}
@@ -93,7 +120,8 @@ export default function Calendar({
                 {onAddOnDate && cell.inMonth && (
                   <button
                     className="calendar-add"
-                    title="Add an event on this day"
+                    title={`Add an event on ${longDate(cell.iso)}`}
+                    aria-label={`Add an event on ${longDate(cell.iso)}`}
                     onClick={() => onAddOnDate(cell.iso)}
                   >
                     +
@@ -101,44 +129,65 @@ export default function Calendar({
                 )}
               </div>
               <div className="calendar-items">
-                {dayAssignments.slice(0, 2).map((a) => {
+                {shownAssignments.map((a) => {
                   const cls = classById(a.class_id);
                   const color = cls ? subjectColor(cls.subject) : '#6f655b';
                   return (
                     <button
                       key={a.id}
-                      className="calendar-item"
-                      style={{ background: `${color}1a`, color, borderColor: `${color}55` }}
-                      title={`${a.title}${cls ? ' · ' + cls.name : ''}`}
+                      // Assignments read as solid chips; personal events are outlined.
+                      className="calendar-item is-assignment"
+                      style={{ borderColor: color, background: `${color}1f` }}
+                      title={`Assignment · ${a.title}${cls ? ' · ' + cls.name : ''}`}
                       onClick={() => onSelectAssignment?.(a)}
                     >
-                      {a.title}
+                      <span className="calendar-item-dot" style={{ background: color }} />
+                      <span className="calendar-item-label">{a.title}</span>
                     </button>
                   );
                 })}
-                {dayEvents.slice(0, 3).map((e) => {
+                {shownEvents.map((e) => {
                   const s = categoryStyle(e.category);
                   return (
                     <button
                       key={e.id}
-                      className="calendar-item"
-                      style={{ background: `${s.color}1a`, color: s.color, borderColor: `${s.color}55` }}
-                      title={`${e.title} (${s.label})`}
+                      className="calendar-item is-event"
+                      style={{ borderColor: `${s.color}88` }}
+                      title={`${s.label} · ${e.title}`}
                       onClick={() => onSelectEvent?.(e)}
                     >
-                      {s.emoji} {e.title}
+                      <span aria-hidden="true">{s.emoji}</span>
+                      <span className="calendar-item-label">{e.title}</span>
                     </button>
                   );
                 })}
-                {total > 5 && <span className="calendar-more">+{total - 5} more</span>}
+                {hidden > 0 && (
+                  <button
+                    className="calendar-more"
+                    aria-label={`Show ${hidden} more item${hidden === 1 ? '' : 's'} on ${longDate(cell.iso)}`}
+                    onClick={() => setExpandedDay(cell.iso)}
+                  >
+                    +{hidden} more
+                  </button>
+                )}
+                {expanded && (
+                  <button
+                    className="calendar-more"
+                    aria-label={`Collapse ${longDate(cell.iso)}`}
+                    onClick={() => setExpandedDay(null)}
+                  >
+                    Show less
+                  </button>
+                )}
               </div>
             </div>
           );
         })}
       </div>
-      <p className="muted" style={{ fontSize: '0.78rem', marginTop: '0.5rem' }}>
-        Subject-colored items are course assignments; the rest are events you added.
-        Click the <strong>+</strong> on any day to add one.
+
+      <p className="meta calendar-caption">
+        Solid chips with a dot are course assignments; outlined chips with an icon are
+        events you added. Use the <strong>+</strong> on any day to add one.
       </p>
     </div>
   );

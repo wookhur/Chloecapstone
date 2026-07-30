@@ -44,7 +44,7 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
           <Link to={`../assignments/${a.id}`} style={{ fontWeight: 600 }}>
             {a.title}
           </Link>
-          <div className={`muted ${overdue ? '' : ''}`} style={{ fontSize: '0.78rem', marginTop: 2 }}>
+          <div className={`due ${overdue ? 'overdue' : ''}`} style={{ marginTop: 2 }}>
             {dueLabel(a.due_date)}
           </div>
         </div>
@@ -56,9 +56,12 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
   return (
     <div>
       <div className="row-between" style={{ marginBottom: '1rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Assignments</h2>
+        <h2 className="section-title">Assignments</h2>
         {isCourseTeacher && (
-          <button className="btn small" onClick={() => setShowForm((v) => !v)}>
+          <button
+            className={`btn small ${showForm ? "secondary" : ""}`}
+            onClick={() => setShowForm((v) => !v)}
+          >
             {showForm ? 'Cancel' : '+ Assignment'}
           </button>
         )}
@@ -125,9 +128,6 @@ function NewAssignmentForm({
         due_date: dueDate,
         type,
         link: link.trim() || null,
-        points_possible: 0,
-        submission_kind: 'none',
-        published: true,
         created_by: teacherId,
       });
       await onDone();
@@ -141,11 +141,11 @@ function NewAssignmentForm({
       <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div className="field" style={{ flex: '1 1 220px' }}>
           <label>Title</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} />
+          <input aria-label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
         <div className="field" style={{ flex: '0 0 130px' }}>
           <label>Type</label>
-          <select value={type} onChange={(e) => setType(e.target.value as AssignmentType)}>
+          <select aria-label="Type" value={type} onChange={(e) => setType(e.target.value as AssignmentType)}>
             {ASSIGNMENT_TYPES.map((t) => (
               <option key={t} value={t}>{t}</option>
             ))}
@@ -153,16 +153,16 @@ function NewAssignmentForm({
         </div>
         <div className="field" style={{ flex: '0 0 150px' }}>
           <label>Due date</label>
-          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <input aria-label="Due date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         </div>
       </div>
       <div className="field">
         <label>Instructions <span className="hint">(optional)</span></label>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+        <textarea aria-label="Instructions" value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
       <div className="field">
         <label>Resource link <span className="hint">(optional)</span></label>
-        <input value={link} placeholder="https://…" onChange={(e) => setLink(e.target.value)} />
+        <input aria-label="Resource link" value={link} placeholder="https://…" onChange={(e) => setLink(e.target.value)} />
       </div>
       <div className="row-between">
         <span />

@@ -6,6 +6,8 @@
 // Set VITE_GOOGLE_CLIENT_ID (and enable the Classroom API in Google Cloud) to
 // connect a real account — the same code then does read-only OAuth + fetch.
 
+import { toISODate } from './dates';
+
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
 
 export const isGoogleClassroomConfigured = Boolean(CLIENT_ID);
@@ -54,7 +56,7 @@ export interface ClassroomSnapshot {
 const iso = (offsetDays: number) => {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
+  return toISODate(d);
 };
 
 function demoSnapshot(): ClassroomSnapshot {

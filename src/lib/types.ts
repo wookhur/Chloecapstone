@@ -20,7 +20,6 @@ export interface ClassInfo {
   period: string | null;
   room: string | null;
   school_year: string;
-  syllabus: string | null;
   created_at: string;
 }
 
@@ -40,8 +39,10 @@ export const ASSIGNMENT_TYPES: AssignmentType[] = [
   'project',
 ];
 
-export type SubmissionKind = 'text' | 'url' | 'none' | 'quiz';
-
+/**
+ * Assignments are informational: this app tracks what's due, while the school's
+ * system of record (PowerSchool) owns points and grading. No submission fields.
+ */
 export interface Assignment {
   id: string;
   class_id: string;
@@ -51,10 +52,7 @@ export interface Assignment {
   due_date: string; // ISO date (YYYY-MM-DD)
   type: AssignmentType;
   link: string | null;
-  points_possible: number;
-  submission_kind: SubmissionKind;
-  published: boolean;
-  created_by: string;
+  created_by: string | null; // null once the posting teacher's profile is removed
   created_at: string;
 }
 

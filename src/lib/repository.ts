@@ -152,6 +152,8 @@ export async function updateAssignment(
 ): Promise<Assignment> {
   if (!isSupabaseConfigured) {
     const idx = mem.assignments.findIndex((a) => a.id === id);
+    // Match the Supabase path, which errors rather than writing to index -1.
+    if (idx === -1) throw new Error(`Assignment ${id} no longer exists`);
     mem.assignments[idx] = { ...mem.assignments[idx], ...patch };
     return mem.assignments[idx];
   }

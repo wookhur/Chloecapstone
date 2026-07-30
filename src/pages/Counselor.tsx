@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import * as repo from '../lib/repository';
 import { today, parseISO } from '../lib/dates';
+import { displayName } from '../lib/names';
 
 /**
  * Counselor console: schedule counseling meetings straight onto a student's
@@ -51,7 +52,7 @@ export default function Counselor() {
         created_by: currentUser.id,
       });
       await refresh();
-      const who = profileById(studentId)?.name.replace(/ \(Student\)$/, '') ?? 'student';
+      const who = displayName(profileById(studentId)) ?? 'student';
       setFlash(`Added to ${who}'s calendar ✓`);
       setNote('');
       setTime('');
@@ -81,40 +82,40 @@ export default function Counselor() {
         <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <div className="field" style={{ flex: '1 1 220px' }}>
             <label>Student</label>
-            <select value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+            <select aria-label="Student" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
               <option value="">Choose a student…</option>
               {students.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name.replace(/ \(Student\)$/, '')} · G{s.grade}
+                  {displayName(s)} · G{s.grade}
                 </option>
               ))}
             </select>
           </div>
           <div className="field" style={{ flex: '1 1 200px' }}>
             <label>Title</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} />
+            <input aria-label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
         </div>
         <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <div className="field" style={{ flex: '0 0 160px' }}>
             <label>Date</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div className="field" style={{ flex: '0 0 130px' }}>
             <label>Time <span className="hint">(optional)</span></label>
-            <input value={time} placeholder="11:15am" onChange={(e) => setTime(e.target.value)} />
+            <input aria-label="Time" value={time} placeholder="11:15am" onChange={(e) => setTime(e.target.value)} />
           </div>
           <div className="field" style={{ flex: '0 0 150px' }}>
             <label>Location <span className="hint">(optional)</span></label>
-            <input value={location} placeholder="Room 102" onChange={(e) => setLocation(e.target.value)} />
+            <input aria-label="Location" value={location} placeholder="Room 102" onChange={(e) => setLocation(e.target.value)} />
           </div>
         </div>
         <div className="field">
           <label>Note <span className="hint">(optional)</span></label>
-          <input value={note} placeholder="e.g. College application timeline" onChange={(e) => setNote(e.target.value)} />
+          <input aria-label="Note" value={note} placeholder="e.g. College application timeline" onChange={(e) => setNote(e.target.value)} />
         </div>
         <div className="row-between">
-          {flash ? <span className="muted" style={{ fontSize: '0.82rem' }}>{flash}</span> : <span />}
+          {flash ? <span className="meta">{flash}</span> : <span />}
           <button className="btn small" disabled={!studentId || !title.trim() || !date || busy} onClick={schedule}>
             {busy ? 'Adding…' : 'Add to student calendar'}
           </button>
@@ -122,7 +123,7 @@ export default function Counselor() {
       </div>
 
       <div className="section">
-        <h2 style={{ fontSize: '1.05rem' }}>Upcoming meetings ({upcoming.length})</h2>
+        <h2 className="section-title">Upcoming meetings ({upcoming.length})</h2>
         {upcoming.length === 0 ? (
           <div className="empty">No meetings scheduled yet.</div>
         ) : (
@@ -130,8 +131,8 @@ export default function Counselor() {
             {upcoming.map((m) => (
               <li key={m.id} className="list-row">
                 <div>
-                  <strong>🧭 {profileById(m.owner_id)?.name.replace(/ \(Student\)$/, '') ?? 'Student'}</strong>
-                  <div className="muted" style={{ fontSize: '0.8rem', marginTop: 2 }}>
+                  <strong>🧭 {displayName(profileById(m.owner_id)) ?? 'Student'}</strong>
+                  <div className="meta" style={{ marginTop: 2 }}>
                     {parseISO(m.date).toLocaleDateString(undefined, {
                       weekday: 'short',
                       month: 'short',
@@ -140,7 +141,7 @@ export default function Counselor() {
                     {m.note ? ` · ${m.note}` : ''}
                   </div>
                 </div>
-                <button className="btn ghost small" onClick={() => cancel(m.id)}>Cancel</button>
+                <button className="btn danger small" onClick={() => cancel(m.id)}>Cancel</button>
               </li>
             ))}
           </ul>
@@ -149,15 +150,15 @@ export default function Counselor() {
 
       {past.length > 0 && (
         <div className="section">
-          <h2 style={{ fontSize: '1.05rem' }}>Past</h2>
+          <h2 className="section-title">Past</h2>
           <ul className="plain-list boxed">
             {past.map((m) => (
               <li key={m.id} className="list-row">
                 <span className="muted">
-                  🧭 {profileById(m.owner_id)?.name.replace(/ \(Student\)$/, '') ?? 'Student'} ·{' '}
+                  🧭 {displayName(profileById(m.owner_id)) ?? 'Student'} ·{' '}
                   {parseISO(m.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                 </span>
-                <button className="btn ghost small" onClick={() => cancel(m.id)}>Remove</button>
+                <button className="btn danger small" onClick={() => cancel(m.id)}>Remove</button>
               </li>
             ))}
           </ul>

@@ -1,6 +1,7 @@
 import { NavLink, Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { subjectColor } from '../../lib/subjectColor';
+import { displayName } from '../../lib/names';
 import CourseHome from './CourseHome';
 import AnnouncementsTab from './AnnouncementsTab';
 import AssignmentsTab from './AssignmentsTab';
@@ -33,6 +34,8 @@ export default function CourseLayout() {
   const teacher = profileById(cls.teacher_id);
   const enrolled = myClassIds.includes(cls.id);
   const isCourseTeacher = currentUser?.id === cls.teacher_id;
+  /** Only people actually in the course may post to it. Anyone may read. */
+  const canPost = enrolled || isCourseTeacher;
 
   return (
     <div className="course-shell">
@@ -41,7 +44,7 @@ export default function CourseLayout() {
           <h1 style={{ color }}>{cls.name}</h1>
           <p className="sub">
             {cls.subject} · Grade {cls.grade_level} · {cls.period} · Room {cls.room ?? '—'} ·{' '}
-            {teacher?.name}
+            {displayName(teacher)}
           </p>
         </div>
         {!enrolled && !isCourseTeacher && (
@@ -69,11 +72,11 @@ export default function CourseLayout() {
             <Route path="announcements" element={<AnnouncementsTab cls={cls} />} />
             <Route path="assignments" element={<AssignmentsTab cls={cls} />} />
             <Route path="assignments/:assignmentId" element={<AssignmentDetail cls={cls} />} />
-            <Route path="discussions" element={<DiscussionsTab cls={cls} />} />
-            <Route path="discussions/:topicId" element={<DiscussionsTab cls={cls} />} />
+            <Route path="discussions" element={<DiscussionsTab cls={cls} canPost={canPost} />} />
+            <Route path="discussions/:topicId" element={<DiscussionsTab cls={cls} canPost={canPost} />} />
             <Route path="people" element={<PeopleTab cls={cls} />} />
             <Route path="files" element={<FilesTab cls={cls} />} />
-            <Route path="quizzes" element={<QuizzesTab cls={cls} />} />
+            <Route path="quizzes" element={<QuizzesTab cls={cls} canPost={canPost} />} />
             <Route path="quizzes/:quizId/practice" element={<QuizTake cls={cls} />} />
             <Route path="*" element={<Navigate to="home" replace />} />
           </Routes>

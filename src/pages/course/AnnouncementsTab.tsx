@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import * as repo from '../../lib/repository';
 import type { ClassInfo } from '../../lib/types';
+import { displayName } from '../../lib/names';
 
 export default function AnnouncementsTab({ cls }: { cls: ClassInfo }) {
   const { currentUser, announcements, profileById, refresh } = useApp();
@@ -37,9 +38,12 @@ export default function AnnouncementsTab({ cls }: { cls: ClassInfo }) {
   return (
     <div>
       <div className="row-between" style={{ marginBottom: '1rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Announcements</h2>
+        <h2 className="section-title">Announcements</h2>
         {isCourseTeacher && (
-          <button className="btn small" onClick={() => setShowForm((v) => !v)}>
+          <button
+            className={`btn small ${showForm ? "secondary" : ""}`}
+            onClick={() => setShowForm((v) => !v)}
+          >
             {showForm ? 'Cancel' : '+ Announcement'}
           </button>
         )}
@@ -49,11 +53,11 @@ export default function AnnouncementsTab({ cls }: { cls: ClassInfo }) {
         <div className="card" style={{ marginBottom: '1rem' }}>
           <div className="field">
             <label>Title</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} />
+            <input aria-label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div className="field">
             <label>Message</label>
-            <textarea value={body} onChange={(e) => setBody(e.target.value)} />
+            <textarea aria-label="Message" value={body} onChange={(e) => setBody(e.target.value)} />
           </div>
           <div className="row-between">
             <span />
@@ -72,7 +76,7 @@ export default function AnnouncementsTab({ cls }: { cls: ClassInfo }) {
             <div key={an.id} className="card">
               <div className="row-between">
                 <strong>{an.title}</strong>
-                <span className="muted" style={{ fontSize: '0.78rem' }}>
+                <span className="meta">
                   {new Date(an.created_at).toLocaleDateString(undefined, {
                     weekday: 'short',
                     month: 'short',
@@ -82,12 +86,12 @@ export default function AnnouncementsTab({ cls }: { cls: ClassInfo }) {
               </div>
               <p className="sub" style={{ margin: '6px 0 0', whiteSpace: 'pre-wrap' }}>{an.body}</p>
               <div className="row-between" style={{ marginTop: '0.6rem' }}>
-                <span className="muted" style={{ fontSize: '0.78rem' }}>
-                  — {profileById(an.author_id)?.name}
+                <span className="meta">
+                  — {displayName(profileById(an.author_id))}
                 </span>
                 {isCourseTeacher && (
                   <button
-                    className="btn ghost small"
+                    className="btn danger small"
                     onClick={async () => {
                       await repo.deleteAnnouncement(an.id);
                       await refresh();

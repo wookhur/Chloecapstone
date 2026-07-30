@@ -24,7 +24,7 @@ export default function AssignmentDetail({ cls }: { cls: ClassInfo }) {
 
   return (
     <div>
-      <Link to="../assignments" className="muted" style={{ fontSize: '0.82rem' }}>
+      <Link to="../assignments" className="meta">
         ← All assignments
       </Link>
       <h2 style={{ margin: '0.5rem 0 0.25rem' }}>

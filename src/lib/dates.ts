@@ -11,8 +11,14 @@ export const TIMEFRAME_LABELS: Record<Timeframe, string> = {
   upcoming: 'All upcoming',
 };
 
+/**
+ * Format a Date as YYYY-MM-DD in the *local* timezone.
+ * Never use toISOString() here — it converts to UTC, which shifts the date by a
+ * day for most of the world and disagrees with parseISO()/monthGrid() below.
+ */
 export function toISODate(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 export function today(): string {
@@ -48,7 +54,7 @@ export function inTimeframe(dueISO: string, frame: Timeframe): boolean {
 
   switch (frame) {
     case 'today':
-      return dueISO === toISODate(now);
+      return dueISO === today();
     case 'week': {
       const [start, end] = weekBounds(now);
       return due >= start && due <= end;

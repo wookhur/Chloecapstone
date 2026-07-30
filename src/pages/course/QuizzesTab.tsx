@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import * as repo from '../../lib/repository';
 import type { ClassInfo, PracticeQuestion } from '../../lib/types';
+import { displayName, initial } from '../../lib/names';
 
 /**
  * Quizlet-style practice quizzes. Any student (or the teacher) can create a
  * quiz for the course; classmates can practice it as many times as they want.
  * Nothing is graded — it's pure self-check practice.
  */
-export default function QuizzesTab({ cls }: { cls: ClassInfo }) {
+export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: boolean }) {
   const { currentUser, practiceQuizzes, practiceQuestions, profileById, refresh } = useApp();
   const [creating, setCreating] = useState(false);
 
@@ -20,10 +21,15 @@ export default function QuizzesTab({ cls }: { cls: ClassInfo }) {
   return (
     <div>
       <div className="row-between" style={{ marginBottom: '0.35rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Practice Quizzes</h2>
-        <button className="btn small" onClick={() => setCreating((v) => !v)}>
-          {creating ? 'Cancel' : '+ Make a quiz'}
-        </button>
+        <h2 className="section-title">Practice Quizzes</h2>
+        {canPost && (
+          <button
+            className={`btn small ${creating ? 'secondary' : ''}`}
+            onClick={() => setCreating((v) => !v)}
+          >
+            {creating ? 'Cancel' : '+ Make a quiz'}
+          </button>
+        )}
       </div>
       <p className="sub" style={{ marginBottom: '1rem' }}>
         Made by students, for students. Create a quiz to help your classmates study,
@@ -56,9 +62,9 @@ export default function QuizzesTab({ cls }: { cls: ClassInfo }) {
                   {q.description && (
                     <p className="sub" style={{ margin: '0 0 0.5rem' }}>{q.description}</p>
                   )}
-                  <p className="muted" style={{ fontSize: '0.78rem', margin: 0 }}>
-                    <span className="avatar">{author?.name.charAt(0) ?? '?'}</span>
-                    {author?.name.replace(/ \(Student\)$/, '')} · {count} card
+                  <p className="meta" style={{ margin: 0 }}>
+                    <span className="avatar">{initial(author)}</span>
+                    {displayName(author)} · {count} card
                     {count === 1 ? '' : 's'}
                   </p>
                 </div>
@@ -72,7 +78,7 @@ export default function QuizzesTab({ cls }: { cls: ClassInfo }) {
                   )}
                   {mine && (
                     <button
-                      className="btn ghost small"
+                      className="btn danger small"
                       onClick={async () => {
                         await repo.deletePracticeQuiz(q.id);
                         await refresh();
@@ -130,14 +136,14 @@ function QuizBuilder({
         <div className="field">
           <label>Quiz title</label>
           <input
-            value={title}
+aria-label="Quiz title"             value={title}
             placeholder="e.g. Chapter 3 vocab"
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
         <div className="field">
           <label>Description <span className="hint">(optional)</span></label>
-          <input value={description} onChange={(e) => setDescription(e.target.value)} />
+          <input aria-label="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
         <div className="row-between">
           <span />
@@ -164,10 +170,10 @@ function QuizBuilder({
         <div key={q.id} className="quiz-question-row">
           <div>
             <strong>Q{i + 1}.</strong> {q.question}
-            <div className="muted" style={{ fontSize: '0.78rem' }}>✓ {q.choices[q.correct_index]}</div>
+            <div className="meta">✓ {q.choices[q.correct_index]}</div>
           </div>
           <button
-            className="btn ghost small"
+            className="btn danger small"
             onClick={async () => {
               await repo.deletePracticeQuestion(q.id);
               await refresh();
@@ -177,7 +183,13 @@ function QuizBuilder({
           </button>
         </div>
       ))}
-      <QuestionEditor quizId={quizId} nextPosition={questions.length + 1} onAdded={refresh} />
+      <QuestionEditor
+        quizId={quizId}
+        // Max+1, not length+1: deleting a middle card would otherwise reuse a
+        // position and make the order unstable.
+        nextPosition={questions.reduce((max, q) => Math.max(max, q.position), 0) + 1}
+        onAdded={refresh}
+      />
     </div>
   );
 }
@@ -196,8 +208,14 @@ function QuestionEditor({
   const [correct, setCorrect] = useState(0);
   const [busy, setBusy] = useState(false);
 
-  const filled = choices.map((c) => c.trim()).filter(Boolean);
-  const canAdd = question.trim() && filled.length >= 2 && correct < filled.length;
+  // Blank choices are dropped, which shifts every later index — so carry the
+  // original position along and re-find the correct answer after compacting.
+  const kept = choices
+    .map((c, i) => ({ text: c.trim(), i }))
+    .filter((c) => c.text !== '');
+  const filled = kept.map((c) => c.text);
+  const correctIndex = kept.findIndex((c) => c.i === correct);
+  const canAdd = Boolean(question.trim()) && filled.length >= 2 && correctIndex >= 0;
 
   const add = async () => {
     if (!canAdd) return;
@@ -208,7 +226,7 @@ function QuestionEditor({
         position: nextPosition,
         question: question.trim(),
         choices: filled,
-        correct_index: correct,
+        correct_index: correctIndex,
       };
       await repo.createPracticeQuestion(q);
       setQuestion('');
@@ -220,11 +238,17 @@ function QuestionEditor({
     }
   };
 
+  const correctIsBlank = choices[correct]?.trim() === '';
+
   return (
     <div className="card subtle" style={{ marginTop: '0.75rem' }}>
       <div className="field">
-        <label>New question</label>
-        <input value={question} onChange={(e) => setQuestion(e.target.value)} />
+        <label htmlFor={`q-text-${quizId}`}>New question</label>
+        <input
+          id={`q-text-${quizId}`}
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+        />
       </div>
       <div className="inline" style={{ gap: '0.6rem', flexWrap: 'wrap' }}>
         {choices.map((c, i) => (
@@ -241,14 +265,17 @@ function QuestionEditor({
             </label>
             <input
               value={c}
+              aria-label={`Choice ${i + 1}`}
               onChange={(e) => setChoices(choices.map((x, j) => (j === i ? e.target.value : x)))}
             />
           </div>
         ))}
       </div>
       <div className="row-between">
-        <span className="muted" style={{ fontSize: '0.78rem' }}>
-          Fill at least 2 choices and mark the correct one.
+        <span className="meta">
+          {correctIsBlank
+            ? 'The choice marked correct is still empty — fill it in or mark another.'
+            : 'Fill at least 2 choices and mark the correct one.'}
         </span>
         <button className="btn small" disabled={!canAdd || busy} onClick={add}>
           {busy ? 'Adding…' : '+ Add card'}

@@ -21,6 +21,11 @@ staying organized rather than grading.
 - **Import from Google Classroom** — pull your courses, coursework (with due
   dates), and announcements in read-only (with a built-in demo when no Google
   credentials are set)
+- **Dark mode** — follows your device's appearance setting automatically
+
+**Counselors** get their own account type and a console (`/counselor`) for
+scheduling counseling meetings straight onto a student's calendar instead of
+emailing dates around. The student sees who scheduled it and can't delete it.
 
 **Inside every course**
 
@@ -122,7 +127,9 @@ src/
 
 ## Roadmap
 
-- **Phase 2:** real login (Supabase Auth / Google), file attachments (Supabase
-  Storage), rubrics, quiz question banks & timers, notifications
-- **Phase 3:** weighted grading groups, export to Google/Apple Calendar (iCal),
-  parent/observer accounts, dark mode
+Grading stays out of scope — PowerSchool remains the system of record.
+
+- **Phase 2:** real login (Supabase Auth / Google), real file uploads (Supabase
+  Storage), due-date reminders/notifications, practice-quiz question banks
+- **Phase 3:** export to Google/Apple Calendar (iCal), parent/observer accounts,
+  richer counselor scheduling (availability slots, student-requested meetings)

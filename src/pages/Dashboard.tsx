@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { dueLabel, today } from '../lib/dates';
 import { subjectColor } from '../lib/subjectColor';
+import { displayName } from '../lib/names';
 
 export default function Dashboard() {
   const {
@@ -48,7 +49,7 @@ export default function Dashboard() {
     <div>
       <div className="page-head">
         <h1>Dashboard</h1>
-        <p>Welcome back, {currentUser.name.replace(/ \(Student\)$/, '')}.</p>
+        <p>Welcome back, {displayName(currentUser)}.</p>
       </div>
 
       <div className="dashboard-layout">
@@ -80,7 +81,7 @@ export default function Dashboard() {
                       <p className="sub">
                         {c.subject} · {c.period} · Room {c.room ?? '—'}
                       </p>
-                      <p className="sub">{teacher?.name}</p>
+                      <p className="sub">{displayName(teacher)}</p>
                     </div>
                     <div className="course-card-icons">
                       <span title="Announcements">📣</span>
@@ -110,10 +111,10 @@ export default function Dashboard() {
                         <div>
                           <strong>{an.title}</strong>
                           <p className="sub" style={{ margin: '2px 0 0' }}>
-                            {cls?.name} · {profileById(an.author_id)?.name}
+                            {cls?.name} · {displayName(profileById(an.author_id))}
                           </p>
                         </div>
-                        <span className="muted" style={{ fontSize: '0.78rem' }}>
+                        <span className="meta">
                           {new Date(an.created_at).toLocaleDateString(undefined, {
                             month: 'short',
                             day: 'numeric',
@@ -131,7 +132,7 @@ export default function Dashboard() {
         <aside className="todo-panel">
           <h2>Coming up</h2>
           {todo.length === 0 ? (
-            <p className="muted" style={{ fontSize: '0.85rem' }}>
+            <p className="meta">
               Nothing due soon. 🎉
             </p>
           ) : (

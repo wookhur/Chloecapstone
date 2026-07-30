@@ -25,8 +25,15 @@ const COUNSELOR_NAV = [
 ];
 
 export default function App() {
-  const { loading, currentUser, profiles, currentUserId, setCurrentUserId, supabaseConnected } =
-    useApp();
+  const {
+    loading,
+    error,
+    currentUser,
+    profiles,
+    currentUserId,
+    setCurrentUserId,
+    supabaseConnected,
+  } = useApp();
 
   if (loading) return <div className="center-screen">Loading Homework Hub…</div>;
 
@@ -87,6 +94,13 @@ export default function App() {
         </header>
 
         <main className="content">
+          {error && (
+            <div className="banner error" role="alert">
+              <span className="dot" />
+              Couldn't load your data: {error}
+            </div>
+          )}
+
           {!supabaseConnected && (
             <div className="banner demo">
               <span className="dot" />

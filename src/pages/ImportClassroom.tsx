@@ -112,7 +112,6 @@ export default function ImportClassroom() {
           period: course.section,
           room: course.room,
           school_year: SCHOOL_YEAR,
-          syllabus: null,
         });
         result.classes += 1;
 
@@ -130,9 +129,6 @@ export default function ImportClassroom() {
             due_date: w.dueDate ?? today(),
             type: w.workType as AssignmentType,
             link: null,
-            points_possible: 0,
-            submission_kind: 'none',
-            published: true,
             created_by: teacherId,
           });
           result.assignments += 1;
@@ -174,7 +170,8 @@ export default function ImportClassroom() {
       )}
 
       {error && (
-        <div className="banner" style={{ background: '#fbe3e1', color: '#a1332c' }}>
+        <div className="banner error" role="alert">
+          <span className="dot" />
           {error}
         </div>
       )}
@@ -202,7 +199,7 @@ export default function ImportClassroom() {
       {phase === 'preview' && snapshot && (
         <div>
           <div className="row-between" style={{ marginBottom: '0.75rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.1rem' }}>
+            <h2 className="section-title">
               Choose courses to import ({selected.size}/{snapshot.courses.length})
             </h2>
             <button className="btn" disabled={selected.size === 0} onClick={runImport}>
@@ -236,7 +233,7 @@ export default function ImportClassroom() {
                       {c.section ? ` · ${c.section}` : ''}
                       {c.room ? ` · Room ${c.room}` : ''}
                     </p>
-                    <p className="muted" style={{ fontSize: '0.78rem', margin: '4px 0 0' }}>
+                    <p className="meta" style={{ margin: '4px 0 0' }}>
                       {work} assignment{work === 1 ? '' : 's'} · {anns} announcement
                       {anns === 1 ? '' : 's'}
                       {already && ' · already imported'}
@@ -261,7 +258,7 @@ export default function ImportClassroom() {
             {summary.announcements} announcement{summary.announcements === 1 ? '' : 's'}.
           </p>
           {summary.skipped.length > 0 && (
-            <p className="muted" style={{ fontSize: '0.82rem' }}>
+            <p className="meta">
               Skipped (already imported): {summary.skipped.join(', ')}
             </p>
           )}
@@ -276,7 +273,7 @@ export default function ImportClassroom() {
         </div>
       )}
 
-      <p className="muted" style={{ fontSize: '0.8rem', marginTop: '1.25rem' }}>
+      <p className="meta" style={{ marginTop: '1.25rem' }}>
         ← Back to <Link to="/courses">Courses</Link>
       </p>
     </div>

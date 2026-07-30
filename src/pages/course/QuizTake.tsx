@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import type { ClassInfo } from '../../lib/types';
+import { displayName } from '../../lib/names';
 
 /**
  * Practice mode for a student-made quiz (Quizlet-style). Answer the cards, get
@@ -41,13 +42,13 @@ export default function QuizTake({ cls }: { cls: ClassInfo }) {
 
   return (
     <div>
-      <Link to="../quizzes" className="muted" style={{ fontSize: '0.82rem' }}>
+      <Link to="../quizzes" className="meta">
         ← All practice quizzes
       </Link>
       <h2 style={{ margin: '0.5rem 0 0.25rem' }}>📚 {quiz.title}</h2>
       <p className="sub" style={{ marginBottom: '1.25rem' }}>
         {questions.length} card{questions.length === 1 ? '' : 's'} · made by{' '}
-        {author?.name.replace(/ \(Student\)$/, '')} · practice mode (not graded)
+        {displayName(author)} · practice mode (not graded)
       </p>
 
       {submitted && (
@@ -116,7 +117,7 @@ export default function QuizTake({ cls }: { cls: ClassInfo }) {
 
           {!submitted && (
             <div className="row-between">
-              <span className="muted" style={{ fontSize: '0.82rem' }}>
+              <span className="meta">
                 {Object.keys(answers).length}/{questions.length} answered
               </span>
               <button className="btn" disabled={!allAnswered} onClick={() => setSubmitted(true)}>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { subjectColor } from '../lib/subjectColor';
+import { displayName } from '../lib/names';
 import { SCHOOL_YEAR } from '../lib/types';
 
 /** Canvas "All Courses" — the flat list of everything you're enrolled in / teach. */
@@ -50,6 +51,7 @@ export default function CoursesPage() {
           <Link to="/courses/import">Import from Google Classroom →</Link>
         </div>
       ) : (
+        <div className="table-scroll">
         <table className="data-table">
           <thead>
             <tr>
@@ -73,7 +75,7 @@ export default function CoursesPage() {
                     </Link>
                   </td>
                   <td>{c.subject}</td>
-                  <td>{profileById(c.teacher_id)?.name}</td>
+                  <td>{displayName(profileById(c.teacher_id))}</td>
                   <td>{c.period}</td>
                   <td>{c.room ?? '—'}</td>
                   <td>{rosterFor(c.id).length}</td>
@@ -82,6 +84,7 @@ export default function CoursesPage() {
             })}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

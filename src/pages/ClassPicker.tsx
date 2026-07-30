@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import * as repo from '../lib/repository';
 import { subjectColor } from '../lib/subjectColor';
 import { SCHOOL_YEAR, SUBJECTS } from '../lib/types';
+import { displayName } from '../lib/names';
 
 export default function ClassPicker() {
   const { currentUser, classes, enrollments, profileById, refresh } = useApp();
@@ -89,10 +90,11 @@ export default function ClassPicker() {
                 <div>
                   <h3 style={{ margin: 0 }}>{c.name}</h3>
                   <p className="sub" style={{ marginTop: 2 }}>
-                    <span className="chip" style={{ background: `${color}1a`, color, borderColor: `${color}55` }}>
+                    <span className="subject-chip">
+                      <span className="legend-dot" style={{ background: color }} />
                       {c.subject}
                     </span>{' '}
-                    {teacher?.name} · {c.period} · Room {c.room}
+                    {displayName(teacher)} · {c.period} · Room {c.room}
                   </p>
                 </div>
                 <button

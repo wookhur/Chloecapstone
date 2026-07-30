@@ -16,7 +16,11 @@ const TIMEFRAMES: Timeframe[] = ['today', 'week', 'month', 'year', 'upcoming'];
 export default function Feed() {
   const { currentUser, assignments, classById, myClassIds } = useApp();
   const [timeframe, setTimeframe] = useState<Timeframe>('week');
-  const [classFilter, setClassFilter] = useState<string>('all');
+  const [rawClassFilter, setClassFilter] = useState<string>('all');
+
+  // Switching users (or dropping a class) must not leave a filter pinned to a
+  // course you're no longer in — that reads as "nothing due".
+  const classFilter = myClassIds.includes(rawClassFilter) ? rawClassFilter : 'all';
 
   const filtered = useMemo(() => {
     const classSet = new Set(myClassIds);

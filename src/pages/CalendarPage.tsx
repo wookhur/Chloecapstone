@@ -6,6 +6,7 @@ import AssignmentCard from '../components/AssignmentCard';
 import * as repo from '../lib/repository';
 import { today } from '../lib/dates';
 import { subjectColor } from '../lib/subjectColor';
+import { displayName } from '../lib/names';
 import {
   CALENDAR_CATEGORIES,
   type Assignment,
@@ -19,7 +20,9 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formDate, setFormDate] = useState(today());
-  const [courseFilter, setCourseFilter] = useState<string>('all');
+  const [rawCourseFilter, setCourseFilter] = useState<string>('all');
+  // Don't keep filtering by a course the current user isn't in.
+  const courseFilter = myClassIds.includes(rawCourseFilter) ? rawCourseFilter : 'all';
 
   const mine = useMemo(() => {
     const set = new Set(myClassIds);
@@ -56,7 +59,7 @@ export default function CalendarPage() {
             <p>Your course assignments plus anything you add yourself.</p>
           </div>
           <button
-            className="btn small"
+            className={`btn small ${showForm ? "secondary" : ""}`}
             onClick={() => {
               setFormDate(today());
               setShowForm((v) => !v);
@@ -143,7 +146,9 @@ export default function CalendarPage() {
           </div>
           <EventCard
             event={selectedEvent}
-            canDelete={!selectedEvent.created_by || selectedEvent.created_by === currentUser.id}
+            // Closed direction: only the person who added it may remove it, so a
+            // counselor meeting whose author row is gone can't be self-deleted.
+            canDelete={selectedEvent.created_by === currentUser.id}
             onDelete={async () => {
               await repo.deleteCalendarEvent(selectedEvent.id);
               setSelectedEvent(null);
@@ -169,7 +174,7 @@ function EventCard({
   const cat = CALENDAR_CATEGORIES.find((c) => c.key === event.category) ?? CALENDAR_CATEGORIES[0];
   const scheduledByName =
     event.created_by && event.created_by !== currentUser?.id
-      ? profileById(event.created_by)?.name ?? null
+      ? displayName(profileById(event.created_by))
       : null;
   return (
     <div className="card" style={{ borderLeft: `4px solid ${cat.color}` }}>
@@ -177,7 +182,8 @@ function EventCard({
         <div>
           <h3 style={{ margin: 0 }}>{cat.emoji} {event.title}</h3>
           <p className="sub" style={{ marginTop: 2 }}>
-            <span className="chip" style={{ background: `${cat.color}1a`, color: cat.color, borderColor: `${cat.color}55` }}>
+            <span className="subject-chip">
+              <span className="legend-dot" style={{ background: cat.color }} />
               {cat.label}
             </span>{' '}
             {new Date(event.date + 'T00:00:00').toLocaleDateString(undefined, {
@@ -191,7 +197,7 @@ function EventCard({
       </div>
       {event.note && <p className="sub" style={{ marginTop: '0.6rem' }}>{event.note}</p>}
       {scheduledByName && (
-        <p className="muted" style={{ fontSize: '0.78rem', marginTop: '0.5rem' }}>
+        <p className="meta" style={{ marginTop: '0.5rem' }}>
           🧭 Scheduled by {scheduledByName}
         </p>
       )}
@@ -238,18 +244,18 @@ function EventForm({
         <div className="field" style={{ flex: '1 1 220px' }}>
           <label>What is it?</label>
           <input
-            value={title}
+aria-label="What is it?"             value={title}
             placeholder="e.g. Dentist appointment, Study group…"
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
         <div className="field" style={{ flex: '0 0 160px' }}>
           <label>Date</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
         <div className="field" style={{ flex: '0 0 150px' }}>
           <label>Type</label>
-          <select value={category} onChange={(e) => setCategory(e.target.value as CalendarEventCategory)}>
+          <select aria-label="Type" value={category} onChange={(e) => setCategory(e.target.value as CalendarEventCategory)}>
             {CALENDAR_CATEGORIES.filter((c) => c.key !== 'counseling').map((c) => (
               <option key={c.key} value={c.key}>{c.emoji} {c.label}</option>
             ))}
@@ -258,7 +264,7 @@ function EventForm({
       </div>
       <div className="field">
         <label>Note <span className="hint">(optional)</span></label>
-        <input value={note} onChange={(e) => setNote(e.target.value)} />
+        <input aria-label="Note" value={note} onChange={(e) => setNote(e.target.value)} />
       </div>
       <div className="row-between">
         <span className="muted" style={{ fontSize: '0.8rem' }}>

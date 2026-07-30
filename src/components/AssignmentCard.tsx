@@ -30,7 +30,8 @@ export default function AssignmentCard({ assignment, cls, onEdit, onDelete }: Pr
           </div>
           <p className="sub" style={{ marginTop: 2 }}>
             {cls ? (
-              <span className="chip" style={{ background: `${color}1a`, color, borderColor: `${color}55` }}>
+              <span className="subject-chip">
+                <span className="legend-dot" style={{ background: color }} />
                 {cls.name}
               </span>
             ) : null}{' '}
