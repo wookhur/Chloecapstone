@@ -11,6 +11,7 @@ import {
   notifyDueSoon,
   reminderLabel,
 } from '../lib/reminders';
+import Icon from './Icon';
 
 /**
  * What's about to be late, surfaced at the top of the dashboard so a student
@@ -45,12 +46,12 @@ export default function DueSoon() {
   if (urgent.length === 0) {
     return (
       <div className="callout subtle-callout">
-        <span className="callout-icon">✅</span>
+        <span className="callout-icon"><Icon name="check" /></span>
         <div className="row-between" style={{ flex: 1 }}>
           <span>Nothing due in the next couple of days. Nice.</span>
           {notificationsSupported && (
             <button className="btn secondary small" onClick={toggleReminders}>
-              {remindersOn ? '🔔 Reminders on' : '🔕 Turn on reminders'}
+              <><Icon name="clock" />{remindersOn ? 'Reminders on' : 'Turn on reminders'}</>
             </button>
           )}
         </div>
@@ -62,11 +63,11 @@ export default function DueSoon() {
     <section className="due-soon" aria-labelledby="due-soon-heading">
       <div className="row-between" style={{ marginBottom: '0.6rem' }}>
         <h2 id="due-soon-heading" className="section-title">
-          ⏰ Due soon ({urgent.length})
+          Due soon ({urgent.length})
         </h2>
         {notificationsSupported && (
           <button className="btn secondary small" onClick={toggleReminders}>
-            {remindersOn ? '🔔 Reminders on' : '🔕 Turn on reminders'}
+            <><Icon name="clock" />{remindersOn ? 'Reminders on' : 'Turn on reminders'}</>
           </button>
         )}
       </div>

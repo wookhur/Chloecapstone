@@ -11,13 +11,7 @@ import {
   type AssignmentType,
   type ClassInfo,
 } from '../../lib/types';
-
-const TYPE_EMOJI: Record<Assignment['type'], string> = {
-  homework: '📝',
-  quiz: '❓',
-  test: '📄',
-  project: '📦',
-};
+import Icon, { ASSIGNMENT_ICON } from '../../components/Icon';
 
 /** Assignment listings for a course (informational — no online submission). */
 export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
@@ -46,7 +40,7 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
         <div className="inline" style={{ gap: '0.5rem' }}>
           <DoneCheckbox assignment={a} />
           <div>
-          <span style={{ marginRight: 6 }}>{TYPE_EMOJI[a.type]}</span>
+          <Icon name={ASSIGNMENT_ICON[a.type]} className="type-glyph" />
           <Link to={`../assignments/${a.id}`} style={{ fontWeight: 600 }}>
             {a.title}
           </Link>

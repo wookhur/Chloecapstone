@@ -93,7 +93,7 @@ function TopicList({ cls, canPost }: { cls: ClassInfo; canPost: boolean }) {
               <li key={t.id} className="list-row">
                 <div>
                   <Link to={`../discussions/${t.id}`} style={{ fontWeight: 600 }}>
-                    💬 {t.title}
+                    {t.title}
                   </Link>
                   <div className="meta" style={{ marginTop: 2 }}>
                     {displayName(profileById(t.author_id))} ·{' '}
@@ -156,7 +156,7 @@ function TopicThread({
       <Link to="../discussions" className="meta">
         ← All discussions
       </Link>
-      <h2 style={{ margin: '0.5rem 0 0.25rem' }}>💬 {topic.title}</h2>
+      <h2 style={{ margin: '0.5rem 0 0.25rem' }}>{topic.title}</h2>
 
       <div className="card" style={{ margin: '0.75rem 0 1.25rem' }}>
         <div className="inline" style={{ gap: '0.5rem', marginBottom: '0.4rem' }}>

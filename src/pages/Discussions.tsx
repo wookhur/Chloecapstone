@@ -151,7 +151,7 @@ export default function Discussions() {
             return (
               <li key={t.id} className="list-row">
                 <button className="disc-row-main" onClick={() => setOpenTopicId(t.id)}>
-                  <span className="disc-title">💬 {t.title}</span>
+                  <span className="disc-title">{t.title}</span>
                   <span className="disc-meta">
                     <span className="subject-chip">
                       <span className="legend-dot" style={{ background: color }} />
@@ -278,7 +278,7 @@ function Thread({ topic, onBack }: { topic: DiscussionTopic; onBack: () => void 
         ← All discussions
       </button>
       <div className="row-between" style={{ margin: '0.25rem 0 0.25rem', flexWrap: 'wrap' }}>
-        <h1 style={{ margin: 0, fontSize: '1.4rem' }}>💬 {topic.title}</h1>
+        <h1 style={{ margin: 0, fontSize: 'var(--text-xl)' }}>{topic.title}</h1>
         {cls && (
           <Link to={`/courses/${cls.id}/discussions`} className="chip">
             {cls.name} →

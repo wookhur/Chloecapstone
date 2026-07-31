@@ -11,6 +11,7 @@ import {
 import { SCHOOL_YEAR, type AssignmentType } from '../lib/types';
 import { today } from '../lib/dates';
 import { subjectColor } from '../lib/subjectColor';
+import Icon from '../components/Icon';
 
 type Phase = 'idle' | 'connecting' | 'preview' | 'importing' | 'done';
 
@@ -183,7 +184,7 @@ export default function ImportClassroom() {
 
       {phase === 'idle' && (
         <div className="card gc-connect">
-          <div className="gc-logo">🎓</div>
+          <div className="gc-logo"><Icon name="download" size="1.5rem" /></div>
           <div style={{ flex: 1 }}>
             <h3 style={{ margin: '0 0 0.25rem' }}>Connect Google Classroom</h3>
             <p className="sub" style={{ margin: 0 }}>
@@ -255,7 +256,7 @@ export default function ImportClassroom() {
 
       {phase === 'done' && summary && (
         <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-          <div style={{ fontSize: '2.2rem' }}>✅</div>
+          <div className="success-mark"><Icon name="check" size="1.5rem" /></div>
           <h2 style={{ margin: '0.5rem 0 0.25rem' }}>Import complete</h2>
           <p className="sub">
             Added {summary.classes} course{summary.classes === 1 ? '' : 's'},{' '}

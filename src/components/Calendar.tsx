@@ -12,6 +12,7 @@ import {
   type CalendarEvent,
   type ClassInfo,
 } from '../lib/types';
+import Icon, { type IconName } from './Icon';
 
 interface Props {
   assignments: Assignment[];
@@ -156,7 +157,7 @@ export default function Calendar({
                       title={`${s.label} · ${e.title}`}
                       onClick={() => onSelectEvent?.(e)}
                     >
-                      <span aria-hidden="true">{s.emoji}</span>
+                      <Icon name={s.icon as IconName} size="0.85em" />
                       <span className="calendar-item-label">{e.title}</span>
                     </button>
                   );

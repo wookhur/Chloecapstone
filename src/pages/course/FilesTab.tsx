@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import * as repo from '../../lib/repository';
 import type { ClassInfo, CourseFile } from '../../lib/types';
 import { displayName } from '../../lib/names';
+import Icon, { type IconName } from '../../components/Icon';
 import {
   MAX_UPLOAD_MB,
   downloadUrl,
@@ -13,15 +14,16 @@ import {
   uploadProblem,
 } from '../../lib/storage';
 
-const FILE_ICONS: [RegExp, string][] = [
-  [/\.pdf$/i, '📕'],
-  [/\.(png|jpe?g|gif|webp)$/i, '🖼️'],
-  [/\.(docx?|txt|md)$/i, '📄'],
-  [/\.(xlsx?|csv)$/i, '📊'],
-  [/\.(pptx?)$/i, '📽️'],
+const FILE_ICONS: [RegExp, IconName][] = [
+  [/\.pdf$/i, 'file'],
+  [/\.(png|jpe?g|gif|webp)$/i, 'image'],
+  [/\.(docx?|txt|md)$/i, 'file'],
+  [/\.(xlsx?|csv)$/i, 'sheet'],
+  [/\.(pptx?)$/i, 'slides'],
 ];
 
-const iconFor = (name: string) => FILE_ICONS.find(([re]) => re.test(name))?.[1] ?? '📎';
+const iconFor = (name: string): IconName =>
+  FILE_ICONS.find(([re]) => re.test(name))?.[1] ?? 'paperclip';
 
 /**
  * Course handouts. The teacher picks a real file; the bytes go to Storage and
@@ -137,7 +139,7 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
             {list.map((f) => (
               <tr key={f.id}>
                 <td>
-                  {iconFor(f.name)}{' '}
+                  <Icon name={iconFor(f.name)} className="file-glyph" />{' '}
                   {isDownloadable(f.storage_path) ? (
                     <button className="linklike" onClick={() => open(f)}>
                       <strong>{f.name}</strong>

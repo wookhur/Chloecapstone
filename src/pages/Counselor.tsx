@@ -137,7 +137,7 @@ export default function Counselor() {
             {upcoming.map((m) => (
               <li key={m.id} className="list-row">
                 <div>
-                  <strong>🧭 {displayName(profileById(m.owner_id))}</strong>
+                  <strong>{displayName(profileById(m.owner_id))}</strong>
                   <div className="meta" style={{ marginTop: 2 }}>
                     {parseISO(m.date).toLocaleDateString(undefined, {
                       weekday: 'short',
@@ -161,7 +161,7 @@ export default function Counselor() {
             {past.map((m) => (
               <li key={m.id} className="list-row">
                 <span className="muted">
-                  🧭 {displayName(profileById(m.owner_id))} ·{' '}
+                  {displayName(profileById(m.owner_id))} ·{' '}
                   {parseISO(m.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                 </span>
                 <button className="btn danger small" onClick={() => cancel(m.id)}>Remove</button>

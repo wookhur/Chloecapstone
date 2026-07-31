@@ -3,13 +3,7 @@ import { useApp } from '../context/AppContext';
 import DoneCheckbox from './DoneCheckbox';
 import { subjectColor } from '../lib/subjectColor';
 import type { Assignment, ClassInfo } from '../lib/types';
-
-const TYPE_EMOJI: Record<Assignment['type'], string> = {
-  homework: '📝',
-  quiz: '❓',
-  test: '📄',
-  project: '📦',
-};
+import Icon, { ASSIGNMENT_ICON } from './Icon';
 
 interface Props {
   assignment: Assignment;
@@ -31,7 +25,7 @@ export default function AssignmentCard({ assignment, cls, onEdit, onDelete }: Pr
         <div>
           <div className="inline" style={{ gap: '0.4rem' }}>
             <DoneCheckbox assignment={assignment} />
-            <span>{TYPE_EMOJI[assignment.type]}</span>
+            <Icon name={ASSIGNMENT_ICON[assignment.type]} />
             <h3 style={{ margin: 0 }}>{assignment.title}</h3>
           </div>
           <p className="sub" style={{ marginTop: 2 }}>

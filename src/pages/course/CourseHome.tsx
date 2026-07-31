@@ -27,7 +27,7 @@ export default function CourseHome({ cls }: { cls: ClassInfo }) {
     <div>
       <div className="section">
         <div className="row-between" style={{ marginBottom: '0.6rem' }}>
-          <h2 className="section-title">📣 Latest announcements</h2>
+          <h2 className="section-title">Latest announcements</h2>
           <Link to="../announcements" className="btn ghost small">View all</Link>
         </div>
         {recent.length === 0 ? (
@@ -50,7 +50,7 @@ export default function CourseHome({ cls }: { cls: ClassInfo }) {
 
       <div className="section">
         <div className="row-between" style={{ marginBottom: '0.6rem' }}>
-          <h2 className="section-title">📝 Coming up</h2>
+          <h2 className="section-title">Coming up</h2>
           <Link to="../assignments" className="btn ghost small">All assignments</Link>
         </div>
         {upcoming.length === 0 ? (
@@ -72,7 +72,7 @@ export default function CourseHome({ cls }: { cls: ClassInfo }) {
       {topics.length > 0 && (
         <div className="section">
           <div className="row-between" style={{ marginBottom: '0.6rem' }}>
-            <h2 className="section-title">💬 Active discussions</h2>
+            <h2 className="section-title">Active discussions</h2>
             <Link to="../discussions" className="btn ghost small">All discussions</Link>
           </div>
           <ul className="plain-list">

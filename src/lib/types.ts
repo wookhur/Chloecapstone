@@ -161,18 +161,20 @@ export type CalendarEventCategory =
   | 'meeting'
   | 'counseling';
 
+/** `icon` is a name from components/Icon, kept as a plain string so this
+ *  module stays free of React imports. */
 export const CALENDAR_CATEGORIES: {
   key: CalendarEventCategory;
   label: string;
-  emoji: string;
+  icon: string;
   color: string;
 }[] = [
-  { key: 'event', label: 'Event', emoji: '📌', color: '#3b6fd4' },
-  { key: 'exam', label: 'Exam', emoji: '🧪', color: '#d24b45' },
-  { key: 'reminder', label: 'Reminder', emoji: '⏰', color: '#a9772a' },
-  { key: 'personal', label: 'Personal', emoji: '⭐', color: '#8a53c4' },
-  { key: 'meeting', label: 'Meeting', emoji: '👥', color: '#2a8ea9' },
-  { key: 'counseling', label: 'Counseling', emoji: '🧭', color: '#0e8a7d' },
+  { key: 'event', label: 'Event', icon: 'pin', color: '#3a62a8' },
+  { key: 'exam', label: 'Exam', icon: 'flask', color: '#b0453c' },
+  { key: 'reminder', label: 'Reminder', icon: 'clock', color: '#94702f' },
+  { key: 'personal', label: 'Personal', icon: 'star', color: '#7451a8' },
+  { key: 'meeting', label: 'Meeting', icon: 'users', color: '#2c7a8f' },
+  { key: 'counseling', label: 'Counseling', icon: 'compass', color: '#177a68' },
 ];
 
 /**
