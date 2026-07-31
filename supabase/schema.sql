@@ -31,6 +31,10 @@ create table profiles (
   -- creates a person's profile ahead of time and they attach to the record
   -- that already has their classes. Nullable for anyone who never signs in.
   email      text unique,
+  -- Whether the Sunday digest goes to this person. Opt-out rather than opt-in:
+  -- the students who most need the reminder are the least likely to go looking
+  -- for a setting to switch on.
+  wants_digest boolean not null default true,
   role       text not null check (role in ('student', 'teacher', 'admin', 'counselor', 'parent')),
   grade      int  check (grade between 6 and 13),
   created_at timestamptz not null default now()

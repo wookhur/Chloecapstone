@@ -11,6 +11,10 @@ export interface Profile {
    *  ahead of time and people attach to the record that already has their
    *  classes. Null in demo mode, where nobody signs in. */
   email: string | null;
+  /** Whether the Sunday digest goes to this person. Opt-out, not opt-in — the
+   *  students who most need it are the least likely to go looking for a
+   *  setting to turn on. */
+  wants_digest: boolean;
   created_at: string;
 }
 

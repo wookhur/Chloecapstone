@@ -39,21 +39,21 @@ const ts = (offsetDays: number, hour = 9) => {
 
 export const demoProfiles: Profile[] = [
   // Teachers
-  { id: 't-anders', email: 'anderson@school.example', name: 'Ms. Anderson', role: 'teacher', grade: null, created_at: now },
-  { id: 't-brooks', email: 'brooks@school.example', name: 'Mr. Brooks', role: 'teacher', grade: null, created_at: now },
-  { id: 't-chen', email: 'chen@school.example', name: 'Dr. Chen', role: 'teacher', grade: null, created_at: now },
-  { id: 't-diaz', email: 'diaz@school.example', name: 'Sr. Diaz', role: 'teacher', grade: null, created_at: now },
+  { id: 't-anders', email: 'anderson@school.example', name: 'Ms. Anderson', role: 'teacher', grade: null, wants_digest: true, created_at: now },
+  { id: 't-brooks', email: 'brooks@school.example', name: 'Mr. Brooks', role: 'teacher', grade: null, wants_digest: true, created_at: now },
+  { id: 't-chen', email: 'chen@school.example', name: 'Dr. Chen', role: 'teacher', grade: null, wants_digest: true, created_at: now },
+  { id: 't-diaz', email: 'diaz@school.example', name: 'Sr. Diaz', role: 'teacher', grade: null, wants_digest: true, created_at: now },
   // Students
-  { id: 's-mina', email: 'mina@school.example', name: 'Mina (Student)', role: 'student', grade: 10, created_at: now },
-  { id: 's-jay', email: 'jay@school.example', name: 'Jay (Student)', role: 'student', grade: 11, created_at: now },
-  { id: 's-leo', email: 'leo@school.example', name: 'Leo (Student)', role: 'student', grade: 10, created_at: now },
-  { id: 's-zoe', email: 'zoe@school.example', name: 'Zoe (Student)', role: 'student', grade: 10, created_at: now },
+  { id: 's-mina', email: 'mina@school.example', name: 'Mina (Student)', role: 'student', grade: 10, wants_digest: true, created_at: now },
+  { id: 's-jay', email: 'jay@school.example', name: 'Jay (Student)', role: 'student', grade: 11, wants_digest: true, created_at: now },
+  { id: 's-leo', email: 'leo@school.example', name: 'Leo (Student)', role: 'student', grade: 10, wants_digest: true, created_at: now },
+  { id: 's-zoe', email: 'zoe@school.example', name: 'Zoe (Student)', role: 'student', grade: 10, wants_digest: true, created_at: now },
   // Parent
-  { id: 'pa-kim', email: 'kim.family@school.example', name: 'Mrs. Kim (Parent)', role: 'parent', grade: null, created_at: now },
+  { id: 'pa-kim', email: 'kim.family@school.example', name: 'Mrs. Kim (Parent)', role: 'parent', grade: null, wants_digest: true, created_at: now },
   // Counselor
-  { id: 'co-rivera', email: 'rivera@school.example', name: 'Ms. Rivera (Counselor)', role: 'counselor', grade: null, created_at: now },
+  { id: 'co-rivera', email: 'rivera@school.example', name: 'Ms. Rivera (Counselor)', role: 'counselor', grade: null, wants_digest: true, created_at: now },
   // Admin
-  { id: 'a-office', email: 'office@school.example', name: 'School Office', role: 'admin', grade: null, created_at: now },
+  { id: 'a-office', email: 'office@school.example', name: 'School Office', role: 'admin', grade: null, wants_digest: true, created_at: now },
 ];
 
 export const demoClasses: ClassInfo[] = [

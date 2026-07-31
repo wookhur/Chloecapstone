@@ -158,6 +158,23 @@ export async function unenroll(studentId: string, classId: string): Promise<void
 export const createProfile = (p: Omit<Profile, 'id' | 'created_at'>) =>
   insertRow<Profile>(mem.profiles, 'profiles', p);
 
+export async function updateProfile(id: string, patch: Partial<Profile>): Promise<Profile> {
+  if (!isSupabaseConfigured) {
+    const idx = mem.profiles.findIndex((p) => p.id === id);
+    if (idx === -1) throw new Error(`Profile ${id} no longer exists`);
+    mem.profiles[idx] = { ...mem.profiles[idx], ...patch };
+    return mem.profiles[idx];
+  }
+  const { data, error } = await supabase!
+    .from('profiles')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Profile;
+}
+
 // --- Classes (teachers create their own) -----------------------------------
 export const createClass = (cls: Omit<ClassInfo, 'id' | 'created_at'>) =>
   insertRow<ClassInfo>(mem.classes, 'classes', cls);

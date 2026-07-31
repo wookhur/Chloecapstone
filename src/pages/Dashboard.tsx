@@ -5,6 +5,7 @@ import { dueLabel, today } from '../lib/dates';
 import { subjectColor } from '../lib/subjectColor';
 import DueSoon from '../components/DueSoon';
 import RequestMeeting from '../components/RequestMeeting';
+import WeeklyDigest from '../components/WeeklyDigest';
 import { displayName } from '../lib/names';
 
 export default function Dashboard() {
@@ -166,6 +167,8 @@ export default function Dashboard() {
       </div>
 
       <RequestMeeting />
+
+      <WeeklyDigest />
     </div>
   );
 }

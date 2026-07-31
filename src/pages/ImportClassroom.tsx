@@ -89,8 +89,10 @@ export default function ImportClassroom() {
         role: 'teacher',
         grade: null,
         // Classroom's course owner comes through as a display name only, so
-        // there is nothing here to attach a sign-in to.
+        // there is nothing here to attach a sign-in to — and with no address,
+        // nothing to send a digest to either.
         email: null,
+        wants_digest: false,
       });
       teacherCache.set(course.ownerName, created.id);
       return created.id;

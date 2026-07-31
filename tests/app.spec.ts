@@ -691,3 +691,59 @@ test.describe('counselor availability', () => {
     await expect(page.locator('#slot-time')).toHaveCount(0);
   });
 });
+
+test.describe('weekly digest', () => {
+  test('previews the week ahead the way the email will read it', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.mina);
+
+    await page.locator('.section', { hasText: 'Weekly email' }).locator('button:has-text("Preview")').click();
+    const preview = page.locator('.digest-preview');
+
+    await expect(preview).toContainText('due this week');
+    await expect(preview).toContainText('Hi Mina');
+    // Addressed by first name — "(Student)" is an account label, not a name.
+    await expect(preview).not.toContainText('(Student)');
+
+    // Her classes only: English 10 is hers, AP Calculus is Jay's.
+    await expect(preview).toContainText('Essay draft');
+    await expect(preview).not.toContainText('Limits practice set');
+
+    // The biology reading is due this week but she already ticked it off.
+    await expect(preview).not.toContainText('Cell organelles reading');
+  });
+
+  test('work already ticked off is left out of the email', async ({ page }) => {
+    await page.goto('/homework');
+    await signInAs(page, USERS.mina);
+
+    // Week and month are calendar ranges, so widen fully to reach later work.
+    await page.click('.toggle:has-text("All upcoming")');
+    const row = page.locator('.assignment', { hasText: 'Preterite' }).first();
+    await row.locator('.done-check input').check();
+
+    await navTo(page, 'Dashboard');
+    await page.locator('.section', { hasText: 'Weekly email' }).locator('button:has-text("Preview")').click();
+    // Mailing someone about work they've finished is how the email gets ignored.
+    await expect(page.locator('.digest-preview')).not.toContainText('Preterite');
+  });
+
+  test('a student can turn the email off and back on', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.mina);
+
+    const panel = page.locator('.section', { hasText: 'Weekly email' });
+    await expect(panel).toContainText('Every Sunday evening');
+    await panel.locator('button:has-text("Turn it off")').click();
+    await expect(panel).toContainText("not getting the Sunday email");
+
+    await panel.locator('button:has-text("Turn it back on")').click();
+    await expect(panel).toContainText('Every Sunday evening');
+  });
+
+  test('teachers are not offered a student digest', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.anderson);
+    await expect(page.locator('.section', { hasText: 'Weekly email' })).toHaveCount(0);
+  });
+});

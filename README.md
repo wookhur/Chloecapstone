@@ -21,6 +21,9 @@ staying organized rather than grading.
 - **Import from Google Classroom** — pull your courses, coursework (with due
   dates), and announcements in read-only (with a built-in demo when no Google
   credentials are set)
+- **Weekly email** — one message Sunday evening with the week ahead, so a
+  deadline can reach a student who hasn't opened the app. Work they've already
+  ticked off is left out, and they can turn it off from the dashboard
 - **Dark mode** — follows your device's appearance setting automatically
 
 **Counselors** get their own account type and a console (`/counselor`) for
@@ -118,6 +121,27 @@ In Supabase → **Authentication → URL Configuration**, set the site URL to yo
 deployment so the link comes back to the right place. Without Supabase
 configured, none of this appears and the app stays in demo mode.
 
+### Turn on the weekly email
+
+The Sunday digest is the one thing the browser can't do on its own — nothing in
+the app is running on a Sunday evening, so the send comes from the server.
+
+```bash
+supabase functions deploy weekly-digest
+supabase secrets set RESEND_API_KEY=... DIGEST_FROM="Homework Hub <hub@yourschool.org>"
+```
+
+Then edit the two placeholders in [`supabase/cron.sql`](./supabase/cron.sql)
+(your project ref, and your school's send time converted to UTC) and run it.
+
+Call the function once by hand with `?dry=1` first: it builds every student's
+digest and returns them as JSON **without sending anything**, so you can read
+the real content before a whole school does.
+
+The email and the in-app preview both call the same `buildDigest()` in
+[`src/lib/digest.ts`](./src/lib/digest.ts), so what students see on the
+dashboard is exactly what arrives.
+
 ### Connect Google Classroom (read-only import)
 
 **Courses → 🎓 Import from Google Classroom** pulls your Classroom courses,
@@ -153,10 +177,11 @@ Site configuration → Environment variables.
 ## Project structure
 
 ```
-supabase/        schema.sql, seed.sql, storage.sql (file bucket), rls-auth.sql
+supabase/        schema.sql, seed.sql, storage.sql (file bucket), rls-auth.sql,
+                 cron.sql (digest schedule), functions/weekly-digest/
 src/
   lib/           supabase client, auth, storage, googleClassroom, types, dates, ical,
-                 reminders, quizBank, subject colors, repository
+                 reminders, quizBank, digest, subject colors, repository
   context/       AppContext — data loading + current-user switcher
   components/    AssignmentCard, Calendar (assignments + personal events)
   pages/         SignIn, Dashboard, CoursesPage, ImportClassroom, Discussions (global hub),
@@ -171,9 +196,13 @@ src/
 Grading stays out of scope — PowerSchool remains the system of record.
 
 Shipped since the first version: due-date reminders, personal done checkboxes,
-iCal export, bulk and repeating assignment entry, student-requested counselor
-meetings, parent/guardian accounts, real file uploads, magic-link sign-in, and
-class question banks, and counselor availability slots.
+iCal export, bulk and repeating assignment entry, counselor meeting requests and
+bookable availability, parent/guardian accounts, real file uploads, magic-link
+sign-in, class question banks, and the weekly email digest.
 
-- **Next:** emailed weekly digests (needs a scheduled server job, not just the
-  browser)
+Nothing on the original roadmap is outstanding. Ideas that would come next:
+
+- Teacher-side view of who's falling behind — deliberately not built yet, since
+  the personal checklist is private on purpose and this would change that
+- Push notifications on phones (the browser reminders only fire with a tab open)
+- A school-wide calendar for events that aren't tied to one class

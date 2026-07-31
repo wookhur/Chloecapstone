@@ -234,6 +234,18 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   border-left: 3px solid var(--brand);
 }
 
+/* The email preview. Bordered and inset so it reads as "this is a message",
+   not as another panel of the app. */
+.digest-preview { border-left: 3px solid var(--brand); }
+.digest-subject {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--line);
+}
+
 /* Reads as a link, behaves as a button — used where the click runs code (like
    fetching a signed download URL) rather than following an href. */
 .linklike { color: var(--brand); padding: 0; text-align: left; }
