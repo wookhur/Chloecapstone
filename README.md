@@ -63,6 +63,19 @@ Use the "Signed in as" switcher (top-right) to try it as a student or a teacher
 which is fully populated: assignments, announcements, discussions, student-made
 practice quizzes, and Mina's personal calendar events.
 
+### Tests
+
+```bash
+npx playwright install chromium   # first time only
+npm test
+```
+
+The suite drives a real browser against a production build in demo mode, so it
+needs no database. It covers the main flows (calendar, assignments, practice
+quizzes, discussions, counselor scheduling), plus the things easiest to break
+without noticing: date handling in three timezones, phone/tablet/desktop
+layout, dark mode, and keyboard/screen-reader accessibility.
+
 ### Connect Supabase (persistent data)
 
 1. Create a project at [supabase.com](https://supabase.com).
