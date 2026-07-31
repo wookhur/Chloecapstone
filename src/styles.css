@@ -223,6 +223,17 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .btn.danger { background: var(--danger); color: #fff; }
 .btn.small { padding: 0.35rem 0.65rem; font-size: var(--text-sm); }
 
+/* The "practice everything the class wrote" call-out above the quiz grid. */
+.bank-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--brand);
+}
+
 /* Reads as a link, behaves as a button — used where the click runs code (like
    fetching a signed download URL) rather than following an href. */
 .linklike { color: var(--brand); padding: 0; text-align: left; }

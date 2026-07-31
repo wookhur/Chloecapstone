@@ -98,6 +98,9 @@ insert into practice_questions (quiz_id, position, question, choices, correct_in
   ('00000000-0000-0000-0000-00000000fb02', 1, 'Factor: x² − 9', array['(x − 3)(x − 3)', '(x + 3)(x − 3)', '(x + 9)(x − 1)', 'prime'], 1),
   ('00000000-0000-0000-0000-00000000fb02', 2, 'Factor: x² + 5x + 6', array['(x + 2)(x + 3)', '(x + 1)(x + 6)', '(x − 2)(x − 3)', '(x + 5)(x + 1)'], 0),
   ('00000000-0000-0000-0000-00000000fb02', 3, 'Factor: x² − 4x', array['x(x − 4)', '(x − 2)(x + 2)', 'x(x + 4)', '4(x − 1)'], 0),
+  -- Same card as fb01's #2: two students wrote it independently, which is why
+  -- the class bank de-duplicates before a study round.
+  ('00000000-0000-0000-0000-00000000fb02', 4, 'The discriminant of ax² + bx + c is…', array['b² − 4ac', '2ac − b', 'b² + 4ac', 'ac − b²'], 0),
   ('00000000-0000-0000-0000-00000000fb03', 1, 'Which organelle makes ATP?', array['Nucleus', 'Ribosome', 'Mitochondrion', 'Vacuole'], 2),
   ('00000000-0000-0000-0000-00000000fb03', 2, 'Where are proteins built?', array['Ribosome', 'Lysosome', 'Chloroplast', 'Cell wall'], 0),
   ('00000000-0000-0000-0000-00000000fb03', 3, 'Photosynthesis happens in the…', array['Mitochondrion', 'Chloroplast', 'Nucleus', 'Membrane'], 1),

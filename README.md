@@ -40,7 +40,7 @@ parent seeing the workload helps, a parent ticking work off does not.
 | Announcements | Teacher posts class-wide notices |
 | Assignments | Upcoming/past list; a detail page with instructions and resource links (read-only — this isn't a submission portal) |
 | Discussions | Threaded topics — anyone can start one and reply |
-| Practice Quizzes | **Quizlet-style, student-made** — any student builds a multiple-choice quiz; classmates practice with instant feedback, a score, and unlimited retries (never graded) |
+| Practice Quizzes | **Quizlet-style, student-made** — any student builds a multiple-choice quiz; classmates practice with instant feedback, a score, and unlimited retries (never graded). The **class question bank** pools every card the class wrote into one shuffled round, and a new quiz can pull in cards that already exist instead of retyping them |
 | People | Course roster |
 | Files | Real file uploads — the teacher posts the handout (up to 20 MB) and students open it from the course, so the worksheet sits next to its due date |
 
@@ -154,7 +154,7 @@ Site configuration → Environment variables.
 supabase/        schema.sql, seed.sql, storage.sql (file bucket), rls-auth.sql
 src/
   lib/           supabase client, auth, storage, googleClassroom, types, dates, ical,
-                 reminders, subject colors, repository
+                 reminders, quizBank, subject colors, repository
   context/       AppContext — data loading + current-user switcher
   components/    AssignmentCard, Calendar (assignments + personal events)
   pages/         SignIn, Dashboard, CoursesPage, ImportClassroom, Discussions (global hub),
@@ -170,7 +170,8 @@ Grading stays out of scope — PowerSchool remains the system of record.
 
 Shipped since the first version: due-date reminders, personal done checkboxes,
 iCal export, bulk and repeating assignment entry, student-requested counselor
-meetings, parent/guardian accounts, real file uploads, and magic-link sign-in.
+meetings, parent/guardian accounts, real file uploads, magic-link sign-in, and
+class question banks.
 
-- **Next:** practice-quiz question banks, counselor availability slots,
-  emailed weekly digests (needs a scheduled server job, not just the browser)
+- **Next:** counselor availability slots, emailed weekly digests (needs a
+  scheduled server job, not just the browser)

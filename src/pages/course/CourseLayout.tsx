@@ -77,6 +77,8 @@ export default function CourseLayout() {
             <Route path="people" element={<PeopleTab cls={cls} />} />
             <Route path="files" element={<FilesTab cls={cls} />} />
             <Route path="quizzes" element={<QuizzesTab cls={cls} canPost={canPost} />} />
+            {/* Declared before the :quizId route so "bank" isn't read as a quiz id. */}
+            <Route path="quizzes/bank/practice" element={<QuizTake cls={cls} mode="bank" />} />
             <Route path="quizzes/:quizId/practice" element={<QuizTake cls={cls} />} />
             <Route path="*" element={<Navigate to="home" replace />} />
           </Routes>

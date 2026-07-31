@@ -158,6 +158,9 @@ export const demoPracticeQuestions: PracticeQuestion[] = [
   { id: 'pqq5', quiz_id: 'pq2', position: 1, question: 'Factor: x² − 9', choices: ['(x − 3)(x − 3)', '(x + 3)(x − 3)', '(x + 9)(x − 1)', 'prime'], correct_index: 1 },
   { id: 'pqq6', quiz_id: 'pq2', position: 2, question: 'Factor: x² + 5x + 6', choices: ['(x + 2)(x + 3)', '(x + 1)(x + 6)', '(x − 2)(x − 3)', '(x + 5)(x + 1)'], correct_index: 0 },
   { id: 'pqq7', quiz_id: 'pq2', position: 3, question: 'Factor: x² − 4x', choices: ['x(x − 4)', '(x − 2)(x + 2)', 'x(x + 4)', '4(x − 1)'], correct_index: 0 },
+  // Two students independently wrote the same discriminant card. That happens
+  // constantly in a real class, and it's why the bank de-duplicates.
+  { id: 'pqq14', quiz_id: 'pq2', position: 4, question: 'The discriminant of ax² + bx + c is…', choices: ['b² − 4ac', '2ac − b', 'b² + 4ac', 'ac − b²'], correct_index: 0 },
   { id: 'pqq8', quiz_id: 'pq3', position: 1, question: 'Which organelle makes ATP?', choices: ['Nucleus', 'Ribosome', 'Mitochondrion', 'Vacuole'], correct_index: 2 },
   { id: 'pqq9', quiz_id: 'pq3', position: 2, question: 'Where are proteins built?', choices: ['Ribosome', 'Lysosome', 'Chloroplast', 'Cell wall'], correct_index: 0 },
   { id: 'pqq10', quiz_id: 'pq3', position: 3, question: 'Photosynthesis happens in the…', choices: ['Mitochondrion', 'Chloroplast', 'Nucleus', 'Membrane'], correct_index: 1 },

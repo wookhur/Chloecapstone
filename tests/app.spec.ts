@@ -557,3 +557,68 @@ test.describe('course files', () => {
     await expect(page.locator('tr', { hasText: 'unit4-formula-sheet.pdf' })).toBeVisible();
   });
 });
+
+test.describe('class question bank', () => {
+  test('practices every card the class made, shuffled and de-duplicated', async ({ page }) => {
+    await page.goto('/courses/c-alg2/quizzes');
+    await signInAs(page, USERS.mina);
+
+    // Two quizzes, 8 cards written, but one is a duplicate of another.
+    const bank = page.locator('.bank-card');
+    await expect(bank).toContainText('7 cards');
+    await bank.locator('a:has-text("Practice the bank")').click();
+
+    await expect(page.locator('h2')).toContainText('question bank');
+    await expect(page.locator('h2 + p.sub')).toContainText('shuffled from 2 quizzes');
+    await expect(page.locator('.card .quiz-choices')).toHaveCount(7);
+
+    // Cards say which quiz they came from, so a student can go find that quiz.
+    await expect(page.locator('.content')).toContainText('Quadratics self-check');
+    await expect(page.locator('.content')).toContainText('Factoring speed round');
+  });
+
+  test('a bank round still scores answers', async ({ page }) => {
+    await page.goto('/courses/c-alg2/quizzes/bank/practice');
+    await signInAs(page, USERS.mina);
+
+    // Answer every card with its first choice, right or wrong.
+    const cards = page.locator('.card:has(.quiz-choices)');
+    const count = await cards.count();
+    for (let i = 0; i < count; i++) {
+      await cards.nth(i).locator('.quiz-choice input').first().check();
+    }
+    await page.click('button:has-text("Check answers")');
+    await expect(page.locator('.practice-scoreboard')).toContainText(`/ ${count}`);
+    await expect(page.locator('button:has-text("Reshuffle")')).toBeVisible();
+  });
+
+  test('a new quiz can pull in cards other students already wrote', async ({ page }) => {
+    // Jay isn't in Algebra II, so use a student who is.
+    await page.goto('/courses/c-alg2/quizzes');
+    await signInAs(page, USERS.mina);
+
+    await page.click('button:has-text("Make a quiz")');
+    await page.fill('input[aria-label="Quiz title"]', 'Unit 4 cram');
+    await page.click('button:has-text("Create & add questions")');
+
+    const picker = page.locator('.card', { hasText: 'From the class bank' });
+    await picker.locator('button:has-text("Browse")').click();
+    await picker.locator('li', { hasText: 'Factor: x² − 9' }).locator('button:has-text("Add")').click();
+
+    // The copy lands in the new quiz, and the bank stops offering it.
+    await expect(page.locator('.quiz-question-row', { hasText: 'Factor: x² − 9' })).toHaveCount(1);
+    await page.click('button:has-text("Done")');
+    await expect(
+      page.locator('.quiz-card', { hasText: 'Unit 4 cram' }),
+    ).toContainText('1 card');
+  });
+
+  test('the bank is per class, not the whole school', async ({ page }) => {
+    await page.goto('/courses/c-bio/quizzes');
+    await signInAs(page, USERS.mina);
+
+    await expect(page.locator('.bank-card')).toContainText('3 cards');
+    await page.click('a:has-text("Practice the bank")');
+    await expect(page.locator('.content')).not.toContainText('discriminant');
+  });
+});
