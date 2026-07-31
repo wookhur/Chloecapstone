@@ -19,6 +19,7 @@ import type {
   DiscussionPost,
   DiscussionTopic,
   Enrollment,
+  MeetingRequest,
   PracticeQuestion,
   PracticeQuiz,
   Profile,
@@ -40,6 +41,7 @@ interface AppState {
   practiceQuestions: PracticeQuestion[];
   files: CourseFile[];
   calendarEvents: CalendarEvent[];
+  meetingRequests: MeetingRequest[];
   currentUserId: string | null;
   currentUser: Profile | null;
   setCurrentUserId: (id: string | null) => void;
@@ -76,6 +78,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [practiceQuestions, setPracticeQuestions] = useState<PracticeQuestion[]>([]);
   const [files, setFiles] = useState<CourseFile[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [meetingRequests, setMeetingRequests] = useState<MeetingRequest[]>([]);
   const [currentUserId, setCurrentUserIdState] = useState<string | null>(
     () => localStorage.getItem(STORAGE_KEY),
   );
@@ -89,7 +92,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setError(null);
     try {
-      const [p, c, e, a, cp, an, dt, dp, pq, pqq, fi, ce] = await Promise.all([
+      const [p, c, e, a, cp, an, dt, dp, pq, pqq, fi, ce, mr] = await Promise.all([
         repo.fetchProfiles(),
         repo.fetchClasses(),
         repo.fetchEnrollments(),
@@ -102,6 +105,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         repo.fetchPracticeQuestions(),
         repo.fetchFiles(),
         repo.fetchCalendarEvents(),
+        repo.fetchMeetingRequests(),
       ]);
       setProfiles(p);
       setClasses(c);
@@ -115,6 +119,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setPracticeQuestions(pqq);
       setFiles(fi);
       setCalendarEvents(ce);
+      setMeetingRequests(mr);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
@@ -242,6 +247,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     practiceQuestions,
     files,
     calendarEvents,
+    meetingRequests,
     currentUserId,
     currentUser,
     setCurrentUserId,

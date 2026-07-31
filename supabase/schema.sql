@@ -7,6 +7,7 @@
 -- or via psql -f supabase/schema.sql
 -- ============================================================================
 
+drop table if exists meeting_requests cascade;
 drop table if exists completions cascade;
 drop table if exists calendar_events cascade;
 drop table if exists files cascade;
@@ -147,6 +148,22 @@ create table files (
 );
 create index files_class_idx on files (class_id);
 
+-- A student asking a counselor for time. Accepting one writes a calendar_events
+-- row onto the student's calendar, so the answer lands where they will see it.
+create table meeting_requests (
+  id           uuid primary key default gen_random_uuid(),
+  student_id   uuid not null references profiles (id) on delete cascade,
+  counselor_id uuid references profiles (id) on delete set null,
+  reason       text not null,
+  preferred    text,
+  status       text not null default 'pending'
+                 check (status in ('pending', 'accepted', 'declined')),
+  response     text,
+  created_at   timestamptz not null default now()
+);
+create index meeting_requests_student_idx on meeting_requests (student_id);
+create index meeting_requests_status_idx on meeting_requests (status);
+
 -- Calendar events: hand-added by a user, or a counselor meeting for a student.
 -- owner_id is whose calendar it shows on; created_by is who added it.
 create table calendar_events (
@@ -175,7 +192,8 @@ begin
   foreach t in array array[
     'profiles', 'classes', 'enrollments', 'assignments', 'completions',
     'announcements', 'discussion_topics', 'discussion_posts',
-    'practice_quizzes', 'practice_questions', 'files', 'calendar_events'
+    'practice_quizzes', 'practice_questions', 'files', 'calendar_events',
+    'meeting_requests'
   ]
   loop
     execute format('alter table %I enable row level security', t);

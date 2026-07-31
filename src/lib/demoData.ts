@@ -10,6 +10,7 @@ import {
   type DiscussionPost,
   type DiscussionTopic,
   type Enrollment,
+  type MeetingRequest,
   type PracticeQuestion,
   type PracticeQuiz,
   type Profile,
@@ -163,6 +164,13 @@ export const demoFiles: CourseFile[] = [
   { id: 'f3', class_id: 'c-bio', name: 'osmosis-lab-handout.pdf', size_kb: 415, uploaded_by: 't-chen', created_at: ts(-3) },
   { id: 'f4', class_id: 'c-bio', name: 'cell-diagram-labeled.png', size_kb: 1024, uploaded_by: 't-chen', created_at: ts(-9) },
   { id: 'f5', class_id: 'c-eng', name: 'giver-discussion-questions.docx', size_kb: 88, uploaded_by: 't-brooks', created_at: ts(-4) },
+];
+
+// One request waiting on Ms. Rivera, so the counselor console has something to
+// act on the moment the demo loads.
+export const demoMeetingRequests: MeetingRequest[] = [
+  { id: 'mr1', student_id: 's-zoe', counselor_id: 'co-rivera', reason: 'Questions about signing up for AP classes next year', preferred: 'Any lunch period this week', status: 'pending', response: null, created_at: ts(-1, 12) },
+  { id: 'mr2', student_id: 's-leo', counselor_id: 'co-rivera', reason: 'Need to talk about my schedule', preferred: null, status: 'accepted', response: null, created_at: ts(-6, 9) },
 ];
 
 // Calendar entries: Mina's own events, plus a counseling meeting Ms. Rivera

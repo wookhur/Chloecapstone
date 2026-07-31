@@ -130,6 +130,11 @@ insert into files (class_id, name, size_kb, uploaded_by) values
   ('00000000-0000-0000-0000-0000000000c3', 'cell-diagram-labeled.png', 1024, '00000000-0000-0000-0000-0000000000d3'),
   ('00000000-0000-0000-0000-0000000000c5', 'giver-discussion-questions.docx', 88, '00000000-0000-0000-0000-0000000000d2');
 
+-- Meeting requests waiting on the counselor ----------------------------------
+insert into meeting_requests (student_id, counselor_id, reason, preferred, status, created_at) values
+  ('00000000-0000-0000-0000-0000000000e4', '00000000-0000-0000-0000-0000000000b1', 'Questions about signing up for AP classes next year', 'Any lunch period this week', 'pending', now() - interval '1 day'),
+  ('00000000-0000-0000-0000-0000000000e3', '00000000-0000-0000-0000-0000000000b1', 'Need to talk about my schedule', null, 'accepted', now() - interval '6 days');
+
 -- Calendar events: students' own entries + counseling meetings Ms. Rivera set ---
 insert into calendar_events (owner_id, title, date, category, note, created_by) values
   ('00000000-0000-0000-0000-0000000000e1', 'Dentist appointment', current_date + 1, 'personal', '3:30pm — leave right after school', '00000000-0000-0000-0000-0000000000e1'),

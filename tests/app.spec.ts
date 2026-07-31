@@ -403,3 +403,57 @@ test.describe('bulk assignment entry', () => {
     await expect(page.locator('button:has-text("Add several")')).toHaveCount(0);
   });
 });
+
+test.describe('counselor meeting requests', () => {
+  test('a student asks and the counselor books it onto their calendar', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.mina);
+
+    await page.click('button:has-text("Request a meeting")');
+    await page.fill('#req-reason', 'Help choosing junior year classes');
+    await page.fill('#req-when', 'Tuesday lunch');
+    await page.click('button:has-text("Send request")');
+    await expect(page.locator('.chip.request-pending')).toBeVisible();
+
+    // The counselor sees it queued and books a time.
+    await signInAs(page, USERS.rivera);
+    await navTo(page, 'Counselor');
+    const queue = page.locator('.section', { hasText: 'Requests from students' });
+    await expect(queue).toContainText('Help choosing junior year classes');
+    await queue.locator('li', { hasText: 'Help choosing' }).locator('button:has-text("Respond")').click();
+
+    await page.fill('#resp-time', '12:30pm');
+    await page.fill('#resp-loc', 'Room 102');
+    await page.click('button:has-text("Book it")');
+
+    // Booking must reach the student's calendar, not just change a status.
+    await signInAs(page, USERS.mina);
+    await navTo(page, 'Calendar');
+    await expect(page.locator('.calendar-grid')).toContainText('Counselor meeting');
+
+    await navTo(page, 'Dashboard');
+    await expect(page.locator('.chip.request-accepted')).toBeVisible();
+  });
+
+  test('declining tells the student why instead of leaving them waiting', async ({ page }) => {
+    await page.goto('/counselor');
+    await signInAs(page, USERS.rivera);
+
+    // Zoe's request is seeded as pending.
+    const queue = page.locator('.section', { hasText: 'Requests from students' });
+    await queue.locator('li', { hasText: 'AP classes' }).locator('button:has-text("Respond")').click();
+    await page.fill('#resp-note', 'Out this week — try next Monday');
+    await page.click('button:has-text("Decline")');
+
+    await signInAs(page, USERS.zoe);
+    await navTo(page, 'Dashboard');
+    await expect(page.locator('.chip.request-declined')).toBeVisible();
+    await expect(page.locator('.content')).toContainText('try next Monday');
+  });
+
+  test('teachers are not offered the counselor request panel', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.anderson);
+    await expect(page.locator('button:has-text("Request a meeting")')).toHaveCount(0);
+  });
+});

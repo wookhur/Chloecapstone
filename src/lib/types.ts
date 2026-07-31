@@ -150,6 +150,24 @@ export const CALENDAR_CATEGORIES: {
   { key: 'counseling', label: 'Counseling', emoji: '🧭', color: '#0e8a7d' },
 ];
 
+export type MeetingRequestStatus = 'pending' | 'accepted' | 'declined';
+
+/**
+ * A student asking a counselor for time. Counselor scheduling used to be
+ * one-way, which meant a student who needed to talk still had to send an email
+ * and wait — the exact gap this app exists to close.
+ */
+export interface MeetingRequest {
+  id: string;
+  student_id: string;
+  counselor_id: string | null; // null = whoever picks it up
+  reason: string;
+  preferred: string | null; // free text, e.g. "any lunch this week"
+  status: MeetingRequestStatus;
+  response: string | null; // counselor's note when declining or rescheduling
+  created_at: string;
+}
+
 export interface CalendarEvent {
   id: string;
   owner_id: string; // whose calendar it shows on

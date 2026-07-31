@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { dueLabel, today } from '../lib/dates';
 import { subjectColor } from '../lib/subjectColor';
 import DueSoon from '../components/DueSoon';
+import RequestMeeting from '../components/RequestMeeting';
 import { displayName } from '../lib/names';
 
 export default function Dashboard() {
@@ -163,6 +164,8 @@ export default function Dashboard() {
           </Link>
         </aside>
       </div>
+
+      <RequestMeeting />
     </div>
   );
 }

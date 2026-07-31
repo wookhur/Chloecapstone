@@ -9,6 +9,7 @@ import {
   demoDiscussionTopics,
   demoEnrollments,
   demoFiles,
+  demoMeetingRequests,
   demoPracticeQuestions,
   demoPracticeQuizzes,
   demoProfiles,
@@ -23,6 +24,7 @@ import type {
   DiscussionPost,
   DiscussionTopic,
   Enrollment,
+  MeetingRequest,
   PracticeQuestion,
   PracticeQuiz,
   Profile,
@@ -47,6 +49,7 @@ const mem = {
   practiceQuestions: [...demoPracticeQuestions],
   files: [...demoFiles],
   calendarEvents: [...demoCalendarEvents],
+  meetingRequests: [...demoMeetingRequests],
 };
 
 const uuid = () =>
@@ -81,6 +84,8 @@ export const fetchPracticeQuizzes = () =>
 export const fetchPracticeQuestions = () =>
   fetchTable<PracticeQuestion>(mem.practiceQuestions, 'practice_questions', 'position');
 export const fetchFiles = () => fetchTable<CourseFile>(mem.files, 'files', 'name');
+export const fetchMeetingRequests = () =>
+  fetchTable<MeetingRequest>(mem.meetingRequests, 'meeting_requests');
 export const fetchCalendarEvents = () =>
   fetchTable<CalendarEvent>(mem.calendarEvents, 'calendar_events', 'date');
 
@@ -314,6 +319,30 @@ export async function deleteFile(id: string): Promise<void> {
   }
   const { error } = await supabase!.from('files').delete().eq('id', id);
   if (error) throw error;
+}
+
+// --- Meeting requests (student asks a counselor for time) ---------------------
+export const createMeetingRequest = (r: Omit<MeetingRequest, 'id' | 'created_at'>) =>
+  insertRow<MeetingRequest>(mem.meetingRequests, 'meeting_requests', r);
+
+export async function updateMeetingRequest(
+  id: string,
+  patch: Partial<MeetingRequest>,
+): Promise<MeetingRequest> {
+  if (!isSupabaseConfigured) {
+    const idx = mem.meetingRequests.findIndex((r) => r.id === id);
+    if (idx === -1) throw new Error(`Meeting request ${id} no longer exists`);
+    mem.meetingRequests[idx] = { ...mem.meetingRequests[idx], ...patch };
+    return mem.meetingRequests[idx];
+  }
+  const { data, error } = await supabase!
+    .from('meeting_requests')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as MeetingRequest;
 }
 
 // --- Calendar events (personal, hand-added) -----------------------------------
