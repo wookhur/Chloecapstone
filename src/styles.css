@@ -620,3 +620,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .progress-row { justify-content: space-between; }
   .done-check input { width: 22px; height: 22px; }
 }
+
+/* Due-soon reminders -------------------------------------------------------*/
+.due-soon { margin-bottom: var(--space-5); }
+.due-soon .list-row { padding: 0.6rem 0.9rem; }

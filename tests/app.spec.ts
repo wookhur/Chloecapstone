@@ -265,3 +265,47 @@ test.describe('personal done checklist', () => {
     await expect(page.locator('.done-check')).toHaveCount(0);
   });
 });
+
+test.describe('due-soon reminders', () => {
+  test('the dashboard leads with what is about to be late', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.mina);
+
+    const panel = page.locator('.due-soon');
+    await expect(panel).toBeVisible();
+    // Seeded work due today and tomorrow should be listed.
+    await expect(panel).toContainText('Quadratics worksheet');
+    await expect(panel.locator('.due')).toContainText([/Due today|Overdue/]);
+  });
+
+  test('ticking work off removes it from the warning', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.mina);
+    await expect(page.locator('.due-soon')).toContainText('Quadratics worksheet');
+
+    await navTo(page, 'To Do');
+    await page
+      .locator('.assignment', { hasText: 'Quadratics worksheet' })
+      .first()
+      .locator('.done-check input')
+      .check();
+
+    await navTo(page, 'Dashboard');
+    await expect(page.locator('.content')).not.toContainText('Quadratics worksheet');
+  });
+
+  test('browser reminders can be switched on', async ({ page, context }) => {
+    await context.grantPermissions(['notifications']);
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.mina);
+
+    await page.click('button:has-text("Turn on reminders")');
+    await expect(page.locator('button:has-text("Reminders on")')).toBeVisible();
+  });
+
+  test('teachers do not get the student reminder panel', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.anderson);
+    await expect(page.locator('.due-soon')).toHaveCount(0);
+  });
+});

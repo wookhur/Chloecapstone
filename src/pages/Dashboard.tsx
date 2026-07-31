@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { dueLabel, today } from '../lib/dates';
 import { subjectColor } from '../lib/subjectColor';
+import DueSoon from '../components/DueSoon';
 import { displayName } from '../lib/names';
 
 export default function Dashboard() {
@@ -54,6 +55,8 @@ export default function Dashboard() {
         <h1>Dashboard</h1>
         <p>Welcome back, {displayName(currentUser)}.</p>
       </div>
+
+      <DueSoon />
 
       <div className="dashboard-layout">
         <div>
