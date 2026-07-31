@@ -19,6 +19,7 @@ import type {
   DiscussionPost,
   DiscussionTopic,
   Enrollment,
+  Guardianship,
   MeetingRequest,
   PracticeQuestion,
   PracticeQuiz,
@@ -42,6 +43,9 @@ interface AppState {
   files: CourseFile[];
   calendarEvents: CalendarEvent[];
   meetingRequests: MeetingRequest[];
+  guardianships: Guardianship[];
+  /** Students a parent account follows (empty for everyone else). */
+  myStudents: Profile[];
   currentUserId: string | null;
   currentUser: Profile | null;
   setCurrentUserId: (id: string | null) => void;
@@ -79,6 +83,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [files, setFiles] = useState<CourseFile[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [meetingRequests, setMeetingRequests] = useState<MeetingRequest[]>([]);
+  const [guardianships, setGuardianships] = useState<Guardianship[]>([]);
   const [currentUserId, setCurrentUserIdState] = useState<string | null>(
     () => localStorage.getItem(STORAGE_KEY),
   );
@@ -92,7 +97,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setError(null);
     try {
-      const [p, c, e, a, cp, an, dt, dp, pq, pqq, fi, ce, mr] = await Promise.all([
+      const [p, c, e, a, cp, an, dt, dp, pq, pqq, fi, ce, mr, gu] = await Promise.all([
         repo.fetchProfiles(),
         repo.fetchClasses(),
         repo.fetchEnrollments(),
@@ -106,6 +111,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         repo.fetchFiles(),
         repo.fetchCalendarEvents(),
         repo.fetchMeetingRequests(),
+        repo.fetchGuardianships(),
       ]);
       setProfiles(p);
       setClasses(c);
@@ -120,6 +126,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setFiles(fi);
       setCalendarEvents(ce);
       setMeetingRequests(mr);
+      setGuardianships(gu);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
@@ -173,6 +180,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .filter((e) => e.student_id === currentUser.id)
       .map((e) => e.class_id);
   }, [currentUser, classes, enrollments]);
+
+  // Students a parent account follows. Everyone else gets an empty list.
+  const myStudents = useMemo(() => {
+    if (currentUser?.role !== 'parent') return [];
+    const ids = new Set(
+      guardianships.filter((g) => g.parent_id === currentUser.id).map((g) => g.student_id),
+    );
+    return profiles.filter((p) => ids.has(p.id)).sort((a, b) => a.name.localeCompare(b.name));
+  }, [currentUser, guardianships, profiles]);
 
   const isDone = useCallback(
     (assignmentId: string) =>
@@ -248,6 +264,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     files,
     calendarEvents,
     meetingRequests,
+    guardianships,
+    myStudents,
     currentUserId,
     currentUser,
     setCurrentUserId,

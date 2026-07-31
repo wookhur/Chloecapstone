@@ -1,6 +1,6 @@
 // Shared types — mirror the columns defined in supabase/schema.sql.
 
-export type Role = 'student' | 'teacher' | 'admin' | 'counselor';
+export type Role = 'student' | 'teacher' | 'admin' | 'counselor' | 'parent';
 
 export interface Profile {
   id: string;
@@ -27,6 +27,18 @@ export interface Enrollment {
   id: string;
   student_id: string;
   class_id: string;
+  created_at: string;
+}
+
+/**
+ * Links a parent/guardian account to a student. A parent sees that student's
+ * upcoming work and counseling meetings and can do nothing else — no posting,
+ * no ticking work off, since the checklist belongs to the student.
+ */
+export interface Guardianship {
+  id: string;
+  parent_id: string;
+  student_id: string;
   created_at: string;
 }
 

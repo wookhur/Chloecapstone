@@ -7,6 +7,7 @@
 -- or via psql -f supabase/schema.sql
 -- ============================================================================
 
+drop table if exists guardianships cascade;
 drop table if exists meeting_requests cascade;
 drop table if exists completions cascade;
 drop table if exists calendar_events cascade;
@@ -25,7 +26,7 @@ drop table if exists profiles cascade;
 create table profiles (
   id         uuid primary key default gen_random_uuid(),
   name       text not null,
-  role       text not null check (role in ('student', 'teacher', 'admin', 'counselor')),
+  role       text not null check (role in ('student', 'teacher', 'admin', 'counselor', 'parent')),
   grade      int  check (grade between 6 and 13),
   created_at timestamptz not null default now()
 );
@@ -55,6 +56,17 @@ create table enrollments (
 );
 create index enrollments_student_idx on enrollments (student_id);
 create index enrollments_class_idx   on enrollments (class_id);
+
+-- Links a guardian account to a student. Read-only by design: a parent sees
+-- upcoming work and counseling meetings, and nothing else.
+create table guardianships (
+  id         uuid primary key default gen_random_uuid(),
+  parent_id  uuid not null references profiles (id) on delete cascade,
+  student_id uuid not null references profiles (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (parent_id, student_id)
+);
+create index guardianships_parent_idx on guardianships (parent_id);
 
 -- Homework / quizzes / tests / projects posted by teachers ------------------
 create table assignments (
@@ -193,7 +205,7 @@ begin
     'profiles', 'classes', 'enrollments', 'assignments', 'completions',
     'announcements', 'discussion_topics', 'discussion_posts',
     'practice_quizzes', 'practice_questions', 'files', 'calendar_events',
-    'meeting_requests'
+    'meeting_requests', 'guardianships'
   ]
   loop
     execute format('alter table %I enable row level security', t);

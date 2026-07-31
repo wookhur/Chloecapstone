@@ -457,3 +457,41 @@ test.describe('counselor meeting requests', () => {
     await expect(page.locator('button:has-text("Request a meeting")')).toHaveCount(0);
   });
 });
+
+test.describe('parent accounts', () => {
+  test('a guardian sees their student\'s upcoming work and meetings', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.kim);
+
+    // Parents land on their own screen, named for the student they follow.
+    await expect(page).toHaveURL(/\/family$/);
+    await expect(page.locator('.page-head')).toContainText('Mina');
+    await expect(page.locator('.section', { hasText: 'Coming up' })).toContainText(
+      'Cell organelles',
+    );
+    await expect(page.locator('.section', { hasText: 'Counseling meetings' })).toContainText(
+      'Counselor check-in',
+    );
+  });
+
+  test('the view is read-only — no ticking, posting, or discussions', async ({ page }) => {
+    await page.goto('/family');
+    await signInAs(page, USERS.kim);
+
+    await expect(page.locator('.done-check')).toHaveCount(0);
+    await expect(page.locator('button:has-text("Request a meeting")')).toHaveCount(0);
+
+    // The nav offers exactly one destination.
+    const labels = await page.locator('.rail-item .rail-label').allTextContents();
+    expect(labels).toEqual(['Family']);
+  });
+
+  test('work the student ticked off is shown as done but not editable', async ({ page }) => {
+    await page.goto('/family');
+    await signInAs(page, USERS.kim);
+    // Mina has already ticked the cell organelles reading in the seed data.
+    const row = page.locator('.list-row', { hasText: 'Cell organelles' });
+    await expect(row).toHaveClass(/is-done/);
+    await expect(row.locator('input')).toHaveCount(0);
+  });
+});

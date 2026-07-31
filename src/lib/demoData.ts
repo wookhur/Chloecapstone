@@ -10,6 +10,7 @@ import {
   type DiscussionPost,
   type DiscussionTopic,
   type Enrollment,
+  type Guardianship,
   type MeetingRequest,
   type PracticeQuestion,
   type PracticeQuiz,
@@ -46,6 +47,8 @@ export const demoProfiles: Profile[] = [
   { id: 's-jay', name: 'Jay (Student)', role: 'student', grade: 11, created_at: now },
   { id: 's-leo', name: 'Leo (Student)', role: 'student', grade: 10, created_at: now },
   { id: 's-zoe', name: 'Zoe (Student)', role: 'student', grade: 10, created_at: now },
+  // Parent
+  { id: 'pa-kim', name: 'Mrs. Kim (Parent)', role: 'parent', grade: null, created_at: now },
   // Counselor
   { id: 'co-rivera', name: 'Ms. Rivera (Counselor)', role: 'counselor', grade: null, created_at: now },
   // Admin
@@ -78,6 +81,11 @@ export const demoEnrollments: Enrollment[] = [
   { id: 'e11', student_id: 's-jay', class_id: 'c-calc', created_at: now },
   { id: 'e12', student_id: 's-jay', class_id: 'c-chem', created_at: now },
   { id: 'e13', student_id: 's-jay', class_id: 'c-lit', created_at: now },
+];
+
+// Mrs. Kim follows Mina.
+export const demoGuardianships: Guardianship[] = [
+  { id: 'g1', parent_id: 'pa-kim', student_id: 's-mina', created_at: now },
 ];
 
 export const demoAssignments: Assignment[] = [

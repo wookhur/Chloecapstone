@@ -9,6 +9,7 @@ import {
   demoDiscussionTopics,
   demoEnrollments,
   demoFiles,
+  demoGuardianships,
   demoMeetingRequests,
   demoPracticeQuestions,
   demoPracticeQuizzes,
@@ -24,6 +25,7 @@ import type {
   DiscussionPost,
   DiscussionTopic,
   Enrollment,
+  Guardianship,
   MeetingRequest,
   PracticeQuestion,
   PracticeQuiz,
@@ -50,6 +52,7 @@ const mem = {
   files: [...demoFiles],
   calendarEvents: [...demoCalendarEvents],
   meetingRequests: [...demoMeetingRequests],
+  guardianships: [...demoGuardianships],
 };
 
 const uuid = () =>
@@ -84,6 +87,8 @@ export const fetchPracticeQuizzes = () =>
 export const fetchPracticeQuestions = () =>
   fetchTable<PracticeQuestion>(mem.practiceQuestions, 'practice_questions', 'position');
 export const fetchFiles = () => fetchTable<CourseFile>(mem.files, 'files', 'name');
+export const fetchGuardianships = () =>
+  fetchTable<Guardianship>(mem.guardianships, 'guardianships');
 export const fetchMeetingRequests = () =>
   fetchTable<MeetingRequest>(mem.meetingRequests, 'meeting_requests');
 export const fetchCalendarEvents = () =>

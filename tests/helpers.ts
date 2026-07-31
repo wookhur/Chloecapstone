@@ -8,6 +8,7 @@ export const USERS = {
   zoe: 's-zoe',
   anderson: 't-anders',
   rivera: 'co-rivera',
+  kim: 'pa-kim',
 } as const;
 
 /** Switch accounts via the top-right picker. */

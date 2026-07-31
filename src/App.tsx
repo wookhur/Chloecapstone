@@ -13,6 +13,7 @@ const ClassPicker = lazy(() => import('./pages/ClassPicker'));
 const TeacherClasses = lazy(() => import('./pages/TeacherClasses'));
 const ImportClassroom = lazy(() => import('./pages/ImportClassroom'));
 const Counselor = lazy(() => import('./pages/Counselor'));
+const Family = lazy(() => import('./pages/Family'));
 const CourseLayout = lazy(() => import('./pages/course/CourseLayout'));
 
 const STUDENT_TEACHER_NAV = [
@@ -28,6 +29,9 @@ const COUNSELOR_NAV = [
   { to: '/calendar', glyph: '🗓️', label: 'Calendar' },
 ];
 
+// Guardians get one read-only screen; nothing here is theirs to edit.
+const PARENT_NAV = [{ to: '/family', glyph: '👪', label: 'Family' }];
+
 export default function App() {
   const {
     loading,
@@ -42,7 +46,9 @@ export default function App() {
   if (loading) return <div className="center-screen">Loading Homework Hub…</div>;
 
   const isCounselor = currentUser?.role === 'counselor';
-  const nav = isCounselor ? COUNSELOR_NAV : STUDENT_TEACHER_NAV;
+  const isParent = currentUser?.role === 'parent';
+  const home = isCounselor ? '/counselor' : isParent ? '/family' : '/dashboard';
+  const nav = isCounselor ? COUNSELOR_NAV : isParent ? PARENT_NAV : STUDENT_TEACHER_NAV;
 
   return (
     <div className="app-shell rail-layout">
@@ -88,6 +94,11 @@ export default function App() {
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </optgroup>
+              <optgroup label="Parents">
+                {profiles.filter((p) => p.role === 'parent').map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </optgroup>
               <optgroup label="Counselors">
                 {profiles.filter((p) => p.role === 'counselor').map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -114,28 +125,39 @@ export default function App() {
           )}
 
           <Suspense fallback={<div className="center-screen">Loading…</div>}>
+          {/*
+            Only the routes a role is allowed to open are declared, so anything
+            else falls through to "*" and lands them back on their own home.
+            Switching accounts doesn't navigate on its own — without this, a
+            guardian who switched over on /dashboard would sit there looking at
+            a student's checklist.
+          */}
           <Routes>
-            <Route
-              path="/"
-              element={<Navigate to={isCounselor ? '/counselor' : '/dashboard'} replace />}
-            />
-            <Route path="/counselor" element={<Counselor />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/courses" element={<CoursesPage />} />
-            <Route path="/courses/browse" element={<ClassPicker />} />
-            <Route path="/courses/manage" element={<TeacherClasses />} />
-            <Route path="/courses/import" element={<ImportClassroom />} />
-            <Route path="/courses/:classId/*" element={<CourseLayout />} />
-            <Route path="/classes" element={<Navigate to="/courses/browse" replace />} />
-            <Route path="/teach" element={<Navigate to="/courses/manage" replace />} />
-            <Route path="/homework" element={<Feed />} />
-            <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/discussions" element={<Discussions />} />
-            <Route path="/inbox" element={<Navigate to="/discussions" replace />} />
-            <Route
-              path="*"
-              element={<Navigate to={isCounselor ? '/counselor' : '/dashboard'} replace />}
-            />
+            <Route path="/" element={<Navigate to={home} replace />} />
+            {isParent ? (
+              <Route path="/family" element={<Family />} />
+            ) : isCounselor ? (
+              <>
+                <Route path="/counselor" element={<Counselor />} />
+                <Route path="/calendar" element={<CalendarPage />} />
+              </>
+            ) : (
+              <>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/courses" element={<CoursesPage />} />
+                <Route path="/courses/browse" element={<ClassPicker />} />
+                <Route path="/courses/manage" element={<TeacherClasses />} />
+                <Route path="/courses/import" element={<ImportClassroom />} />
+                <Route path="/courses/:classId/*" element={<CourseLayout />} />
+                <Route path="/classes" element={<Navigate to="/courses/browse" replace />} />
+                <Route path="/teach" element={<Navigate to="/courses/manage" replace />} />
+                <Route path="/homework" element={<Feed />} />
+                <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/discussions" element={<Discussions />} />
+                <Route path="/inbox" element={<Navigate to="/discussions" replace />} />
+              </>
+            )}
+            <Route path="*" element={<Navigate to={home} replace />} />
           </Routes>
           </Suspense>
         </main>

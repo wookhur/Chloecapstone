@@ -19,6 +19,7 @@ insert into profiles (id, name, role, grade) values
   ('00000000-0000-0000-0000-0000000000e3', 'Leo (Student)',  'student', 10),
   ('00000000-0000-0000-0000-0000000000e4', 'Zoe (Student)',  'student', 10),
   ('00000000-0000-0000-0000-0000000000b1', 'Ms. Rivera (Counselor)', 'counselor', null),
+  ('00000000-0000-0000-0000-0000000000f1', 'Mrs. Kim (Parent)', 'parent', null),
   ('00000000-0000-0000-0000-0000000000a1', 'School Office', 'admin', null);
 
 -- Class catalog -------------------------------------------------------------
@@ -48,6 +49,10 @@ insert into enrollments (student_id, class_id) values
   ('00000000-0000-0000-0000-0000000000e2', '00000000-0000-0000-0000-0000000000c2'),
   ('00000000-0000-0000-0000-0000000000e2', '00000000-0000-0000-0000-0000000000c4'),
   ('00000000-0000-0000-0000-0000000000e2', '00000000-0000-0000-0000-0000000000c6');
+
+-- Guardian links --------------------------------------------------------------
+insert into guardianships (parent_id, student_id) values
+  ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-0000000000e1');
 
 -- Assignments (due dates relative to today so filters show content) ----------
 insert into assignments (id, class_id, title, description, assigned_date, due_date, type, link, created_by) values
