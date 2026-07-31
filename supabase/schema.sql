@@ -9,6 +9,7 @@
 
 drop table if exists guardianships cascade;
 drop table if exists meeting_requests cascade;
+drop table if exists counselor_slots cascade;
 drop table if exists completions cascade;
 drop table if exists calendar_events cascade;
 drop table if exists files cascade;
@@ -169,6 +170,25 @@ create table files (
 );
 create index files_class_idx on files (class_id);
 
+-- Times a counselor has said they're free. Students book one themselves, which
+-- is the point: asking and then waiting to hear back is what made people give
+-- up on talking to anyone. start_time is text because schools run on periods
+-- and lunch waves ("Lunch A", "Period 5"), not clock times.
+create table counselor_slots (
+  id           uuid primary key default gen_random_uuid(),
+  counselor_id uuid not null references profiles (id) on delete cascade,
+  date         date not null,
+  start_time   text not null,
+  location     text,
+  -- null = still open. Booking is a conditional update on this being null, so
+  -- two students hitting "book" at once can't both win.
+  booked_by    uuid references profiles (id) on delete set null,
+  created_at   timestamptz not null default now(),
+  unique (counselor_id, date, start_time)
+);
+create index counselor_slots_open_idx on counselor_slots (counselor_id, date)
+  where booked_by is null;
+
 -- A student asking a counselor for time. Accepting one writes a calendar_events
 -- row onto the student's calendar, so the answer lands where they will see it.
 create table meeting_requests (
@@ -177,6 +197,9 @@ create table meeting_requests (
   counselor_id uuid references profiles (id) on delete set null,
   reason       text not null,
   preferred    text,
+  -- Set when the student booked one of the counselor's posted times themselves
+  -- rather than asking for one.
+  slot_id      uuid references counselor_slots (id) on delete set null,
   status       text not null default 'pending'
                  check (status in ('pending', 'accepted', 'declined')),
   response     text,
@@ -214,7 +237,7 @@ begin
     'profiles', 'classes', 'enrollments', 'assignments', 'completions',
     'announcements', 'discussion_topics', 'discussion_posts',
     'practice_quizzes', 'practice_questions', 'files', 'calendar_events',
-    'meeting_requests', 'guardianships'
+    'meeting_requests', 'counselor_slots', 'guardianships'
   ]
   loop
     execute format('alter table %I enable row level security', t);

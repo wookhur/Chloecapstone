@@ -142,9 +142,17 @@ insert into files (class_id, name, size_kb, uploaded_by) values
   ('00000000-0000-0000-0000-0000000000c5', 'giver-discussion-questions.docx', 88, '00000000-0000-0000-0000-0000000000d2');
 
 -- Meeting requests waiting on the counselor ----------------------------------
-insert into meeting_requests (student_id, counselor_id, reason, preferred, status, created_at) values
-  ('00000000-0000-0000-0000-0000000000e4', '00000000-0000-0000-0000-0000000000b1', 'Questions about signing up for AP classes next year', 'Any lunch period this week', 'pending', now() - interval '1 day'),
-  ('00000000-0000-0000-0000-0000000000e3', '00000000-0000-0000-0000-0000000000b1', 'Need to talk about my schedule', null, 'accepted', now() - interval '6 days');
+-- Times Ms. Rivera has posted as free. One is already taken, so the console
+-- shows both states without anyone having to click first.
+insert into counselor_slots (id, counselor_id, date, start_time, location, booked_by) values
+  ('00000000-0000-0000-0000-00000000cc01', '00000000-0000-0000-0000-0000000000b1', current_date + 1, 'Lunch A (11:15)',  'Room 102', null),
+  ('00000000-0000-0000-0000-00000000cc02', '00000000-0000-0000-0000-0000000000b1', current_date + 1, 'Lunch B (11:55)',  'Room 102', '00000000-0000-0000-0000-0000000000e3'),
+  ('00000000-0000-0000-0000-00000000cc03', '00000000-0000-0000-0000-0000000000b1', current_date + 3, 'Period 5 (1:30)',  'Room 102', null),
+  ('00000000-0000-0000-0000-00000000cc04', '00000000-0000-0000-0000-0000000000b1', current_date + 4, 'Lunch A (11:15)',  'Room 102', null);
+
+insert into meeting_requests (student_id, counselor_id, reason, preferred, status, slot_id, created_at) values
+  ('00000000-0000-0000-0000-0000000000e4', '00000000-0000-0000-0000-0000000000b1', 'Questions about signing up for AP classes next year', 'Any lunch period this week', 'pending', null, now() - interval '1 day'),
+  ('00000000-0000-0000-0000-0000000000e3', '00000000-0000-0000-0000-0000000000b1', 'Need to talk about my schedule', null, 'accepted', '00000000-0000-0000-0000-00000000cc02', now() - interval '6 days');
 
 -- Calendar events: students' own entries + counseling meetings Ms. Rivera set ---
 insert into calendar_events (owner_id, title, date, category, note, created_by) values

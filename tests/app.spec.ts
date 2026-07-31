@@ -160,13 +160,15 @@ test.describe('counselor', () => {
     await page.goto('/counselor');
     await signInAs(page, USERS.rivera);
 
-    await page.selectOption('.card select', USERS.zoe);
-    const text = page.locator('.card input:not([type=date])');
+    // Scoped to this card — the availability panel above it has a form too.
+    const form = page.locator('.card', { hasText: 'Schedule a meeting' });
+    await form.locator('select').selectOption(USERS.zoe);
+    const text = form.locator('input:not([type=date])');
     await text.nth(0).fill('College essay review');
     await text.nth(1).fill('2:00pm');
-    await page.fill('.card input[type=date]', new Intl.DateTimeFormat('en-CA').format(new Date()));
+    await form.locator('input[type=date]').fill(new Intl.DateTimeFormat('en-CA').format(new Date()));
     await page.click('button:has-text("Add to student calendar")');
-    await expect(page.locator('.card')).toContainText('calendar ✓');
+    await expect(form).toContainText('calendar ✓');
 
     await signInAs(page, USERS.zoe);
     await navTo(page, 'Calendar');
@@ -620,5 +622,72 @@ test.describe('class question bank', () => {
     await expect(page.locator('.bank-card')).toContainText('3 cards');
     await page.click('a:has-text("Practice the bank")');
     await expect(page.locator('.content')).not.toContainText('discriminant');
+  });
+});
+
+test.describe('counselor availability', () => {
+  test('a student books a posted time and it lands on their calendar', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.mina);
+
+    await page.click('button:has-text("Request a meeting")');
+    await page.fill('#req-reason', 'Course selection questions');
+    // Picking a posted time books it outright — no second approval step.
+    await page.selectOption('#req-slot', { index: 1 });
+    await page.click('button:has-text("Book this time")');
+    await expect(page.locator('.chip.request-accepted')).toBeVisible();
+
+    await navTo(page, 'Calendar');
+    await expect(page.locator('.calendar-grid')).toContainText('Counselor meeting');
+  });
+
+  test('a booked time stops being offered to the next student', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.mina);
+
+    await page.click('button:has-text("Request a meeting")');
+    const before = await page.locator('#req-slot option').count();
+    await page.fill('#req-reason', 'Taking the first open time');
+    await page.selectOption('#req-slot', { index: 1 });
+    await page.click('button:has-text("Book this time")');
+
+    await signInAs(page, USERS.zoe);
+    await page.click('button:has-text("Request a meeting")');
+    await expect(page.locator('#req-slot option')).toHaveCount(before - 1);
+  });
+
+  test('with no time picked it is still just a request the counselor answers', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.mina);
+
+    await page.click('button:has-text("Request a meeting")');
+    await page.fill('#req-reason', 'Something private, whenever works');
+    await page.fill('#req-when', 'Any afternoon');
+    await page.click('button:has-text("Send request")');
+    await expect(page.locator('.chip.request-pending')).toBeVisible();
+  });
+
+  test('a counselor posts a weekly time and sees who booked one', async ({ page }) => {
+    await page.goto('/counselor');
+    await signInAs(page, USERS.rivera);
+
+    const panel = page.locator('.section', { hasText: 'My open times' });
+    await expect(panel).toContainText('Booked by Leo');
+
+    const openBefore = await panel.locator('button:has-text("Remove")').count();
+    await page.fill('#slot-time', 'Period 2 (9:05)');
+    await page.click('button:has-text("Post this time")');
+    await expect(panel.locator('button:has-text("Remove")')).toHaveCount(openBefore + 1);
+
+    // The same time twice would let two students each claim it.
+    await page.fill('#slot-time', 'Period 2 (9:05)');
+    await page.click('button:has-text("Post this time")');
+    await expect(panel).toContainText('already on your list');
+  });
+
+  test('students never see the availability editor', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.mina);
+    await expect(page.locator('#slot-time')).toHaveCount(0);
   });
 });

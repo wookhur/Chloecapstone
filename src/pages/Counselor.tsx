@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import * as repo from '../lib/repository';
 import { today, parseISO } from '../lib/dates';
 import { displayName } from '../lib/names';
+import Availability from './counselor/Availability';
 import RequestQueue from './counselor/RequestQueue';
 
 /**
@@ -77,6 +78,8 @@ export default function Counselor() {
         <h1>Counselor</h1>
         <p>Schedule meetings straight onto a student's calendar — no email chains.</p>
       </div>
+
+      <Availability counselorId={currentUser.id} />
 
       <RequestQueue counselorId={currentUser.id} />
 

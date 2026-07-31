@@ -23,6 +23,7 @@ import type {
   CalendarEvent,
   ClassInfo,
   Completion,
+  CounselorSlot,
   CourseFile,
   DiscussionPost,
   DiscussionTopic,
@@ -51,6 +52,7 @@ interface AppState {
   files: CourseFile[];
   calendarEvents: CalendarEvent[];
   meetingRequests: MeetingRequest[];
+  counselorSlots: CounselorSlot[];
   guardianships: Guardianship[];
   /** Students a parent account follows (empty for everyone else). */
   myStudents: Profile[];
@@ -98,6 +100,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [files, setFiles] = useState<CourseFile[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [meetingRequests, setMeetingRequests] = useState<MeetingRequest[]>([]);
+  const [counselorSlots, setCounselorSlots] = useState<CounselorSlot[]>([]);
   const [guardianships, setGuardianships] = useState<Guardianship[]>([]);
   const [currentUserId, setCurrentUserIdState] = useState<string | null>(
     () => localStorage.getItem(STORAGE_KEY),
@@ -114,7 +117,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setError(null);
     try {
-      const [p, c, e, a, cp, an, dt, dp, pq, pqq, fi, ce, mr, gu] = await Promise.all([
+      const [p, c, e, a, cp, an, dt, dp, pq, pqq, fi, ce, mr, cs, gu] = await Promise.all([
         repo.fetchProfiles(),
         repo.fetchClasses(),
         repo.fetchEnrollments(),
@@ -128,6 +131,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         repo.fetchFiles(),
         repo.fetchCalendarEvents(),
         repo.fetchMeetingRequests(),
+        repo.fetchCounselorSlots(),
         repo.fetchGuardianships(),
       ]);
       setProfiles(p);
@@ -143,6 +147,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setFiles(fi);
       setCalendarEvents(ce);
       setMeetingRequests(mr);
+      setCounselorSlots(cs);
       setGuardianships(gu);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -333,6 +338,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     files,
     calendarEvents,
     meetingRequests,
+    counselorSlots,
     guardianships,
     myStudents,
     currentUserId,

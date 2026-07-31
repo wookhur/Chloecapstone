@@ -6,6 +6,7 @@ import {
   demoCalendarEvents,
   demoClasses,
   demoCompletions,
+  demoCounselorSlots,
   demoDiscussionPosts,
   demoDiscussionTopics,
   demoEnrollments,
@@ -22,6 +23,7 @@ import type {
   CalendarEvent,
   ClassInfo,
   Completion,
+  CounselorSlot,
   CourseFile,
   DiscussionPost,
   DiscussionTopic,
@@ -53,6 +55,7 @@ const mem = {
   files: [...demoFiles],
   calendarEvents: [...demoCalendarEvents],
   meetingRequests: [...demoMeetingRequests],
+  counselorSlots: [...demoCounselorSlots],
   guardianships: [...demoGuardianships],
 };
 
@@ -94,6 +97,8 @@ export const fetchMeetingRequests = () =>
   fetchTable<MeetingRequest>(mem.meetingRequests, 'meeting_requests');
 export const fetchCalendarEvents = () =>
   fetchTable<CalendarEvent>(mem.calendarEvents, 'calendar_events', 'date');
+export const fetchCounselorSlots = () =>
+  fetchTable<CounselorSlot>(mem.counselorSlots, 'counselor_slots', 'date');
 
 // --- Generic insert helper ---------------------------------------------------
 async function insertRow<T extends { id: string; created_at?: string }>(
@@ -355,6 +360,87 @@ export async function updateMeetingRequest(
     .single();
   if (error) throw error;
   return data as MeetingRequest;
+}
+
+// --- Counselor availability slots --------------------------------------------
+export async function createCounselorSlots(
+  rows: Omit<CounselorSlot, 'id' | 'created_at'>[],
+): Promise<CounselorSlot[]> {
+  if (rows.length === 0) return [];
+  if (!isSupabaseConfigured) {
+    const created = rows
+      // Posting the same time twice would put two identical rows on the list and
+      // let two students each "book" it. The unique index does this in Postgres.
+      .filter(
+        (r) =>
+          !mem.counselorSlots.some(
+            (s) =>
+              s.counselor_id === r.counselor_id &&
+              s.date === r.date &&
+              s.start_time === r.start_time,
+          ),
+      )
+      .map((r) => ({ ...r, id: uuid(), created_at: nowISO() })) as CounselorSlot[];
+    mem.counselorSlots.push(...created);
+    return created;
+  }
+  const { data, error } = await supabase!
+    .from('counselor_slots')
+    .upsert(rows, { onConflict: 'counselor_id,date,start_time', ignoreDuplicates: true })
+    .select();
+  if (error) throw error;
+  return (data ?? []) as CounselorSlot[];
+}
+
+export async function deleteCounselorSlot(id: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    mem.counselorSlots = mem.counselorSlots.filter((s) => s.id !== id);
+    return;
+  }
+  const { error } = await supabase!.from('counselor_slots').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/**
+ * Claim an open slot. The write is conditional on it still being open, so two
+ * students hitting "book" at the same time can't both get it — the second gets
+ * told the time was taken instead of a meeting that doesn't exist.
+ */
+export async function bookCounselorSlot(
+  slotId: string,
+  studentId: string,
+): Promise<CounselorSlot> {
+  const taken = new Error('That time was just booked by someone else. Pick another.');
+  if (!isSupabaseConfigured) {
+    const idx = mem.counselorSlots.findIndex((s) => s.id === slotId);
+    if (idx === -1) throw new Error('That time is no longer available.');
+    if (mem.counselorSlots[idx].booked_by) throw taken;
+    mem.counselorSlots[idx] = { ...mem.counselorSlots[idx], booked_by: studentId };
+    return mem.counselorSlots[idx];
+  }
+  const { data, error } = await supabase!
+    .from('counselor_slots')
+    .update({ booked_by: studentId })
+    .eq('id', slotId)
+    .is('booked_by', null)
+    .select();
+  if (error) throw error;
+  if (!data || data.length === 0) throw taken;
+  return data[0] as CounselorSlot;
+}
+
+/** Free a slot again — used when a booked meeting is cancelled. */
+export async function releaseCounselorSlot(slotId: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    const idx = mem.counselorSlots.findIndex((s) => s.id === slotId);
+    if (idx !== -1) mem.counselorSlots[idx] = { ...mem.counselorSlots[idx], booked_by: null };
+    return;
+  }
+  const { error } = await supabase!
+    .from('counselor_slots')
+    .update({ booked_by: null })
+    .eq('id', slotId);
+  if (error) throw error;
 }
 
 // --- Calendar events (personal, hand-added) -----------------------------------

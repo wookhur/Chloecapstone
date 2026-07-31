@@ -6,6 +6,7 @@ import {
   type CalendarEvent,
   type ClassInfo,
   type Completion,
+  type CounselorSlot,
   type CourseFile,
   type DiscussionPost,
   type DiscussionTopic,
@@ -177,11 +178,20 @@ export const demoFiles: CourseFile[] = [
   { id: 'f5', class_id: 'c-eng', name: 'giver-discussion-questions.docx', size_kb: 88, storage_path: null, uploaded_by: 't-brooks', created_at: ts(-4) },
 ];
 
+// Times Ms. Rivera has posted as free. One is already taken, so the demo shows
+// both states without anyone having to click first.
+export const demoCounselorSlots: CounselorSlot[] = [
+  { id: 'cs1', counselor_id: 'co-rivera', date: iso(1), start_time: 'Lunch A (11:15)', location: 'Room 102', booked_by: null, created_at: ts(-2) },
+  { id: 'cs2', counselor_id: 'co-rivera', date: iso(1), start_time: 'Lunch B (11:55)', location: 'Room 102', booked_by: 's-leo', created_at: ts(-2) },
+  { id: 'cs3', counselor_id: 'co-rivera', date: iso(3), start_time: 'Period 5 (1:30)', location: 'Room 102', booked_by: null, created_at: ts(-2) },
+  { id: 'cs4', counselor_id: 'co-rivera', date: iso(4), start_time: 'Lunch A (11:15)', location: 'Room 102', booked_by: null, created_at: ts(-2) },
+];
+
 // One request waiting on Ms. Rivera, so the counselor console has something to
 // act on the moment the demo loads.
 export const demoMeetingRequests: MeetingRequest[] = [
-  { id: 'mr1', student_id: 's-zoe', counselor_id: 'co-rivera', reason: 'Questions about signing up for AP classes next year', preferred: 'Any lunch period this week', status: 'pending', response: null, created_at: ts(-1, 12) },
-  { id: 'mr2', student_id: 's-leo', counselor_id: 'co-rivera', reason: 'Need to talk about my schedule', preferred: null, status: 'accepted', response: null, created_at: ts(-6, 9) },
+  { id: 'mr1', student_id: 's-zoe', counselor_id: 'co-rivera', reason: 'Questions about signing up for AP classes next year', preferred: 'Any lunch period this week', status: 'pending', response: null, slot_id: null, created_at: ts(-1, 12) },
+  { id: 'mr2', student_id: 's-leo', counselor_id: 'co-rivera', reason: 'Need to talk about my schedule', preferred: null, status: 'accepted', response: null, slot_id: 'cs2', created_at: ts(-6, 9) },
 ];
 
 // Calendar entries: Mina's own events, plus a counseling meeting Ms. Rivera

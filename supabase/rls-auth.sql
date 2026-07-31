@@ -20,7 +20,7 @@ begin
     'profiles', 'classes', 'enrollments', 'assignments', 'completions',
     'announcements', 'discussion_topics', 'discussion_posts',
     'practice_quizzes', 'practice_questions', 'files', 'calendar_events',
-    'meeting_requests', 'guardianships'
+    'meeting_requests', 'counselor_slots', 'guardianships'
   ]
   loop
     execute format('drop policy if exists "pilot full access — %s" on %I', t, t);

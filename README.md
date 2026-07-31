@@ -25,8 +25,10 @@ staying organized rather than grading.
 
 **Counselors** get their own account type and a console (`/counselor`) for
 scheduling counseling meetings straight onto a student's calendar instead of
-emailing dates around. Students can also **ask for a meeting** from their
-dashboard and get an answer back there, rather than waiting on an email.
+emailing dates around. They can **post the times they're free** (weekly repeats
+in one go) and students **book an open time themselves** — it's on their
+calendar immediately, with no waiting for a reply. Students with nothing that
+suits them can still just ask, and get the answer on their dashboard.
 
 **Parents/guardians** get one read-only screen (`/family`): what's coming up for
 their student and any counseling meetings booked. Deliberately read-only — a
@@ -171,7 +173,7 @@ Grading stays out of scope — PowerSchool remains the system of record.
 Shipped since the first version: due-date reminders, personal done checkboxes,
 iCal export, bulk and repeating assignment entry, student-requested counselor
 meetings, parent/guardian accounts, real file uploads, magic-link sign-in, and
-class question banks.
+class question banks, and counselor availability slots.
 
-- **Next:** counselor availability slots, emailed weekly digests (needs a
-  scheduled server job, not just the browser)
+- **Next:** emailed weekly digests (needs a scheduled server job, not just the
+  browser)

@@ -171,6 +171,25 @@ export const CALENDAR_CATEGORIES: {
   { key: 'counseling', label: 'Counseling', emoji: '🧭', color: '#0e8a7d' },
 ];
 
+/**
+ * A time a counselor has said they're free. Students book one directly — the
+ * whole problem with counselor scheduling is the waiting, and an open time on
+ * a list doesn't need a second round of approval to become a meeting.
+ *
+ * `start_time` is free text ("11:15am", "Lunch B") rather than a time column:
+ * schools run on periods and lunch waves, not clock times, and a counselor
+ * typing what they'd write on a sign-up sheet is what students recognise.
+ */
+export interface CounselorSlot {
+  id: string;
+  counselor_id: string;
+  date: string; // YYYY-MM-DD
+  start_time: string;
+  location: string | null;
+  booked_by: string | null; // null = still open
+  created_at: string;
+}
+
 export type MeetingRequestStatus = 'pending' | 'accepted' | 'declined';
 
 /**
@@ -186,6 +205,7 @@ export interface MeetingRequest {
   preferred: string | null; // free text, e.g. "any lunch this week"
   status: MeetingRequestStatus;
   response: string | null; // counselor's note when declining or rescheduling
+  slot_id: string | null; // set when the student booked an open time themselves
   created_at: string;
 }
 
