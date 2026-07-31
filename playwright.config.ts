@@ -12,12 +12,22 @@ const preinstalledChromium = [
   '/usr/bin/chromium',
 ].find((p): p is string => Boolean(p) && existsSync(p!));
 
+const chrome = {
+  ...devices['Desktop Chrome'],
+  launchOptions: preinstalledChromium ? { executablePath: preinstalledChromium } : {},
+};
+
 /**
  * Tests run against a production build served by `vite preview`, so they cover
  * what actually ships (including code-split chunks) rather than the dev server.
  *
- * The app runs in demo mode here — no Supabase env vars — so the suite is
- * self-contained and needs no database.
+ * Two builds, because whether sign-in exists is decided at build time by the
+ * Supabase env vars:
+ *
+ *   :4173  demo mode — no env vars, account switcher, no login. Most tests.
+ *   :4174  configured — sign-in gate in front of everything (tests/auth.spec.ts).
+ *          The Supabase URL points at a closed port: these tests are about the
+ *          gate being there, not about talking to a real project.
  */
 export default defineConfig({
   testDir: './tests',
@@ -26,25 +36,35 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'line' : 'list',
 
-  use: {
-    baseURL: 'http://localhost:4173',
-    trace: 'on-first-retry',
-  },
+  use: { trace: 'on-first-retry' },
 
   projects: [
     {
       name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        launchOptions: preinstalledChromium ? { executablePath: preinstalledChromium } : {},
-      },
+      testIgnore: /auth\.spec\.ts/,
+      use: { ...chrome, baseURL: 'http://localhost:4173' },
+    },
+    {
+      name: 'signed-in',
+      testMatch: /auth\.spec\.ts/,
+      use: { ...chrome, baseURL: 'http://localhost:4174' },
     },
   ],
 
-  webServer: {
-    command: 'npm run build && npm run preview -- --port 4173',
-    url: 'http://localhost:4173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: 'npm run build && npm run preview -- --port 4173',
+      url: 'http://localhost:4173',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command:
+        'VITE_SUPABASE_URL=http://127.0.0.1:9999 VITE_SUPABASE_ANON_KEY=test-anon-key ' +
+        'npx vite build --outDir dist-auth && npx vite preview --outDir dist-auth --port 4174',
+      url: 'http://localhost:4174',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });

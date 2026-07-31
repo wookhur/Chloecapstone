@@ -25,7 +25,12 @@ staying organized rather than grading.
 
 **Counselors** get their own account type and a console (`/counselor`) for
 scheduling counseling meetings straight onto a student's calendar instead of
-emailing dates around. The student sees who scheduled it and can't delete it.
+emailing dates around. Students can also **ask for a meeting** from their
+dashboard and get an answer back there, rather than waiting on an email.
+
+**Parents/guardians** get one read-only screen (`/family`): what's coming up for
+their student and any counseling meetings booked. Deliberately read-only — a
+parent seeing the workload helps, a parent ticking work off does not.
 
 **Inside every course**
 
@@ -88,10 +93,28 @@ layout, dark mode, and keyboard/screen-reader accessibility.
    cp .env.example .env.local
    # edit .env.local: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
    ```
-4. Restart `npm run dev`. The "Demo mode" banner disappears and data is live.
+4. Restart `npm run dev`. The "Demo mode" banner disappears, data is live, and
+   the app now asks people to sign in.
 
-> The pilot RLS policies grant the anon key full access for a closed cohort.
-> Tighten them once Supabase Auth is added (see comments in `schema.sql`).
+> Connecting Supabase also turns on **sign-in** — see below. The starting RLS
+> policies grant the anon key full access so the app stays explorable; once real
+> accounts exist, run [`supabase/rls-auth.sql`](./supabase/rls-auth.sql) to
+> restrict every table and the file bucket to signed-in users.
+
+### Signing in
+
+With Supabase connected, the demo account switcher disappears and the app opens
+on a sign-in screen. It emails a **magic link** — no passwords for students to
+lose, and no reset flow to support.
+
+Sign-in matches the email against `profiles.email`, so the office creates
+people's profiles up front and signing in attaches you to the record that
+already has your classes. An address with no profile is told to ask the office
+rather than being dropped into an empty app.
+
+In Supabase → **Authentication → URL Configuration**, set the site URL to your
+deployment so the link comes back to the right place. Without Supabase
+configured, none of this appears and the app stays in demo mode.
 
 ### Connect Google Classroom (read-only import)
 
@@ -128,13 +151,13 @@ Site configuration → Environment variables.
 ## Project structure
 
 ```
-supabase/        schema.sql + seed.sql + storage.sql (file bucket)
+supabase/        schema.sql, seed.sql, storage.sql (file bucket), rls-auth.sql
 src/
-  lib/           supabase client, storage, googleClassroom, types, dates, ical,
+  lib/           supabase client, auth, storage, googleClassroom, types, dates, ical,
                  reminders, subject colors, repository
   context/       AppContext — data loading + current-user switcher
   components/    AssignmentCard, Calendar (assignments + personal events)
-  pages/         Dashboard, CoursesPage, ImportClassroom, Discussions (global hub),
+  pages/         SignIn, Dashboard, CoursesPage, ImportClassroom, Discussions (global hub),
                  Feed, CalendarPage, ClassPicker (student), TeacherClasses (teacher)
   pages/course/  CourseLayout + tabs: Home, Announcements, Assignments,
                  AssignmentDetail, Discussions, Quizzes (practice), QuizTake,
@@ -147,8 +170,7 @@ Grading stays out of scope — PowerSchool remains the system of record.
 
 Shipped since the first version: due-date reminders, personal done checkboxes,
 iCal export, bulk and repeating assignment entry, student-requested counselor
-meetings, parent/guardian accounts, and real file uploads.
+meetings, parent/guardian accounts, real file uploads, and magic-link sign-in.
 
-- **Next:** real login (Supabase Auth), which replaces the demo account switcher
-- **Later:** practice-quiz question banks, counselor availability slots,
+- **Next:** practice-quiz question banks, counselor availability slots,
   emailed weekly digests (needs a scheduled server job, not just the browser)

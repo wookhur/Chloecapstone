@@ -9,18 +9,21 @@
 -- ============================================================================
 
 -- People --------------------------------------------------------------------
-insert into profiles (id, name, role, grade) values
-  ('00000000-0000-0000-0000-0000000000d1', 'Ms. Anderson', 'teacher', null),
-  ('00000000-0000-0000-0000-0000000000d2', 'Mr. Brooks',   'teacher', null),
-  ('00000000-0000-0000-0000-0000000000d3', 'Dr. Chen',     'teacher', null),
-  ('00000000-0000-0000-0000-0000000000d4', 'Sr. Diaz',     'teacher', null),
-  ('00000000-0000-0000-0000-0000000000e1', 'Mina (Student)', 'student', 10),
-  ('00000000-0000-0000-0000-0000000000e2', 'Jay (Student)',  'student', 11),
-  ('00000000-0000-0000-0000-0000000000e3', 'Leo (Student)',  'student', 10),
-  ('00000000-0000-0000-0000-0000000000e4', 'Zoe (Student)',  'student', 10),
-  ('00000000-0000-0000-0000-0000000000b1', 'Ms. Rivera (Counselor)', 'counselor', null),
-  ('00000000-0000-0000-0000-0000000000f1', 'Mrs. Kim (Parent)', 'parent', null),
-  ('00000000-0000-0000-0000-0000000000a1', 'School Office', 'admin', null);
+-- Emails are what sign-in matches on. Replace these with real school
+-- addresses before a pilot; @school.example is reserved for examples and can
+-- never receive a magic link.
+insert into profiles (id, name, email, role, grade) values
+  ('00000000-0000-0000-0000-0000000000d1', 'Ms. Anderson', 'anderson@school.example', 'teacher', null),
+  ('00000000-0000-0000-0000-0000000000d2', 'Mr. Brooks',   'brooks@school.example',   'teacher', null),
+  ('00000000-0000-0000-0000-0000000000d3', 'Dr. Chen',     'chen@school.example',     'teacher', null),
+  ('00000000-0000-0000-0000-0000000000d4', 'Sr. Diaz',     'diaz@school.example',     'teacher', null),
+  ('00000000-0000-0000-0000-0000000000e1', 'Mina (Student)', 'mina@school.example', 'student', 10),
+  ('00000000-0000-0000-0000-0000000000e2', 'Jay (Student)',  'jay@school.example',  'student', 11),
+  ('00000000-0000-0000-0000-0000000000e3', 'Leo (Student)',  'leo@school.example',  'student', 10),
+  ('00000000-0000-0000-0000-0000000000e4', 'Zoe (Student)',  'zoe@school.example',  'student', 10),
+  ('00000000-0000-0000-0000-0000000000b1', 'Ms. Rivera (Counselor)', 'rivera@school.example', 'counselor', null),
+  ('00000000-0000-0000-0000-0000000000f1', 'Mrs. Kim (Parent)', 'kim.family@school.example', 'parent', null),
+  ('00000000-0000-0000-0000-0000000000a1', 'School Office', 'office@school.example', 'admin', null);
 
 -- Class catalog -------------------------------------------------------------
 insert into classes (id, name, subject, grade_level, teacher_id, period, room, school_year) values

@@ -336,6 +336,16 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .center-screen { display: grid; place-items: center; min-height: 60vh; color: var(--ink-soft); }
 
+/* Sign-in / "your email isn't set up yet" card. Narrow on purpose: one thing
+   to read, one thing to type. */
+.signin-card {
+  width: min(28rem, calc(100vw - 2rem));
+  margin: var(--space-5) auto;
+  color: var(--ink);
+  text-align: left;
+}
+.signin-card .btn { width: 100%; justify-content: center; }
+
 /* Global nav rail ----------------------------------------------------------*/
 .rail-layout { flex-direction: row; }
 .global-rail {

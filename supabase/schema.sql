@@ -26,10 +26,15 @@ drop table if exists profiles cascade;
 create table profiles (
   id         uuid primary key default gen_random_uuid(),
   name       text not null,
+  -- School email. Sign-in matches on this (see src/lib/auth.ts), so the office
+  -- creates a person's profile ahead of time and they attach to the record
+  -- that already has their classes. Nullable for anyone who never signs in.
+  email      text unique,
   role       text not null check (role in ('student', 'teacher', 'admin', 'counselor', 'parent')),
   grade      int  check (grade between 6 and 13),
   created_at timestamptz not null default now()
 );
+create index profiles_email_idx on profiles (lower(email));
 create index profiles_role_idx on profiles (role);
 
 -- The class catalog: a course taught by one teacher for a school year --------
@@ -198,9 +203,9 @@ create index calendar_events_creator_idx on calendar_events (created_by);
 
 -- ---------------------------------------------------------------------------
 -- Row Level Security
--- Pilot runs on the public anon key (no per-user auth yet), so anon gets full
--- access. When Supabase Auth is added, tighten these to per-user rules
--- (e.g. students edit only their own posts; teachers only their classes).
+-- These starting policies grant the anon key full access, which is what makes
+-- the app explorable before anyone signs in. Once real accounts exist, run
+-- rls-auth.sql to drop anon and leave signed-in users only.
 -- ---------------------------------------------------------------------------
 do $$
 declare t text;

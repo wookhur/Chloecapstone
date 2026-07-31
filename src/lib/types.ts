@@ -7,6 +7,10 @@ export interface Profile {
   name: string;
   role: Role;
   grade: number | null;
+  /** School email. Signing in matches on this, so the office creates profiles
+   *  ahead of time and people attach to the record that already has their
+   *  classes. Null in demo mode, where nobody signs in. */
+  email: string | null;
   created_at: string;
 }
 

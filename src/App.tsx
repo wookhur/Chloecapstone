@@ -3,6 +3,7 @@ import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { useApp } from './context/AppContext';
 import Dashboard from './pages/Dashboard';
 import Feed from './pages/Feed';
+import SignIn from './pages/SignIn';
 
 // Everything past the two screens students open first is split out, so a phone
 // on school wifi downloads a fraction of the app up front.
@@ -41,9 +42,33 @@ export default function App() {
     currentUserId,
     setCurrentUserId,
     supabaseConnected,
+    authEnabled,
+    authUser,
+    authLoading,
+    signOut,
   } = useApp();
 
-  if (loading) return <div className="center-screen">Loading Homework Hub…</div>;
+  if (loading || authLoading) return <div className="center-screen">Loading Homework Hub…</div>;
+
+  // With Supabase connected, nothing is reachable until you sign in.
+  if (authEnabled && !authUser) return <SignIn />;
+
+  // Signed in with an address the school hasn't set up yet. Better to say so
+  // than to show an app with no classes in it and let them wonder.
+  if (authEnabled && authUser && !currentUser) {
+    return (
+      <div className="center-screen">
+        <div className="card signin-card">
+          <h1 style={{ marginTop: 0 }}>Almost there</h1>
+          <p>
+            {authUser.email} isn't set up in Homework Hub yet, so there's nothing
+            to show. Ask the school office to add it and try again.
+          </p>
+          <button className="btn secondary" onClick={signOut}>Sign out</button>
+        </div>
+      </div>
+    );
+  }
 
   const isCounselor = currentUser?.role === 'counselor';
   const isParent = currentUser?.role === 'parent';
@@ -77,6 +102,12 @@ export default function App() {
             </span>
           </div>
           <div className="topbar-spacer" />
+          {authEnabled ? (
+            <div className="user-switcher">
+              <span className="meta">{currentUser?.name}</span>
+              <button className="btn secondary small" onClick={signOut}>Sign out</button>
+            </div>
+          ) : (
           <div className="user-switcher">
             <label htmlFor="user">Signed in as</label>
             <select
@@ -106,6 +137,7 @@ export default function App() {
               </optgroup>
             </select>
           </div>
+          )}
         </header>
 
         <main className="content">

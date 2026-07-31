@@ -8,6 +8,14 @@ import {
   type ReactNode,
 } from 'react';
 import * as repo from '../lib/repository';
+import {
+  currentAuthUser,
+  isAuthEnabled,
+  onAuthChange,
+  profileForEmail,
+  signOut as authSignOut,
+  type AuthUser,
+} from '../lib/auth';
 import { isSupabaseConfigured } from '../lib/supabase';
 import type {
   Announcement,
@@ -50,6 +58,13 @@ interface AppState {
   currentUser: Profile | null;
   setCurrentUserId: (id: string | null) => void;
   refresh: () => Promise<void>;
+  /** True when Supabase is connected, so people sign in instead of picking an account. */
+  authEnabled: boolean;
+  /** Who is signed in with Supabase Auth (null in demo mode, or before sign-in). */
+  authUser: AuthUser | null;
+  /** Still checking for an existing session — don't show the sign-in screen yet. */
+  authLoading: boolean;
+  signOut: () => Promise<void>;
   // helpers
   classById: (id: string) => ClassInfo | undefined;
   profileById: (id: string) => Profile | undefined;
@@ -87,6 +102,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUserId, setCurrentUserIdState] = useState<string | null>(
     () => localStorage.getItem(STORAGE_KEY),
   );
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(isAuthEnabled);
 
   const setCurrentUserId = useCallback((id: string | null) => {
     setCurrentUserIdState(id);
@@ -132,23 +149,75 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Load the data — but with auth on, not until someone is actually signed in.
+  // Fetching first would mean an unauthenticated visitor hammering the tables,
+  // and a slow or unreachable database would hold them on "Loading…" with no
+  // sign-in screen to reach.
   useEffect(() => {
+    if (isAuthEnabled) {
+      if (authLoading) return;
+      if (!authUser) {
+        setLoading(false);
+        return;
+      }
+    }
     (async () => {
       setLoading(true);
       await refresh();
       setLoading(false);
     })();
-  }, [refresh]);
+  }, [refresh, authUser, authLoading]);
 
-  // Pick who's signed in. Defaults to the demo persona who actually has content
-  // — "the first student" would depend on row order, which differs between demo
-  // mode (declaration order) and Supabase (ordered by name).
+  // Watch the Supabase session. Also fires on the redirect back from a magic
+  // link, which is how the sign-in actually completes.
+  useEffect(() => {
+    if (!isAuthEnabled) return;
+    let cancelled = false;
+    currentAuthUser()
+      .then((u) => {
+        if (cancelled) return;
+        setAuthUser(u);
+        setAuthLoading(false);
+      })
+      .catch(() => !cancelled && setAuthLoading(false));
+    const unsubscribe = onAuthChange((u) => {
+      setAuthUser(u);
+      setAuthLoading(false);
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
+
+  // Signed in: you are whoever the school's profile list says that email is.
+  // No switcher, and nothing in localStorage can override it.
+  useEffect(() => {
+    if (!isAuthEnabled) return;
+    if (!authUser) {
+      setCurrentUserId(null);
+      return;
+    }
+    if (profiles.length === 0) return;
+    setCurrentUserId(profileForEmail(profiles, authUser.email)?.id ?? null);
+  }, [authUser, profiles, setCurrentUserId]);
+
+  const signOut = useCallback(async () => {
+    await authSignOut();
+    setAuthUser(null);
+    setCurrentUserId(null);
+  }, [setCurrentUserId]);
+
+  // Demo mode picks who's signed in. Defaults to the demo persona who actually
+  // has content — "the first student" would depend on row order, which differs
+  // between demo mode (declaration order) and Supabase (ordered by name).
   //
   // Also self-heals a saved id that no longer resolves: switching demo ->
   // Supabase, or reseeding the database, changes every id, and a stale one
   // leaves the app stuck showing "Select a user to begin" while the account
   // switcher misleadingly displays the first person in the list.
   useEffect(() => {
+    if (isAuthEnabled) return;
     if (profiles.length === 0) return;
     const stillExists = currentUserId && profiles.some((p) => p.id === currentUserId);
     if (stillExists) return;
@@ -270,6 +339,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     currentUser,
     setCurrentUserId,
     refresh,
+    authEnabled: isAuthEnabled,
+    authUser,
+    authLoading,
+    signOut,
     classById,
     profileById,
     myClassIds,
