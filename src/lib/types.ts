@@ -1,12 +1,20 @@
 // Shared types — mirror the columns defined in supabase/schema.sql.
 
-export type Role = 'student' | 'teacher' | 'admin' | 'counselor';
+export type Role = 'student' | 'teacher' | 'admin' | 'counselor' | 'parent';
 
 export interface Profile {
   id: string;
   name: string;
   role: Role;
   grade: number | null;
+  /** School email. Signing in matches on this, so the office creates profiles
+   *  ahead of time and people attach to the record that already has their
+   *  classes. Null in demo mode, where nobody signs in. */
+  email: string | null;
+  /** Whether the Sunday digest goes to this person. Opt-out, not opt-in — the
+   *  students who most need it are the least likely to go looking for a
+   *  setting to turn on. */
+  wants_digest: boolean;
   created_at: string;
 }
 
@@ -27,6 +35,18 @@ export interface Enrollment {
   id: string;
   student_id: string;
   class_id: string;
+  created_at: string;
+}
+
+/**
+ * Links a parent/guardian account to a student. A parent sees that student's
+ * upcoming work and counseling meetings and can do nothing else — no posting,
+ * no ticking work off, since the checklist belongs to the student.
+ */
+export interface Guardianship {
+  id: string;
+  parent_id: string;
+  student_id: string;
   created_at: string;
 }
 
@@ -54,6 +74,18 @@ export interface Assignment {
   link: string | null;
   created_by: string | null; // null once the posting teacher's profile is removed
   created_at: string;
+}
+
+/**
+ * A student ticking their own checklist. Private to that student and never a
+ * grade — teachers don't see it. It exists so the app can replace the paper
+ * planner students are already crossing things off in.
+ */
+export interface Completion {
+  id: string;
+  assignment_id: string;
+  student_id: string;
+  completed_at: string;
 }
 
 export interface Announcement {
@@ -105,12 +137,17 @@ export interface PracticeQuestion {
   correct_index: number;
 }
 
-/** File metadata only — actual storage comes in a later phase. */
+/**
+ * A course handout. The row is metadata; the bytes live in Supabase Storage at
+ * `storage_path`. Rows created before storage existed have no path, so they
+ * show in the list but can't be opened.
+ */
 export interface CourseFile {
   id: string;
   class_id: string;
   name: string;
   size_kb: number;
+  storage_path: string | null;
   uploaded_by: string;
   created_at: string;
 }
@@ -137,6 +174,44 @@ export const CALENDAR_CATEGORIES: {
   { key: 'meeting', label: 'Meeting', emoji: '👥', color: '#2a8ea9' },
   { key: 'counseling', label: 'Counseling', emoji: '🧭', color: '#0e8a7d' },
 ];
+
+/**
+ * A time a counselor has said they're free. Students book one directly — the
+ * whole problem with counselor scheduling is the waiting, and an open time on
+ * a list doesn't need a second round of approval to become a meeting.
+ *
+ * `start_time` is free text ("11:15am", "Lunch B") rather than a time column:
+ * schools run on periods and lunch waves, not clock times, and a counselor
+ * typing what they'd write on a sign-up sheet is what students recognise.
+ */
+export interface CounselorSlot {
+  id: string;
+  counselor_id: string;
+  date: string; // YYYY-MM-DD
+  start_time: string;
+  location: string | null;
+  booked_by: string | null; // null = still open
+  created_at: string;
+}
+
+export type MeetingRequestStatus = 'pending' | 'accepted' | 'declined';
+
+/**
+ * A student asking a counselor for time. Counselor scheduling used to be
+ * one-way, which meant a student who needed to talk still had to send an email
+ * and wait — the exact gap this app exists to close.
+ */
+export interface MeetingRequest {
+  id: string;
+  student_id: string;
+  counselor_id: string | null; // null = whoever picks it up
+  reason: string;
+  preferred: string | null; // free text, e.g. "any lunch this week"
+  status: MeetingRequestStatus;
+  response: string | null; // counselor's note when declining or rescheduling
+  slot_id: string | null; // set when the student booked an open time themselves
+  created_at: string;
+}
 
 export interface CalendarEvent {
   id: string;

@@ -1,13 +1,18 @@
 import { isSupabaseConfigured, supabase } from './supabase';
+import { removeStoredFile } from './storage';
 import {
   demoAnnouncements,
   demoAssignments,
   demoCalendarEvents,
   demoClasses,
+  demoCompletions,
+  demoCounselorSlots,
   demoDiscussionPosts,
   demoDiscussionTopics,
   demoEnrollments,
   demoFiles,
+  demoGuardianships,
+  demoMeetingRequests,
   demoPracticeQuestions,
   demoPracticeQuizzes,
   demoProfiles,
@@ -17,10 +22,14 @@ import type {
   Assignment,
   CalendarEvent,
   ClassInfo,
+  Completion,
+  CounselorSlot,
   CourseFile,
   DiscussionPost,
   DiscussionTopic,
   Enrollment,
+  Guardianship,
+  MeetingRequest,
   PracticeQuestion,
   PracticeQuiz,
   Profile,
@@ -37,6 +46,7 @@ const mem = {
   classes: [...demoClasses],
   enrollments: [...demoEnrollments],
   assignments: [...demoAssignments],
+  completions: [...demoCompletions],
   announcements: [...demoAnnouncements],
   discussionTopics: [...demoDiscussionTopics],
   discussionPosts: [...demoDiscussionPosts],
@@ -44,6 +54,9 @@ const mem = {
   practiceQuestions: [...demoPracticeQuestions],
   files: [...demoFiles],
   calendarEvents: [...demoCalendarEvents],
+  meetingRequests: [...demoMeetingRequests],
+  counselorSlots: [...demoCounselorSlots],
+  guardianships: [...demoGuardianships],
 };
 
 const uuid = () =>
@@ -66,6 +79,7 @@ export const fetchProfiles = () => fetchTable<Profile>(mem.profiles, 'profiles',
 export const fetchClasses = () => fetchTable<ClassInfo>(mem.classes, 'classes', 'name');
 export const fetchEnrollments = () => fetchTable<Enrollment>(mem.enrollments, 'enrollments');
 export const fetchAssignments = () => fetchTable<Assignment>(mem.assignments, 'assignments');
+export const fetchCompletions = () => fetchTable<Completion>(mem.completions, 'completions');
 export const fetchAnnouncements = () =>
   fetchTable<Announcement>(mem.announcements, 'announcements');
 export const fetchDiscussionTopics = () =>
@@ -77,8 +91,14 @@ export const fetchPracticeQuizzes = () =>
 export const fetchPracticeQuestions = () =>
   fetchTable<PracticeQuestion>(mem.practiceQuestions, 'practice_questions', 'position');
 export const fetchFiles = () => fetchTable<CourseFile>(mem.files, 'files', 'name');
+export const fetchGuardianships = () =>
+  fetchTable<Guardianship>(mem.guardianships, 'guardianships');
+export const fetchMeetingRequests = () =>
+  fetchTable<MeetingRequest>(mem.meetingRequests, 'meeting_requests');
 export const fetchCalendarEvents = () =>
   fetchTable<CalendarEvent>(mem.calendarEvents, 'calendar_events', 'date');
+export const fetchCounselorSlots = () =>
+  fetchTable<CounselorSlot>(mem.counselorSlots, 'counselor_slots', 'date');
 
 // --- Generic insert helper ---------------------------------------------------
 async function insertRow<T extends { id: string; created_at?: string }>(
@@ -138,6 +158,23 @@ export async function unenroll(studentId: string, classId: string): Promise<void
 export const createProfile = (p: Omit<Profile, 'id' | 'created_at'>) =>
   insertRow<Profile>(mem.profiles, 'profiles', p);
 
+export async function updateProfile(id: string, patch: Partial<Profile>): Promise<Profile> {
+  if (!isSupabaseConfigured) {
+    const idx = mem.profiles.findIndex((p) => p.id === id);
+    if (idx === -1) throw new Error(`Profile ${id} no longer exists`);
+    mem.profiles[idx] = { ...mem.profiles[idx], ...patch };
+    return mem.profiles[idx];
+  }
+  const { data, error } = await supabase!
+    .from('profiles')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Profile;
+}
+
 // --- Classes (teachers create their own) -----------------------------------
 export const createClass = (cls: Omit<ClassInfo, 'id' | 'created_at'>) =>
   insertRow<ClassInfo>(mem.classes, 'classes', cls);
@@ -145,6 +182,28 @@ export const createClass = (cls: Omit<ClassInfo, 'id' | 'created_at'>) =>
 // --- Assignments (teachers post homework) ----------------------------------
 export const createAssignment = (a: Omit<Assignment, 'id' | 'created_at'>) =>
   insertRow<Assignment>(mem.assignments, 'assignments', a);
+
+/**
+ * Insert several assignments at once. Teachers plan a unit in one sitting, so a
+ * single round trip beats one request per row.
+ */
+export async function createAssignments(
+  rows: Omit<Assignment, 'id' | 'created_at'>[],
+): Promise<Assignment[]> {
+  if (rows.length === 0) return [];
+  if (!isSupabaseConfigured) {
+    const created = rows.map((r) => ({
+      ...r,
+      id: uuid(),
+      created_at: nowISO(),
+    })) as Assignment[];
+    mem.assignments.push(...created);
+    return created;
+  }
+  const { data, error } = await supabase!.from('assignments').insert(rows).select();
+  if (error) throw error;
+  return data as Assignment[];
+}
 
 export async function updateAssignment(
   id: string,
@@ -174,6 +233,47 @@ export async function deleteAssignment(id: string): Promise<void> {
   }
   const { error } = await supabase!.from('assignments').delete().eq('id', id);
   if (error) throw error;
+}
+
+// --- Completions (a student's private checklist) -----------------------------
+/** Tick or untick an assignment for one student. Returns the new state. */
+export async function setCompleted(
+  assignmentId: string,
+  studentId: string,
+  done: boolean,
+): Promise<boolean> {
+  if (!isSupabaseConfigured) {
+    if (done) {
+      if (!mem.completions.some((c) => c.assignment_id === assignmentId && c.student_id === studentId)) {
+        mem.completions.push({
+          id: uuid(),
+          assignment_id: assignmentId,
+          student_id: studentId,
+          completed_at: nowISO(),
+        });
+      }
+    } else {
+      mem.completions = mem.completions.filter(
+        (c) => !(c.assignment_id === assignmentId && c.student_id === studentId),
+      );
+    }
+    return done;
+  }
+
+  if (done) {
+    const { error } = await supabase!
+      .from('completions')
+      .insert({ assignment_id: assignmentId, student_id: studentId });
+    if (error && error.code !== '23505') throw error; // ignore double-tick
+  } else {
+    const { error } = await supabase!
+      .from('completions')
+      .delete()
+      .eq('assignment_id', assignmentId)
+      .eq('student_id', studentId);
+    if (error) throw error;
+  }
+  return done;
 }
 
 // --- Announcements -----------------------------------------------------------
@@ -236,16 +336,127 @@ export async function deletePracticeQuestion(id: string): Promise<void> {
   if (error) throw error;
 }
 
-// --- Files (metadata only for now) --------------------------------------------
+// --- Files (row here, bytes in Storage — see lib/storage.ts) ------------------
 export const createFile = (f: Omit<CourseFile, 'id' | 'created_at'>) =>
   insertRow<CourseFile>(mem.files, 'files', f);
 
-export async function deleteFile(id: string): Promise<void> {
+/**
+ * Removes the stored bytes first. If that fails we stop and keep the row, so
+ * the file stays listed and openable — the alternative is an invisible object
+ * sitting in the bucket that nobody can find to clean up.
+ */
+export async function deleteFile(id: string, storagePath: string | null): Promise<void> {
+  await removeStoredFile(storagePath);
   if (!isSupabaseConfigured) {
     mem.files = mem.files.filter((f) => f.id !== id);
     return;
   }
   const { error } = await supabase!.from('files').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// --- Meeting requests (student asks a counselor for time) ---------------------
+export const createMeetingRequest = (r: Omit<MeetingRequest, 'id' | 'created_at'>) =>
+  insertRow<MeetingRequest>(mem.meetingRequests, 'meeting_requests', r);
+
+export async function updateMeetingRequest(
+  id: string,
+  patch: Partial<MeetingRequest>,
+): Promise<MeetingRequest> {
+  if (!isSupabaseConfigured) {
+    const idx = mem.meetingRequests.findIndex((r) => r.id === id);
+    if (idx === -1) throw new Error(`Meeting request ${id} no longer exists`);
+    mem.meetingRequests[idx] = { ...mem.meetingRequests[idx], ...patch };
+    return mem.meetingRequests[idx];
+  }
+  const { data, error } = await supabase!
+    .from('meeting_requests')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as MeetingRequest;
+}
+
+// --- Counselor availability slots --------------------------------------------
+export async function createCounselorSlots(
+  rows: Omit<CounselorSlot, 'id' | 'created_at'>[],
+): Promise<CounselorSlot[]> {
+  if (rows.length === 0) return [];
+  if (!isSupabaseConfigured) {
+    const created = rows
+      // Posting the same time twice would put two identical rows on the list and
+      // let two students each "book" it. The unique index does this in Postgres.
+      .filter(
+        (r) =>
+          !mem.counselorSlots.some(
+            (s) =>
+              s.counselor_id === r.counselor_id &&
+              s.date === r.date &&
+              s.start_time === r.start_time,
+          ),
+      )
+      .map((r) => ({ ...r, id: uuid(), created_at: nowISO() })) as CounselorSlot[];
+    mem.counselorSlots.push(...created);
+    return created;
+  }
+  const { data, error } = await supabase!
+    .from('counselor_slots')
+    .upsert(rows, { onConflict: 'counselor_id,date,start_time', ignoreDuplicates: true })
+    .select();
+  if (error) throw error;
+  return (data ?? []) as CounselorSlot[];
+}
+
+export async function deleteCounselorSlot(id: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    mem.counselorSlots = mem.counselorSlots.filter((s) => s.id !== id);
+    return;
+  }
+  const { error } = await supabase!.from('counselor_slots').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/**
+ * Claim an open slot. The write is conditional on it still being open, so two
+ * students hitting "book" at the same time can't both get it — the second gets
+ * told the time was taken instead of a meeting that doesn't exist.
+ */
+export async function bookCounselorSlot(
+  slotId: string,
+  studentId: string,
+): Promise<CounselorSlot> {
+  const taken = new Error('That time was just booked by someone else. Pick another.');
+  if (!isSupabaseConfigured) {
+    const idx = mem.counselorSlots.findIndex((s) => s.id === slotId);
+    if (idx === -1) throw new Error('That time is no longer available.');
+    if (mem.counselorSlots[idx].booked_by) throw taken;
+    mem.counselorSlots[idx] = { ...mem.counselorSlots[idx], booked_by: studentId };
+    return mem.counselorSlots[idx];
+  }
+  const { data, error } = await supabase!
+    .from('counselor_slots')
+    .update({ booked_by: studentId })
+    .eq('id', slotId)
+    .is('booked_by', null)
+    .select();
+  if (error) throw error;
+  if (!data || data.length === 0) throw taken;
+  return data[0] as CounselorSlot;
+}
+
+/** Free a slot again — used when a booked meeting is cancelled. */
+export async function releaseCounselorSlot(slotId: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    const idx = mem.counselorSlots.findIndex((s) => s.id === slotId);
+    if (idx !== -1) mem.counselorSlots[idx] = { ...mem.counselorSlots[idx], booked_by: null };
+    return;
+  }
+  const { error } = await supabase!
+    .from('counselor_slots')
+    .update({ booked_by: null })
+    .eq('id', slotId);
   if (error) throw error;
 }
 

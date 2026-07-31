@@ -119,3 +119,30 @@ export function dueLabel(dueISO: string): string {
   if (diffDays < 7) return `Due in ${diffDays} days`;
   return `Due ${MONTH_NAMES[due.getMonth()].slice(0, 3)} ${due.getDate()}`;
 }
+
+export const WEEKDAY_LABELS = [
+  'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+];
+
+/**
+ * Every date between `startISO` and `endISO` (inclusive) that falls on the given
+ * weekday. Used to turn "every Friday until winter break" into real dated rows,
+ * so the rest of the app keeps treating assignments as simple dated items.
+ */
+export function weeklyDates(startISO: string, endISO: string, weekday: number): string[] {
+  const start = parseISO(startISO);
+  const end = parseISO(endISO);
+  if (end < start) return [];
+
+  const cursor = new Date(start);
+  // Advance to the first matching weekday on or after the start date.
+  cursor.setDate(cursor.getDate() + ((weekday - cursor.getDay() + 7) % 7));
+
+  const dates: string[] = [];
+  // A school year is ~40 weeks; the cap stops a bad range spinning forever.
+  while (cursor <= end && dates.length < 60) {
+    dates.push(toISODate(cursor));
+    cursor.setDate(cursor.getDate() + 7);
+  }
+  return dates;
+}

@@ -5,10 +5,14 @@ import {
   type Assignment,
   type CalendarEvent,
   type ClassInfo,
+  type Completion,
+  type CounselorSlot,
   type CourseFile,
   type DiscussionPost,
   type DiscussionTopic,
   type Enrollment,
+  type Guardianship,
+  type MeetingRequest,
   type PracticeQuestion,
   type PracticeQuiz,
   type Profile,
@@ -35,19 +39,21 @@ const ts = (offsetDays: number, hour = 9) => {
 
 export const demoProfiles: Profile[] = [
   // Teachers
-  { id: 't-anders', name: 'Ms. Anderson', role: 'teacher', grade: null, created_at: now },
-  { id: 't-brooks', name: 'Mr. Brooks', role: 'teacher', grade: null, created_at: now },
-  { id: 't-chen', name: 'Dr. Chen', role: 'teacher', grade: null, created_at: now },
-  { id: 't-diaz', name: 'Sr. Diaz', role: 'teacher', grade: null, created_at: now },
+  { id: 't-anders', email: 'anderson@school.example', name: 'Ms. Anderson', role: 'teacher', grade: null, wants_digest: true, created_at: now },
+  { id: 't-brooks', email: 'brooks@school.example', name: 'Mr. Brooks', role: 'teacher', grade: null, wants_digest: true, created_at: now },
+  { id: 't-chen', email: 'chen@school.example', name: 'Dr. Chen', role: 'teacher', grade: null, wants_digest: true, created_at: now },
+  { id: 't-diaz', email: 'diaz@school.example', name: 'Sr. Diaz', role: 'teacher', grade: null, wants_digest: true, created_at: now },
   // Students
-  { id: 's-mina', name: 'Mina (Student)', role: 'student', grade: 10, created_at: now },
-  { id: 's-jay', name: 'Jay (Student)', role: 'student', grade: 11, created_at: now },
-  { id: 's-leo', name: 'Leo (Student)', role: 'student', grade: 10, created_at: now },
-  { id: 's-zoe', name: 'Zoe (Student)', role: 'student', grade: 10, created_at: now },
+  { id: 's-mina', email: 'mina@school.example', name: 'Mina (Student)', role: 'student', grade: 10, wants_digest: true, created_at: now },
+  { id: 's-jay', email: 'jay@school.example', name: 'Jay (Student)', role: 'student', grade: 11, wants_digest: true, created_at: now },
+  { id: 's-leo', email: 'leo@school.example', name: 'Leo (Student)', role: 'student', grade: 10, wants_digest: true, created_at: now },
+  { id: 's-zoe', email: 'zoe@school.example', name: 'Zoe (Student)', role: 'student', grade: 10, wants_digest: true, created_at: now },
+  // Parent
+  { id: 'pa-kim', email: 'kim.family@school.example', name: 'Mrs. Kim (Parent)', role: 'parent', grade: null, wants_digest: true, created_at: now },
   // Counselor
-  { id: 'co-rivera', name: 'Ms. Rivera (Counselor)', role: 'counselor', grade: null, created_at: now },
+  { id: 'co-rivera', email: 'rivera@school.example', name: 'Ms. Rivera (Counselor)', role: 'counselor', grade: null, wants_digest: true, created_at: now },
   // Admin
-  { id: 'a-office', name: 'School Office', role: 'admin', grade: null, created_at: now },
+  { id: 'a-office', email: 'office@school.example', name: 'School Office', role: 'admin', grade: null, wants_digest: true, created_at: now },
 ];
 
 export const demoClasses: ClassInfo[] = [
@@ -78,6 +84,11 @@ export const demoEnrollments: Enrollment[] = [
   { id: 'e13', student_id: 's-jay', class_id: 'c-lit', created_at: now },
 ];
 
+// Mrs. Kim follows Mina.
+export const demoGuardianships: Guardianship[] = [
+  { id: 'g1', parent_id: 'pa-kim', student_id: 's-mina', created_at: now },
+];
+
 export const demoAssignments: Assignment[] = [
   { id: 'a1', class_id: 'c-alg2', title: 'Quadratics worksheet §4.3', description: 'Problems 1–20, show your work.', assigned_date: iso(-2), due_date: iso(0), type: 'homework', link: null, created_by: 't-anders', created_at: now },
   { id: 'a2', class_id: 'c-alg2', title: 'Unit 4 quiz', description: 'Covers factoring and the quadratic formula.', assigned_date: iso(-5), due_date: iso(3), type: 'quiz', link: null, created_by: 't-anders', created_at: now },
@@ -94,6 +105,16 @@ export const demoAssignments: Assignment[] = [
   { id: 'a12', class_id: 'c-alg2', title: 'Unit 3 test — polynomials', description: null, assigned_date: iso(-14), due_date: iso(-7), type: 'test', link: null, created_by: 't-anders', created_at: now },
   { id: 'a13', class_id: 'c-bio', title: 'Microscope lab worksheet', description: 'Complete during lab.', assigned_date: iso(-9), due_date: iso(-4), type: 'homework', link: null, created_by: 't-chen', created_at: now },
   { id: 'a14', class_id: 'c-eng', title: 'Reading log — weeks 1–2', description: null, assigned_date: iso(-12), due_date: iso(-5), type: 'homework', link: null, created_by: 't-brooks', created_at: now },
+];
+
+// A few things Mina has already ticked off, so the checked state is visible
+// immediately without the demo looking like nothing has been done.
+export const demoCompletions: Completion[] = [
+  { id: 'cp1', assignment_id: 'a11', student_id: 's-mina', completed_at: ts(-7, 20) },
+  { id: 'cp2', assignment_id: 'a12', student_id: 's-mina', completed_at: ts(-8, 18) },
+  { id: 'cp3', assignment_id: 'a13', student_id: 's-mina', completed_at: ts(-5, 16) },
+  { id: 'cp4', assignment_id: 'a3', student_id: 's-mina', completed_at: ts(0, 8) },
+  { id: 'cp5', assignment_id: 'a11', student_id: 's-leo', completed_at: ts(-6, 21) },
 ];
 
 export const demoAnnouncements: Announcement[] = [
@@ -138,6 +159,9 @@ export const demoPracticeQuestions: PracticeQuestion[] = [
   { id: 'pqq5', quiz_id: 'pq2', position: 1, question: 'Factor: x² − 9', choices: ['(x − 3)(x − 3)', '(x + 3)(x − 3)', '(x + 9)(x − 1)', 'prime'], correct_index: 1 },
   { id: 'pqq6', quiz_id: 'pq2', position: 2, question: 'Factor: x² + 5x + 6', choices: ['(x + 2)(x + 3)', '(x + 1)(x + 6)', '(x − 2)(x − 3)', '(x + 5)(x + 1)'], correct_index: 0 },
   { id: 'pqq7', quiz_id: 'pq2', position: 3, question: 'Factor: x² − 4x', choices: ['x(x − 4)', '(x − 2)(x + 2)', 'x(x + 4)', '4(x − 1)'], correct_index: 0 },
+  // Two students independently wrote the same discriminant card. That happens
+  // constantly in a real class, and it's why the bank de-duplicates.
+  { id: 'pqq14', quiz_id: 'pq2', position: 4, question: 'The discriminant of ax² + bx + c is…', choices: ['b² − 4ac', '2ac − b', 'b² + 4ac', 'ac − b²'], correct_index: 0 },
   { id: 'pqq8', quiz_id: 'pq3', position: 1, question: 'Which organelle makes ATP?', choices: ['Nucleus', 'Ribosome', 'Mitochondrion', 'Vacuole'], correct_index: 2 },
   { id: 'pqq9', quiz_id: 'pq3', position: 2, question: 'Where are proteins built?', choices: ['Ribosome', 'Lysosome', 'Chloroplast', 'Cell wall'], correct_index: 0 },
   { id: 'pqq10', quiz_id: 'pq3', position: 3, question: 'Photosynthesis happens in the…', choices: ['Mitochondrion', 'Chloroplast', 'Nucleus', 'Membrane'], correct_index: 1 },
@@ -147,11 +171,27 @@ export const demoPracticeQuestions: PracticeQuestion[] = [
 ];
 
 export const demoFiles: CourseFile[] = [
-  { id: 'f1', class_id: 'c-alg2', name: 'unit4-formula-sheet.pdf', size_kb: 182, uploaded_by: 't-anders', created_at: ts(-5) },
-  { id: 'f2', class_id: 'c-alg2', name: 'ch4-practice-answers.pdf', size_kb: 240, uploaded_by: 't-anders', created_at: ts(-2) },
-  { id: 'f3', class_id: 'c-bio', name: 'osmosis-lab-handout.pdf', size_kb: 415, uploaded_by: 't-chen', created_at: ts(-3) },
-  { id: 'f4', class_id: 'c-bio', name: 'cell-diagram-labeled.png', size_kb: 1024, uploaded_by: 't-chen', created_at: ts(-9) },
-  { id: 'f5', class_id: 'c-eng', name: 'giver-discussion-questions.docx', size_kb: 88, uploaded_by: 't-brooks', created_at: ts(-4) },
+  { id: 'f1', class_id: 'c-alg2', name: 'unit4-formula-sheet.pdf', size_kb: 182, storage_path: null, uploaded_by: 't-anders', created_at: ts(-5) },
+  { id: 'f2', class_id: 'c-alg2', name: 'ch4-practice-answers.pdf', size_kb: 240, storage_path: null, uploaded_by: 't-anders', created_at: ts(-2) },
+  { id: 'f3', class_id: 'c-bio', name: 'osmosis-lab-handout.pdf', size_kb: 415, storage_path: null, uploaded_by: 't-chen', created_at: ts(-3) },
+  { id: 'f4', class_id: 'c-bio', name: 'cell-diagram-labeled.png', size_kb: 1024, storage_path: null, uploaded_by: 't-chen', created_at: ts(-9) },
+  { id: 'f5', class_id: 'c-eng', name: 'giver-discussion-questions.docx', size_kb: 88, storage_path: null, uploaded_by: 't-brooks', created_at: ts(-4) },
+];
+
+// Times Ms. Rivera has posted as free. One is already taken, so the demo shows
+// both states without anyone having to click first.
+export const demoCounselorSlots: CounselorSlot[] = [
+  { id: 'cs1', counselor_id: 'co-rivera', date: iso(1), start_time: 'Lunch A (11:15)', location: 'Room 102', booked_by: null, created_at: ts(-2) },
+  { id: 'cs2', counselor_id: 'co-rivera', date: iso(1), start_time: 'Lunch B (11:55)', location: 'Room 102', booked_by: 's-leo', created_at: ts(-2) },
+  { id: 'cs3', counselor_id: 'co-rivera', date: iso(3), start_time: 'Period 5 (1:30)', location: 'Room 102', booked_by: null, created_at: ts(-2) },
+  { id: 'cs4', counselor_id: 'co-rivera', date: iso(4), start_time: 'Lunch A (11:15)', location: 'Room 102', booked_by: null, created_at: ts(-2) },
+];
+
+// One request waiting on Ms. Rivera, so the counselor console has something to
+// act on the moment the demo loads.
+export const demoMeetingRequests: MeetingRequest[] = [
+  { id: 'mr1', student_id: 's-zoe', counselor_id: 'co-rivera', reason: 'Questions about signing up for AP classes next year', preferred: 'Any lunch period this week', status: 'pending', response: null, slot_id: null, created_at: ts(-1, 12) },
+  { id: 'mr2', student_id: 's-leo', counselor_id: 'co-rivera', reason: 'Need to talk about my schedule', preferred: null, status: 'accepted', response: null, slot_id: 'cs2', created_at: ts(-6, 9) },
 ];
 
 // Calendar entries: Mina's own events, plus a counseling meeting Ms. Rivera

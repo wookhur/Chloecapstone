@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import * as repo from '../../lib/repository';
 import type { ClassInfo, PracticeQuestion } from '../../lib/types';
 import { displayName, initial } from '../../lib/names';
+import { bankFor, cardKey, dedupe } from '../../lib/quizBank';
 
 /**
  * Quizlet-style practice quizzes. Any student (or the teacher) can create a
@@ -17,6 +18,11 @@ export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: 
   const quizzes = practiceQuizzes
     .filter((q) => q.class_id === cls.id)
     .sort((a, b) => b.created_at.localeCompare(a.created_at));
+
+  const bank = useMemo(
+    () => dedupe(bankFor(practiceQuizzes, practiceQuestions, cls.id)),
+    [practiceQuizzes, practiceQuestions, cls.id],
+  );
 
   return (
     <div>
@@ -35,6 +41,23 @@ export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: 
         Made by students, for students. Create a quiz to help your classmates study,
         or practice one below — it's not graded, so practice as much as you like. 📚
       </p>
+
+      {/* One quiz is one person's twelve cards. The night before a test you
+          want all of them, which is what the bank is. */}
+      {bank.length > 0 && (
+        <div className="card bank-card">
+          <div>
+            <strong>🎴 Class question bank</strong>
+            <p className="sub" style={{ margin: '2px 0 0' }}>
+              {bank.length} card{bank.length === 1 ? '' : 's'} from every quiz in{' '}
+              {cls.name}, shuffled together.
+            </p>
+          </div>
+          <Link to="../quizzes/bank/practice" className="btn small">
+            ▶ Practice the bank
+          </Link>
+        </div>
+      )}
 
       {creating && currentUser && (
         <QuizBuilder
@@ -158,6 +181,7 @@ aria-label="Quiz title"             value={title}
   const questions = practiceQuestions
     .filter((q) => q.quiz_id === quizId)
     .sort((a, b) => a.position - b.position);
+  const nextPosition = questions.reduce((max, q) => Math.max(max, q.position), 0) + 1;
 
   return (
     <div className="card" style={{ marginBottom: '1rem' }}>
@@ -187,9 +211,97 @@ aria-label="Quiz title"             value={title}
         quizId={quizId}
         // Max+1, not length+1: deleting a middle card would otherwise reuse a
         // position and make the order unstable.
-        nextPosition={questions.reduce((max, q) => Math.max(max, q.position), 0) + 1}
+        nextPosition={nextPosition}
         onAdded={refresh}
       />
+      <BankPicker
+        cls={cls}
+        quizId={quizId}
+        nextPosition={nextPosition}
+        already={questions}
+        onAdded={refresh}
+      />
+    </div>
+  );
+}
+
+/**
+ * Pull a card someone else already wrote into this quiz. Half of what students
+ * type into a new quiz already exists in the class bank, and retyping it is
+ * the reason quizzes stall at four cards.
+ *
+ * It copies rather than links: the original author can delete or fix theirs
+ * without cards vanishing out of somebody else's quiz mid-study.
+ */
+function BankPicker({
+  cls,
+  quizId,
+  nextPosition,
+  already,
+  onAdded,
+}: {
+  cls: ClassInfo;
+  quizId: string;
+  nextPosition: number;
+  already: PracticeQuestion[];
+  onAdded: () => Promise<void>;
+}) {
+  const { practiceQuizzes, practiceQuestions } = useApp();
+  const [open, setOpen] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const mine = new Set(already.map(cardKey));
+  const available = dedupe(bankFor(practiceQuizzes, practiceQuestions, cls.id)).filter(
+    (c) => c.quiz_id !== quizId && !mine.has(cardKey(c)),
+  );
+
+  if (available.length === 0) return null;
+
+  const copy = async (cardId: string) => {
+    const card = available.find((c) => c.id === cardId);
+    if (!card) return;
+    setBusyId(cardId);
+    try {
+      await repo.createPracticeQuestion({
+        quiz_id: quizId,
+        position: nextPosition,
+        question: card.question,
+        choices: card.choices,
+        correct_index: card.correct_index,
+      });
+      await onAdded();
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  return (
+    <div className="card subtle" style={{ marginTop: '0.75rem' }}>
+      <div className="row-between">
+        <strong>From the class bank</strong>
+        <button className="btn small secondary" onClick={() => setOpen((v) => !v)}>
+          {open ? 'Hide' : `Browse ${available.length} card${available.length === 1 ? '' : 's'}`}
+        </button>
+      </div>
+      {open && (
+        <ul className="plain-list" style={{ marginTop: '0.6rem' }}>
+          {available.map((c) => (
+            <li key={c.id} className="quiz-question-row">
+              <div>
+                {c.question}
+                <div className="meta">✓ {c.choices[c.correct_index]} · {c.quizTitle}</div>
+              </div>
+              <button
+                className="btn small"
+                disabled={busyId === c.id}
+                onClick={() => copy(c.id)}
+              >
+                {busyId === c.id ? 'Adding…' : '+ Add'}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

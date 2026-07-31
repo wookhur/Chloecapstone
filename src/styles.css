@@ -223,6 +223,34 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .btn.danger { background: var(--danger); color: #fff; }
 .btn.small { padding: 0.35rem 0.65rem; font-size: var(--text-sm); }
 
+/* The "practice everything the class wrote" call-out above the quiz grid. */
+.bank-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--brand);
+}
+
+/* The email preview. Bordered and inset so it reads as "this is a message",
+   not as another panel of the app. */
+.digest-preview { border-left: 3px solid var(--brand); }
+.digest-subject {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--line);
+}
+
+/* Reads as a link, behaves as a button — used where the click runs code (like
+   fetching a signed download URL) rather than following an href. */
+.linklike { color: var(--brand); padding: 0; text-align: left; }
+.linklike:hover { text-decoration: underline; }
+
 /* Toggles ------------------------------------------------------------------*/
 .toggle-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .toggle {
@@ -330,6 +358,16 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   border: 1px dashed var(--line); border-radius: var(--radius); background: var(--surface);
 }
 .center-screen { display: grid; place-items: center; min-height: 60vh; color: var(--ink-soft); }
+
+/* Sign-in / "your email isn't set up yet" card. Narrow on purpose: one thing
+   to read, one thing to type. */
+.signin-card {
+  width: min(28rem, calc(100vw - 2rem));
+  margin: var(--space-5) auto;
+  color: var(--ink);
+  text-align: left;
+}
+.signin-card .btn { width: 100%; justify-content: center; }
 
 /* Global nav rail ----------------------------------------------------------*/
 .rail-layout { flex-direction: row; }
@@ -594,3 +632,49 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   border: 1px solid var(--line);
 }
 .subject-chip .legend-dot { width: 7px; height: 7px; }
+
+/* Personal "done" checklist ------------------------------------------------*/
+.done-check {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: var(--text-sm); color: var(--ink-soft); cursor: pointer;
+  flex: 0 0 auto;
+}
+.done-check input {
+  width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; margin: 0;
+}
+.done-check.is-done { color: var(--accent); font-weight: 600; }
+
+/* A ticked item settles down instead of disappearing, so the student can still
+   see it and untick if they were wrong. */
+.is-done .calendar-item-label,
+.assignment.is-done h3,
+.assignment-row.is-done a { text-decoration: line-through; }
+.assignment.is-done, .assignment-row.is-done { opacity: 0.62; }
+
+.progress-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.progress-row input { accent-color: var(--brand); }
+
+@media (max-width: 640px) {
+  .progress-row { justify-content: space-between; }
+  .done-check input { width: 22px; height: 22px; }
+}
+
+/* Due-soon reminders -------------------------------------------------------*/
+.due-soon { margin-bottom: var(--space-5); }
+.due-soon .list-row { padding: 0.6rem 0.9rem; }
+
+/* Bulk assignment entry ----------------------------------------------------*/
+.bulk-preview {
+  margin-top: var(--space-3); padding: var(--space-2) var(--space-3);
+  background: var(--surface-2); border-radius: var(--radius-sm);
+}
+.bulk-row {
+  display: flex; justify-content: space-between; gap: var(--space-3);
+  padding: 0.2rem 0; font-size: var(--text-sm);
+}
+.bulk-row.has-error { color: var(--danger); }
+
+/* Counselor meeting requests -----------------------------------------------*/
+.chip.request-pending { background: var(--warn-soft); color: var(--warn-ink); border-color: var(--warn); }
+.chip.request-accepted { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.chip.request-declined { background: var(--surface-2); color: var(--ink-soft); }

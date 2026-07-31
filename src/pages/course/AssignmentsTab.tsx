@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { dueLabel, today } from '../../lib/dates';
 import * as repo from '../../lib/repository';
+import DoneCheckbox from '../../components/DoneCheckbox';
+import BulkAssignments from './BulkAssignments';
 import {
   ASSIGNMENT_TYPES,
   type Assignment,
@@ -19,8 +21,9 @@ const TYPE_EMOJI: Record<Assignment['type'], string> = {
 
 /** Assignment listings for a course (informational — no online submission). */
 export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
-  const { currentUser, assignments, refresh } = useApp();
+  const { currentUser, assignments, isDone, refresh } = useApp();
   const [showForm, setShowForm] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
 
   const isCourseTeacher = currentUser?.id === cls.teacher_id;
 
@@ -36,16 +39,20 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
   }, [assignments, cls.id]);
 
   const renderRow = (a: Assignment) => {
-    const overdue = a.due_date < today();
+    const done = isDone(a.id);
+    const overdue = !done && a.due_date < today();
     return (
-      <li key={a.id} className="list-row assignment-row">
-        <div>
+      <li key={a.id} className={`list-row assignment-row ${done ? 'is-done' : ''}`}>
+        <div className="inline" style={{ gap: '0.5rem' }}>
+          <DoneCheckbox assignment={a} />
+          <div>
           <span style={{ marginRight: 6 }}>{TYPE_EMOJI[a.type]}</span>
           <Link to={`../assignments/${a.id}`} style={{ fontWeight: 600 }}>
             {a.title}
           </Link>
           <div className={`due ${overdue ? 'overdue' : ''}`} style={{ marginTop: 2 }}>
             {dueLabel(a.due_date)}
+          </div>
           </div>
         </div>
         <span className="chip" style={{ textTransform: 'capitalize' }}>{a.type}</span>
@@ -58,14 +65,30 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
       <div className="row-between" style={{ marginBottom: '1rem' }}>
         <h2 className="section-title">Assignments</h2>
         {isCourseTeacher && (
-          <button
-            className={`btn small ${showForm ? "secondary" : ""}`}
-            onClick={() => setShowForm((v) => !v)}
-          >
-            {showForm ? 'Cancel' : '+ Assignment'}
-          </button>
+          <div className="inline" style={{ gap: '0.4rem' }}>
+            <button
+              className={`btn secondary small ${showBulk ? "on" : ""}`}
+              onClick={() => { setShowBulk((v) => !v); setShowForm(false); }}
+            >
+              {showBulk ? 'Cancel' : '⚡ Add several'}
+            </button>
+            <button
+              className={`btn small ${showForm ? "secondary" : ""}`}
+              onClick={() => { setShowForm((v) => !v); setShowBulk(false); }}
+            >
+              {showForm ? 'Cancel' : '+ Assignment'}
+            </button>
+          </div>
         )}
       </div>
+
+      {showBulk && (
+        <BulkAssignments
+          cls={cls}
+          teacherId={currentUser!.id}
+          onDone={refresh}
+        />
+      )}
 
       {showForm && (
         <NewAssignmentForm

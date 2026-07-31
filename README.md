@@ -21,11 +21,21 @@ staying organized rather than grading.
 - **Import from Google Classroom** — pull your courses, coursework (with due
   dates), and announcements in read-only (with a built-in demo when no Google
   credentials are set)
+- **Weekly email** — one message Sunday evening with the week ahead, so a
+  deadline can reach a student who hasn't opened the app. Work they've already
+  ticked off is left out, and they can turn it off from the dashboard
 - **Dark mode** — follows your device's appearance setting automatically
 
 **Counselors** get their own account type and a console (`/counselor`) for
 scheduling counseling meetings straight onto a student's calendar instead of
-emailing dates around. The student sees who scheduled it and can't delete it.
+emailing dates around. They can **post the times they're free** (weekly repeats
+in one go) and students **book an open time themselves** — it's on their
+calendar immediately, with no waiting for a reply. Students with nothing that
+suits them can still just ask, and get the answer on their dashboard.
+
+**Parents/guardians** get one read-only screen (`/family`): what's coming up for
+their student and any counseling meetings booked. Deliberately read-only — a
+parent seeing the workload helps, a parent ticking work off does not.
 
 **Inside every course**
 
@@ -35,9 +45,9 @@ emailing dates around. The student sees who scheduled it and can't delete it.
 | Announcements | Teacher posts class-wide notices |
 | Assignments | Upcoming/past list; a detail page with instructions and resource links (read-only — this isn't a submission portal) |
 | Discussions | Threaded topics — anyone can start one and reply |
-| Practice Quizzes | **Quizlet-style, student-made** — any student builds a multiple-choice quiz; classmates practice with instant feedback, a score, and unlimited retries (never graded) |
+| Practice Quizzes | **Quizlet-style, student-made** — any student builds a multiple-choice quiz; classmates practice with instant feedback, a score, and unlimited retries (never graded). The **class question bank** pools every card the class wrote into one shuffled round, and a new quiz can pull in cards that already exist instead of retyping them |
 | People | Course roster |
-| Files | Course file list (metadata now; storage in a later phase) |
+| Files | Real file uploads — the teacher posts the handout (up to 20 MB) and students open it from the course, so the worksheet sits next to its due date |
 
 Assignments are informational (the school's system of record handles grades),
 so there's no online submission or grading here.
@@ -63,20 +73,74 @@ Use the "Signed in as" switcher (top-right) to try it as a student or a teacher
 which is fully populated: assignments, announcements, discussions, student-made
 practice quizzes, and Mina's personal calendar events.
 
+### Tests
+
+```bash
+npx playwright install chromium   # first time only
+npm test
+```
+
+The suite drives a real browser against a production build in demo mode, so it
+needs no database. It covers the main flows (calendar, assignments, practice
+quizzes, discussions, counselor scheduling), plus the things easiest to break
+without noticing: date handling in three timezones, phone/tablet/desktop
+layout, dark mode, and keyboard/screen-reader accessibility.
+
 ### Connect Supabase (persistent data)
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In the dashboard **SQL Editor**, run [`supabase/schema.sql`](./supabase/schema.sql)
-   then [`supabase/seed.sql`](./supabase/seed.sql).
+2. In the dashboard **SQL Editor**, run [`supabase/schema.sql`](./supabase/schema.sql),
+   then [`supabase/seed.sql`](./supabase/seed.sql), then
+   [`supabase/storage.sql`](./supabase/storage.sql) (creates the private
+   `course-files` bucket that the Files tab uploads to).
 3. Copy your project URL and anon key into a local env file:
    ```bash
    cp .env.example .env.local
    # edit .env.local: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
    ```
-4. Restart `npm run dev`. The "Demo mode" banner disappears and data is live.
+4. Restart `npm run dev`. The "Demo mode" banner disappears, data is live, and
+   the app now asks people to sign in.
 
-> The pilot RLS policies grant the anon key full access for a closed cohort.
-> Tighten them once Supabase Auth is added (see comments in `schema.sql`).
+> Connecting Supabase also turns on **sign-in** — see below. The starting RLS
+> policies grant the anon key full access so the app stays explorable; once real
+> accounts exist, run [`supabase/rls-auth.sql`](./supabase/rls-auth.sql) to
+> restrict every table and the file bucket to signed-in users.
+
+### Signing in
+
+With Supabase connected, the demo account switcher disappears and the app opens
+on a sign-in screen. It emails a **magic link** — no passwords for students to
+lose, and no reset flow to support.
+
+Sign-in matches the email against `profiles.email`, so the office creates
+people's profiles up front and signing in attaches you to the record that
+already has your classes. An address with no profile is told to ask the office
+rather than being dropped into an empty app.
+
+In Supabase → **Authentication → URL Configuration**, set the site URL to your
+deployment so the link comes back to the right place. Without Supabase
+configured, none of this appears and the app stays in demo mode.
+
+### Turn on the weekly email
+
+The Sunday digest is the one thing the browser can't do on its own — nothing in
+the app is running on a Sunday evening, so the send comes from the server.
+
+```bash
+supabase functions deploy weekly-digest
+supabase secrets set RESEND_API_KEY=... DIGEST_FROM="Homework Hub <hub@yourschool.org>"
+```
+
+Then edit the two placeholders in [`supabase/cron.sql`](./supabase/cron.sql)
+(your project ref, and your school's send time converted to UTC) and run it.
+
+Call the function once by hand with `?dry=1` first: it builds every student's
+digest and returns them as JSON **without sending anything**, so you can read
+the real content before a whole school does.
+
+The email and the in-app preview both call the same `buildDigest()` in
+[`src/lib/digest.ts`](./src/lib/digest.ts), so what students see on the
+dashboard is exactly what arrives.
 
 ### Connect Google Classroom (read-only import)
 
@@ -113,12 +177,14 @@ Site configuration → Environment variables.
 ## Project structure
 
 ```
-supabase/        schema.sql + seed.sql
+supabase/        schema.sql, seed.sql, storage.sql (file bucket), rls-auth.sql,
+                 cron.sql (digest schedule), functions/weekly-digest/
 src/
-  lib/           supabase client, googleClassroom, types, dates, subject colors, repository
+  lib/           supabase client, auth, storage, googleClassroom, types, dates, ical,
+                 reminders, quizBank, digest, subject colors, repository
   context/       AppContext — data loading + current-user switcher
   components/    AssignmentCard, Calendar (assignments + personal events)
-  pages/         Dashboard, CoursesPage, ImportClassroom, Discussions (global hub),
+  pages/         SignIn, Dashboard, CoursesPage, ImportClassroom, Discussions (global hub),
                  Feed, CalendarPage, ClassPicker (student), TeacherClasses (teacher)
   pages/course/  CourseLayout + tabs: Home, Announcements, Assignments,
                  AssignmentDetail, Discussions, Quizzes (practice), QuizTake,
@@ -129,7 +195,14 @@ src/
 
 Grading stays out of scope — PowerSchool remains the system of record.
 
-- **Phase 2:** real login (Supabase Auth / Google), real file uploads (Supabase
-  Storage), due-date reminders/notifications, practice-quiz question banks
-- **Phase 3:** export to Google/Apple Calendar (iCal), parent/observer accounts,
-  richer counselor scheduling (availability slots, student-requested meetings)
+Shipped since the first version: due-date reminders, personal done checkboxes,
+iCal export, bulk and repeating assignment entry, counselor meeting requests and
+bookable availability, parent/guardian accounts, real file uploads, magic-link
+sign-in, class question banks, and the weekly email digest.
+
+Nothing on the original roadmap is outstanding. Ideas that would come next:
+
+- Teacher-side view of who's falling behind — deliberately not built yet, since
+  the personal checklist is private on purpose and this would change that
+- Push notifications on phones (the browser reminders only fire with a tab open)
+- A school-wide calendar for events that aren't tied to one class

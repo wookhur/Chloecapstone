@@ -14,15 +14,16 @@ import { subjectColor } from '../lib/subjectColor';
 const TIMEFRAMES: Timeframe[] = ['today', 'week', 'month', 'year', 'upcoming'];
 
 export default function Feed() {
-  const { currentUser, assignments, classById, myClassIds } = useApp();
+  const { currentUser, assignments, classById, myClassIds, isDone } = useApp();
   const [timeframe, setTimeframe] = useState<Timeframe>('week');
   const [rawClassFilter, setClassFilter] = useState<string>('all');
+  const [hideDone, setHideDone] = useState(false);
 
   // Switching users (or dropping a class) must not leave a filter pinned to a
   // course you're no longer in — that reads as "nothing due".
   const classFilter = myClassIds.includes(rawClassFilter) ? rawClassFilter : 'all';
 
-  const filtered = useMemo(() => {
+  const inScope = useMemo(() => {
     const classSet = new Set(myClassIds);
     return assignments
       .filter((a) => classSet.has(a.class_id))
@@ -30,6 +31,12 @@ export default function Feed() {
       .filter((a) => inTimeframe(a.due_date, timeframe))
       .sort((a, b) => parseISO(a.due_date).getTime() - parseISO(b.due_date).getTime());
   }, [assignments, myClassIds, classFilter, timeframe]);
+
+  const doneCount = useMemo(() => inScope.filter((a) => isDone(a.id)).length, [inScope, isDone]);
+  const filtered = useMemo(
+    () => (hideDone ? inScope.filter((a) => !isDone(a.id)) : inScope),
+    [inScope, hideDone, isDone],
+  );
 
   // Group by due date for readable sections.
   const groups = useMemo(() => {
@@ -104,8 +111,24 @@ export default function Feed() {
             </button>
           ))}
         </div>
+        {isStudent && inScope.length > 0 && (
+          <div className="progress-row">
+            <span className="meta">
+              {doneCount} of {inScope.length} done
+            </span>
+            <label className="inline meta" style={{ gap: '0.35rem' }}>
+              <input
+                type="checkbox"
+                checked={hideDone}
+                onChange={(e) => setHideDone(e.target.checked)}
+              />
+              Hide done
+            </label>
+          </div>
+        )}
         <select
           className="select"
+          aria-label="Filter by class"
           value={classFilter}
           onChange={(e) => setClassFilter(e.target.value)}
         >

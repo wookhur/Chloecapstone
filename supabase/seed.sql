@@ -9,17 +9,21 @@
 -- ============================================================================
 
 -- People --------------------------------------------------------------------
-insert into profiles (id, name, role, grade) values
-  ('00000000-0000-0000-0000-0000000000d1', 'Ms. Anderson', 'teacher', null),
-  ('00000000-0000-0000-0000-0000000000d2', 'Mr. Brooks',   'teacher', null),
-  ('00000000-0000-0000-0000-0000000000d3', 'Dr. Chen',     'teacher', null),
-  ('00000000-0000-0000-0000-0000000000d4', 'Sr. Diaz',     'teacher', null),
-  ('00000000-0000-0000-0000-0000000000e1', 'Mina (Student)', 'student', 10),
-  ('00000000-0000-0000-0000-0000000000e2', 'Jay (Student)',  'student', 11),
-  ('00000000-0000-0000-0000-0000000000e3', 'Leo (Student)',  'student', 10),
-  ('00000000-0000-0000-0000-0000000000e4', 'Zoe (Student)',  'student', 10),
-  ('00000000-0000-0000-0000-0000000000b1', 'Ms. Rivera (Counselor)', 'counselor', null),
-  ('00000000-0000-0000-0000-0000000000a1', 'School Office', 'admin', null);
+-- Emails are what sign-in matches on. Replace these with real school
+-- addresses before a pilot; @school.example is reserved for examples and can
+-- never receive a magic link.
+insert into profiles (id, name, email, role, grade) values
+  ('00000000-0000-0000-0000-0000000000d1', 'Ms. Anderson', 'anderson@school.example', 'teacher', null),
+  ('00000000-0000-0000-0000-0000000000d2', 'Mr. Brooks',   'brooks@school.example',   'teacher', null),
+  ('00000000-0000-0000-0000-0000000000d3', 'Dr. Chen',     'chen@school.example',     'teacher', null),
+  ('00000000-0000-0000-0000-0000000000d4', 'Sr. Diaz',     'diaz@school.example',     'teacher', null),
+  ('00000000-0000-0000-0000-0000000000e1', 'Mina (Student)', 'mina@school.example', 'student', 10),
+  ('00000000-0000-0000-0000-0000000000e2', 'Jay (Student)',  'jay@school.example',  'student', 11),
+  ('00000000-0000-0000-0000-0000000000e3', 'Leo (Student)',  'leo@school.example',  'student', 10),
+  ('00000000-0000-0000-0000-0000000000e4', 'Zoe (Student)',  'zoe@school.example',  'student', 10),
+  ('00000000-0000-0000-0000-0000000000b1', 'Ms. Rivera (Counselor)', 'rivera@school.example', 'counselor', null),
+  ('00000000-0000-0000-0000-0000000000f1', 'Mrs. Kim (Parent)', 'kim.family@school.example', 'parent', null),
+  ('00000000-0000-0000-0000-0000000000a1', 'School Office', 'office@school.example', 'admin', null);
 
 -- Class catalog -------------------------------------------------------------
 insert into classes (id, name, subject, grade_level, teacher_id, period, room, school_year) values
@@ -49,6 +53,10 @@ insert into enrollments (student_id, class_id) values
   ('00000000-0000-0000-0000-0000000000e2', '00000000-0000-0000-0000-0000000000c4'),
   ('00000000-0000-0000-0000-0000000000e2', '00000000-0000-0000-0000-0000000000c6');
 
+-- Guardian links --------------------------------------------------------------
+insert into guardianships (parent_id, student_id) values
+  ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-0000000000e1');
+
 -- Assignments (due dates relative to today so filters show content) ----------
 insert into assignments (id, class_id, title, description, assigned_date, due_date, type, link, created_by) values
   ('00000000-0000-0000-0000-00000000ab01', '00000000-0000-0000-0000-0000000000c1', 'Quadratics worksheet §4.3', 'Problems 1–20, show your work.', current_date - 2, current_date,      'homework', null, '00000000-0000-0000-0000-0000000000d1'),
@@ -67,6 +75,14 @@ insert into assignments (id, class_id, title, description, assigned_date, due_da
   ('00000000-0000-0000-0000-00000000ab13', '00000000-0000-0000-0000-0000000000c3', 'Microscope lab worksheet', 'Complete during lab.', current_date - 9, current_date - 4, 'homework', null, '00000000-0000-0000-0000-0000000000d3'),
   ('00000000-0000-0000-0000-00000000ab14', '00000000-0000-0000-0000-0000000000c5', 'Reading log — weeks 1–2', null, current_date - 12, current_date - 5, 'homework', null, '00000000-0000-0000-0000-0000000000d2');
 
+-- A few things students have already ticked off their own lists ---------------
+insert into completions (assignment_id, student_id, completed_at) values
+  ('00000000-0000-0000-0000-00000000ab11', '00000000-0000-0000-0000-0000000000e1', now() - interval '7 days'),
+  ('00000000-0000-0000-0000-00000000ab12', '00000000-0000-0000-0000-0000000000e1', now() - interval '8 days'),
+  ('00000000-0000-0000-0000-00000000ab13', '00000000-0000-0000-0000-0000000000e1', now() - interval '5 days'),
+  ('00000000-0000-0000-0000-00000000ab03', '00000000-0000-0000-0000-0000000000e1', now() - interval '2 hours'),
+  ('00000000-0000-0000-0000-00000000ab11', '00000000-0000-0000-0000-0000000000e3', now() - interval '6 days');
+
 -- Practice quizzes (Quizlet-style, made by students) --------------------------
 insert into practice_quizzes (id, class_id, author_id, title, description, created_at) values
   ('00000000-0000-0000-0000-00000000fb01', '00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000e1', 'Quadratics self-check', 'Made this while studying for Unit 4 — good luck!', now() - interval '2 days'),
@@ -82,6 +98,9 @@ insert into practice_questions (quiz_id, position, question, choices, correct_in
   ('00000000-0000-0000-0000-00000000fb02', 1, 'Factor: x² − 9', array['(x − 3)(x − 3)', '(x + 3)(x − 3)', '(x + 9)(x − 1)', 'prime'], 1),
   ('00000000-0000-0000-0000-00000000fb02', 2, 'Factor: x² + 5x + 6', array['(x + 2)(x + 3)', '(x + 1)(x + 6)', '(x − 2)(x − 3)', '(x + 5)(x + 1)'], 0),
   ('00000000-0000-0000-0000-00000000fb02', 3, 'Factor: x² − 4x', array['x(x − 4)', '(x − 2)(x + 2)', 'x(x + 4)', '4(x − 1)'], 0),
+  -- Same card as fb01's #2: two students wrote it independently, which is why
+  -- the class bank de-duplicates before a study round.
+  ('00000000-0000-0000-0000-00000000fb02', 4, 'The discriminant of ax² + bx + c is…', array['b² − 4ac', '2ac − b', 'b² + 4ac', 'ac − b²'], 0),
   ('00000000-0000-0000-0000-00000000fb03', 1, 'Which organelle makes ATP?', array['Nucleus', 'Ribosome', 'Mitochondrion', 'Vacuole'], 2),
   ('00000000-0000-0000-0000-00000000fb03', 2, 'Where are proteins built?', array['Ribosome', 'Lysosome', 'Chloroplast', 'Cell wall'], 0),
   ('00000000-0000-0000-0000-00000000fb03', 3, 'Photosynthesis happens in the…', array['Mitochondrion', 'Chloroplast', 'Nucleus', 'Membrane'], 1),
@@ -121,6 +140,19 @@ insert into files (class_id, name, size_kb, uploaded_by) values
   ('00000000-0000-0000-0000-0000000000c3', 'osmosis-lab-handout.pdf', 415, '00000000-0000-0000-0000-0000000000d3'),
   ('00000000-0000-0000-0000-0000000000c3', 'cell-diagram-labeled.png', 1024, '00000000-0000-0000-0000-0000000000d3'),
   ('00000000-0000-0000-0000-0000000000c5', 'giver-discussion-questions.docx', 88, '00000000-0000-0000-0000-0000000000d2');
+
+-- Meeting requests waiting on the counselor ----------------------------------
+-- Times Ms. Rivera has posted as free. One is already taken, so the console
+-- shows both states without anyone having to click first.
+insert into counselor_slots (id, counselor_id, date, start_time, location, booked_by) values
+  ('00000000-0000-0000-0000-00000000cc01', '00000000-0000-0000-0000-0000000000b1', current_date + 1, 'Lunch A (11:15)',  'Room 102', null),
+  ('00000000-0000-0000-0000-00000000cc02', '00000000-0000-0000-0000-0000000000b1', current_date + 1, 'Lunch B (11:55)',  'Room 102', '00000000-0000-0000-0000-0000000000e3'),
+  ('00000000-0000-0000-0000-00000000cc03', '00000000-0000-0000-0000-0000000000b1', current_date + 3, 'Period 5 (1:30)',  'Room 102', null),
+  ('00000000-0000-0000-0000-00000000cc04', '00000000-0000-0000-0000-0000000000b1', current_date + 4, 'Lunch A (11:15)',  'Room 102', null);
+
+insert into meeting_requests (student_id, counselor_id, reason, preferred, status, slot_id, created_at) values
+  ('00000000-0000-0000-0000-0000000000e4', '00000000-0000-0000-0000-0000000000b1', 'Questions about signing up for AP classes next year', 'Any lunch period this week', 'pending', null, now() - interval '1 day'),
+  ('00000000-0000-0000-0000-0000000000e3', '00000000-0000-0000-0000-0000000000b1', 'Need to talk about my schedule', null, 'accepted', '00000000-0000-0000-0000-00000000cc02', now() - interval '6 days');
 
 -- Calendar events: students' own entries + counseling meetings Ms. Rivera set ---
 insert into calendar_events (owner_id, title, date, category, note, created_by) values
