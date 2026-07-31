@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, supabase } from './supabase';
+import { removeStoredFile } from './storage';
 import {
   demoAnnouncements,
   demoAssignments,
@@ -313,11 +314,17 @@ export async function deletePracticeQuestion(id: string): Promise<void> {
   if (error) throw error;
 }
 
-// --- Files (metadata only for now) --------------------------------------------
+// --- Files (row here, bytes in Storage — see lib/storage.ts) ------------------
 export const createFile = (f: Omit<CourseFile, 'id' | 'created_at'>) =>
   insertRow<CourseFile>(mem.files, 'files', f);
 
-export async function deleteFile(id: string): Promise<void> {
+/**
+ * Removes the stored bytes first. If that fails we stop and keep the row, so
+ * the file stays listed and openable — the alternative is an invisible object
+ * sitting in the bucket that nobody can find to clean up.
+ */
+export async function deleteFile(id: string, storagePath: string | null): Promise<void> {
+  await removeStoredFile(storagePath);
   if (!isSupabaseConfigured) {
     mem.files = mem.files.filter((f) => f.id !== id);
     return;

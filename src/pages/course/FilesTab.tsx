@@ -1,8 +1,17 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import * as repo from '../../lib/repository';
-import type { ClassInfo } from '../../lib/types';
+import type { ClassInfo, CourseFile } from '../../lib/types';
 import { displayName } from '../../lib/names';
+import {
+  MAX_UPLOAD_MB,
+  downloadUrl,
+  formatSize,
+  isDownloadable,
+  sizeInKb,
+  uploadFile,
+  uploadProblem,
+} from '../../lib/storage';
 
 const FILE_ICONS: [RegExp, string][] = [
   [/\.pdf$/i, '📕'],
@@ -14,55 +23,99 @@ const FILE_ICONS: [RegExp, string][] = [
 
 const iconFor = (name: string) => FILE_ICONS.find(([re]) => re.test(name))?.[1] ?? '📎';
 
-const formatSize = (kb: number) => (kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`);
-
-/** Canvas Files tab — metadata-only for now (storage comes in a later phase). */
+/**
+ * Course handouts. The teacher picks a real file; the bytes go to Storage and
+ * students open them from here — the point being that the worksheet lives next
+ * to the due date instead of in an email thread from three weeks ago.
+ */
 export default function FilesTab({ cls }: { cls: ClassInfo }) {
   const { currentUser, files, profileById, refresh } = useApp();
-  const [name, setName] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
 
   const isCourseTeacher = currentUser?.id === cls.teacher_id;
   const list = files
     .filter((f) => f.class_id === cls.id)
     .sort((a, b) => b.created_at.localeCompare(a.created_at));
 
-  const add = async () => {
-    if (!currentUser || !name.trim()) return;
+  const onPick = async (picked: FileList | null) => {
+    const file = picked?.[0];
+    if (!file || !currentUser) return;
+
+    const why = uploadProblem(file);
+    if (why) {
+      setProblem(why);
+      if (inputRef.current) inputRef.current.value = '';
+      return;
+    }
+
+    setProblem(null);
     setBusy(true);
     try {
+      // Bytes first: a row pointing at nothing is worse than no row at all.
+      const path = await uploadFile(cls.id, file);
       await repo.createFile({
         class_id: cls.id,
-        name: name.trim(),
-        size_kb: Math.max(1, Math.round(name.length * 13.7)), // placeholder size
+        name: file.name,
+        size_kb: sizeInKb(file.size),
+        storage_path: path,
         uploaded_by: currentUser.id,
       });
-      setName('');
       await refresh();
+    } catch (err) {
+      setProblem(err instanceof Error ? err.message : String(err));
     } finally {
       setBusy(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  const open = async (f: CourseFile) => {
+    try {
+      const url = await downloadUrl(f.storage_path!);
+      if (url) window.open(url, '_blank', 'noopener');
+      else setProblem(`${f.name} is no longer in storage.`);
+    } catch (err) {
+      setProblem(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const remove = async (f: CourseFile) => {
+    setProblem(null);
+    try {
+      await repo.deleteFile(f.id, f.storage_path);
+      await refresh();
+    } catch (err) {
+      setProblem(err instanceof Error ? err.message : String(err));
     }
   };
 
   return (
     <div>
-      <h2 className="section-title" style={{ marginBottom: "1rem" }}>Files</h2>
+      <h2 className="section-title" style={{ marginBottom: '1rem' }}>Files</h2>
 
       {isCourseTeacher && (
         <div className="card subtle" style={{ marginBottom: '1rem' }}>
-          <div className="inline" style={{ gap: '0.6rem' }}>
-            <div className="field" style={{ flex: 1, marginBottom: 0 }}>
-              <input
-                value={name}
-                aria-label="File name"
-                placeholder="filename.pdf — real uploads come with storage in a later phase"
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <button className="btn small" disabled={!name.trim() || busy} onClick={add}>
-              {busy ? 'Adding…' : 'Add file'}
-            </button>
-          </div>
+          <label className="field" style={{ marginBottom: 0 }}>
+            <span>Upload a handout</span>
+            <input
+              ref={inputRef}
+              type="file"
+              disabled={busy}
+              onChange={(e) => onPick(e.target.files)}
+            />
+          </label>
+          <p className="meta" style={{ margin: '0.5rem 0 0' }}>
+            {busy ? 'Uploading…' : `Up to ${MAX_UPLOAD_MB} MB. Everyone in ${cls.name} can open it.`}
+          </p>
+        </div>
+      )}
+
+      {problem && (
+        <div className="banner error" role="alert" style={{ marginBottom: '1rem' }}>
+          <span className="dot" />
+          {problem}
         </div>
       )}
 
@@ -84,7 +137,17 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
             {list.map((f) => (
               <tr key={f.id}>
                 <td>
-                  {iconFor(f.name)} <strong>{f.name}</strong>
+                  {iconFor(f.name)}{' '}
+                  {isDownloadable(f.storage_path) ? (
+                    <button className="linklike" onClick={() => open(f)}>
+                      <strong>{f.name}</strong>
+                    </button>
+                  ) : (
+                    <>
+                      <strong>{f.name}</strong>
+                      <span className="meta"> · sample file, nothing to open</span>
+                    </>
+                  )}
                 </td>
                 <td>{formatSize(f.size_kb)}</td>
                 <td>{displayName(profileById(f.uploaded_by))}</td>
@@ -98,10 +161,8 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
                   <td>
                     <button
                       className="btn danger small"
-                      onClick={async () => {
-                        await repo.deleteFile(f.id);
-                        await refresh();
-                      }}
+                      aria-label={`Delete ${f.name}`}
+                      onClick={() => remove(f)}
                     >
                       Delete
                     </button>

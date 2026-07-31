@@ -129,12 +129,17 @@ export interface PracticeQuestion {
   correct_index: number;
 }
 
-/** File metadata only — actual storage comes in a later phase. */
+/**
+ * A course handout. The row is metadata; the bytes live in Supabase Storage at
+ * `storage_path`. Rows created before storage existed have no path, so they
+ * show in the list but can't be opened.
+ */
 export interface CourseFile {
   id: string;
   class_id: string;
   name: string;
   size_kb: number;
+  storage_path: string | null;
   uploaded_by: string;
   created_at: string;
 }

@@ -149,14 +149,18 @@ create table practice_questions (
 create index practice_questions_quiz_idx on practice_questions (quiz_id);
 create unique index practice_questions_order_idx on practice_questions (quiz_id, position);
 
--- Course files (metadata only; storage buckets come in a later phase) ----------------
+-- Course files. This table is the metadata; the bytes live in the Storage
+-- bucket set up by storage.sql, at storage_path. Null means there is no object
+-- behind the row (the sample rows in seed.sql), and the app won't offer it for
+-- download.
 create table files (
-  id          uuid primary key default gen_random_uuid(),
-  class_id    uuid not null references classes (id) on delete cascade,
-  name        text not null,
-  size_kb     int  not null default 0,
-  uploaded_by uuid not null references profiles (id) on delete cascade,
-  created_at  timestamptz not null default now()
+  id           uuid primary key default gen_random_uuid(),
+  class_id     uuid not null references classes (id) on delete cascade,
+  name         text not null,
+  size_kb      int  not null default 0,
+  storage_path text unique,
+  uploaded_by  uuid not null references profiles (id) on delete cascade,
+  created_at   timestamptz not null default now()
 );
 create index files_class_idx on files (class_id);
 

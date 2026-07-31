@@ -223,6 +223,11 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .btn.danger { background: var(--danger); color: #fff; }
 .btn.small { padding: 0.35rem 0.65rem; font-size: var(--text-sm); }
 
+/* Reads as a link, behaves as a button — used where the click runs code (like
+   fetching a signed download URL) rather than following an href. */
+.linklike { color: var(--brand); padding: 0; text-align: left; }
+.linklike:hover { text-decoration: underline; }
+
 /* Toggles ------------------------------------------------------------------*/
 .toggle-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .toggle {

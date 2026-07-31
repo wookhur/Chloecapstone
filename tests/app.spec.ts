@@ -495,3 +495,65 @@ test.describe('parent accounts', () => {
     await expect(row.locator('input')).toHaveCount(0);
   });
 });
+
+test.describe('course files', () => {
+  test('a teacher uploads a real file and it can be opened again', async ({ page }) => {
+    await page.goto('/courses/c-alg2/files');
+    await signInAs(page, USERS.anderson);
+
+    await page.setInputFiles('input[type="file"]', {
+      name: 'unit5-review.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('%PDF-1.4 pretend worksheet'.repeat(200)),
+    });
+
+    const row = page.locator('tr', { hasText: 'unit5-review.pdf' });
+    await expect(row).toBeVisible();
+    await expect(row).toContainText('5 KB');
+    await expect(row).toContainText('Ms. Anderson');
+
+    // Uploaded files are openable; the seeded metadata-only rows are not.
+    await expect(row.locator('button.linklike')).toBeVisible();
+    const seeded = page.locator('tr', { hasText: 'unit4-formula-sheet.pdf' });
+    await expect(seeded.locator('button.linklike')).toHaveCount(0);
+  });
+
+  test('an oversized file is refused with a reason, not a silent failure', async ({ page }) => {
+    await page.goto('/courses/c-alg2/files');
+    await signInAs(page, USERS.anderson);
+
+    await page.setInputFiles('input[type="file"]', {
+      name: 'whole-textbook.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.alloc(21 * 1024 * 1024, 1),
+    });
+
+    await expect(page.locator('.banner.error')).toContainText('The limit is 20 MB');
+    await expect(page.locator('tr', { hasText: 'whole-textbook.pdf' })).toHaveCount(0);
+  });
+
+  test('deleting removes the file from the list', async ({ page }) => {
+    await page.goto('/courses/c-alg2/files');
+    await signInAs(page, USERS.anderson);
+
+    await page.setInputFiles('input[type="file"]', {
+      name: 'scratch.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('temporary'),
+    });
+    const row = page.locator('tr', { hasText: 'scratch.txt' });
+    await expect(row).toBeVisible();
+
+    await row.locator('button:has-text("Delete")').click();
+    await expect(row).toHaveCount(0);
+  });
+
+  test('students can read the file list but not upload to it', async ({ page }) => {
+    await page.goto('/courses/c-alg2/files');
+    await signInAs(page, USERS.mina);
+
+    await expect(page.locator('input[type="file"]')).toHaveCount(0);
+    await expect(page.locator('button:has-text("Delete")')).toHaveCount(0);
+    await expect(page.locator('tr', { hasText: 'unit4-formula-sheet.pdf' })).toBeVisible();
+  });
+});

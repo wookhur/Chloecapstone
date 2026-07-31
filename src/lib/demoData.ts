@@ -167,11 +167,11 @@ export const demoPracticeQuestions: PracticeQuestion[] = [
 ];
 
 export const demoFiles: CourseFile[] = [
-  { id: 'f1', class_id: 'c-alg2', name: 'unit4-formula-sheet.pdf', size_kb: 182, uploaded_by: 't-anders', created_at: ts(-5) },
-  { id: 'f2', class_id: 'c-alg2', name: 'ch4-practice-answers.pdf', size_kb: 240, uploaded_by: 't-anders', created_at: ts(-2) },
-  { id: 'f3', class_id: 'c-bio', name: 'osmosis-lab-handout.pdf', size_kb: 415, uploaded_by: 't-chen', created_at: ts(-3) },
-  { id: 'f4', class_id: 'c-bio', name: 'cell-diagram-labeled.png', size_kb: 1024, uploaded_by: 't-chen', created_at: ts(-9) },
-  { id: 'f5', class_id: 'c-eng', name: 'giver-discussion-questions.docx', size_kb: 88, uploaded_by: 't-brooks', created_at: ts(-4) },
+  { id: 'f1', class_id: 'c-alg2', name: 'unit4-formula-sheet.pdf', size_kb: 182, storage_path: null, uploaded_by: 't-anders', created_at: ts(-5) },
+  { id: 'f2', class_id: 'c-alg2', name: 'ch4-practice-answers.pdf', size_kb: 240, storage_path: null, uploaded_by: 't-anders', created_at: ts(-2) },
+  { id: 'f3', class_id: 'c-bio', name: 'osmosis-lab-handout.pdf', size_kb: 415, storage_path: null, uploaded_by: 't-chen', created_at: ts(-3) },
+  { id: 'f4', class_id: 'c-bio', name: 'cell-diagram-labeled.png', size_kb: 1024, storage_path: null, uploaded_by: 't-chen', created_at: ts(-9) },
+  { id: 'f5', class_id: 'c-eng', name: 'giver-discussion-questions.docx', size_kb: 88, storage_path: null, uploaded_by: 't-brooks', created_at: ts(-4) },
 ];
 
 // One request waiting on Ms. Rivera, so the counselor console has something to

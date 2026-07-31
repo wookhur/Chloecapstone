@@ -37,7 +37,7 @@ emailing dates around. The student sees who scheduled it and can't delete it.
 | Discussions | Threaded topics — anyone can start one and reply |
 | Practice Quizzes | **Quizlet-style, student-made** — any student builds a multiple-choice quiz; classmates practice with instant feedback, a score, and unlimited retries (never graded) |
 | People | Course roster |
-| Files | Course file list (metadata now; storage in a later phase) |
+| Files | Real file uploads — the teacher posts the handout (up to 20 MB) and students open it from the course, so the worksheet sits next to its due date |
 
 Assignments are informational (the school's system of record handles grades),
 so there's no online submission or grading here.
@@ -79,8 +79,10 @@ layout, dark mode, and keyboard/screen-reader accessibility.
 ### Connect Supabase (persistent data)
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In the dashboard **SQL Editor**, run [`supabase/schema.sql`](./supabase/schema.sql)
-   then [`supabase/seed.sql`](./supabase/seed.sql).
+2. In the dashboard **SQL Editor**, run [`supabase/schema.sql`](./supabase/schema.sql),
+   then [`supabase/seed.sql`](./supabase/seed.sql), then
+   [`supabase/storage.sql`](./supabase/storage.sql) (creates the private
+   `course-files` bucket that the Files tab uploads to).
 3. Copy your project URL and anon key into a local env file:
    ```bash
    cp .env.example .env.local
@@ -126,9 +128,10 @@ Site configuration → Environment variables.
 ## Project structure
 
 ```
-supabase/        schema.sql + seed.sql
+supabase/        schema.sql + seed.sql + storage.sql (file bucket)
 src/
-  lib/           supabase client, googleClassroom, types, dates, subject colors, repository
+  lib/           supabase client, storage, googleClassroom, types, dates, ical,
+                 reminders, subject colors, repository
   context/       AppContext — data loading + current-user switcher
   components/    AssignmentCard, Calendar (assignments + personal events)
   pages/         Dashboard, CoursesPage, ImportClassroom, Discussions (global hub),
@@ -142,7 +145,10 @@ src/
 
 Grading stays out of scope — PowerSchool remains the system of record.
 
-- **Phase 2:** real login (Supabase Auth / Google), real file uploads (Supabase
-  Storage), due-date reminders/notifications, practice-quiz question banks
-- **Phase 3:** export to Google/Apple Calendar (iCal), parent/observer accounts,
-  richer counselor scheduling (availability slots, student-requested meetings)
+Shipped since the first version: due-date reminders, personal done checkboxes,
+iCal export, bulk and repeating assignment entry, student-requested counselor
+meetings, parent/guardian accounts, and real file uploads.
+
+- **Next:** real login (Supabase Auth), which replaces the demo account switcher
+- **Later:** practice-quiz question banks, counselor availability slots,
+  emailed weekly digests (needs a scheduled server job, not just the browser)
