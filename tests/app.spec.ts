@@ -309,3 +309,42 @@ test.describe('due-soon reminders', () => {
     await expect(page.locator('.due-soon')).toHaveCount(0);
   });
 });
+
+test.describe('calendar export', () => {
+  test('downloads a valid .ics containing the student\'s dates', async ({ page }) => {
+    await page.goto('/calendar');
+    await signInAs(page, USERS.mina);
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.click('button:has-text("Export")'),
+    ]);
+    expect(download.suggestedFilename()).toBe('homework-hub.ics');
+
+    const stream = await download.createReadStream();
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) chunks.push(chunk as Buffer);
+    const ics = Buffer.concat(chunks).toString('utf8');
+
+    // Structure calendar apps require.
+    expect(ics.startsWith('BEGIN:VCALENDAR')).toBe(true);
+    expect(ics.trimEnd().endsWith('END:VCALENDAR')).toBe(true);
+    expect(ics).toContain('VERSION:2.0');
+    expect(ics.includes('\r\n')).toBe(true);
+
+    // Every event opened must be closed.
+    const opens = (ics.match(/BEGIN:VEVENT/g) ?? []).length;
+    const closes = (ics.match(/END:VEVENT/g) ?? []).length;
+    expect(opens).toBe(closes);
+    expect(opens).toBeGreaterThan(0);
+
+    // Content: course work and a personal event, with all-day dates.
+    expect(ics).toContain('Quadratics worksheet');
+    expect(ics).toContain('Dentist appointment');
+    expect(ics).toMatch(/DTSTART;VALUE=DATE:\d{8}/);
+
+    // No line may exceed the 75-octet limit once folded.
+    const tooLong = ics.split('\r\n').filter((l) => l.length > 75);
+    expect(tooLong, tooLong.join(' | ')).toEqual([]);
+  });
+});

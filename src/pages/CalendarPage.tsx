@@ -7,6 +7,7 @@ import * as repo from '../lib/repository';
 import { today } from '../lib/dates';
 import { subjectColor } from '../lib/subjectColor';
 import { displayName } from '../lib/names';
+import { buildICS, downloadICS } from '../lib/ical';
 import {
   CALENDAR_CATEGORIES,
   type Assignment,
@@ -43,6 +44,19 @@ export default function CalendarPage() {
     .filter((c): c is NonNullable<typeof c> => Boolean(c))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  // A snapshot the student can open in the calendar app they already use.
+  const exportCalendar = () => {
+    downloadICS(
+      buildICS({
+        assignments: mine,
+        events: myEvents,
+        classById,
+        calendarName: `Homework Hub — ${displayName(currentUser)}`,
+      }),
+      'homework-hub.ics',
+    );
+  };
+
   const openAddForm = (iso: string) => {
     setFormDate(iso);
     setShowForm(true);
@@ -58,15 +72,20 @@ export default function CalendarPage() {
             <h1>Calendar</h1>
             <p>Your course assignments plus anything you add yourself.</p>
           </div>
-          <button
-            className={`btn small ${showForm ? "secondary" : ""}`}
-            onClick={() => {
-              setFormDate(today());
-              setShowForm((v) => !v);
-            }}
-          >
-            {showForm ? 'Cancel' : '+ Add event'}
-          </button>
+          <div className="inline" style={{ gap: '0.4rem' }}>
+            <button className="btn secondary small" onClick={exportCalendar}>
+              📤 Export (.ics)
+            </button>
+            <button
+              className={`btn small ${showForm ? "secondary" : ""}`}
+              onClick={() => {
+                setFormDate(today());
+                setShowForm((v) => !v);
+              }}
+            >
+              {showForm ? 'Cancel' : '+ Add event'}
+            </button>
+          </div>
         </div>
       </div>
 
