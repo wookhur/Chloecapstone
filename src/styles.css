@@ -624,3 +624,14 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* Due-soon reminders -------------------------------------------------------*/
 .due-soon { margin-bottom: var(--space-5); }
 .due-soon .list-row { padding: 0.6rem 0.9rem; }
+
+/* Bulk assignment entry ----------------------------------------------------*/
+.bulk-preview {
+  margin-top: var(--space-3); padding: var(--space-2) var(--space-3);
+  background: var(--surface-2); border-radius: var(--radius-sm);
+}
+.bulk-row {
+  display: flex; justify-content: space-between; gap: var(--space-3);
+  padding: 0.2rem 0; font-size: var(--text-sm);
+}
+.bulk-row.has-error { color: var(--danger); }

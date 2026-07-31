@@ -348,3 +348,58 @@ test.describe('calendar export', () => {
     expect(tooLong, tooLong.join(' | ')).toEqual([]);
   });
 });
+
+test.describe('bulk assignment entry', () => {
+  test('a pasted list posts every valid row and flags the bad ones', async ({ page }) => {
+    await page.goto('/courses/c-alg2/assignments');
+    await signInAs(page, USERS.anderson);
+    await page.click('button:has-text("Add several")');
+
+    await page.fill(
+      '#bulk-paste',
+      [
+        'Chapter 7 worksheet, 2026-11-06',
+        'Chapter 7 quiz, 2026-11-13',
+        'Broken row with no date',
+      ].join('\n'),
+    );
+
+    // The preview separates what will post from what needs fixing.
+    await expect(page.locator('.bulk-preview')).toContainText('2 ready');
+    await expect(page.locator('.bulk-preview')).toContainText('1 need fixing');
+    await expect(page.locator('.bulk-row.has-error')).toHaveCount(1);
+
+    await page.click('button:has-text("Post 2 assignments")');
+    await expect(page.locator('.card')).toContainText('Posted 2 assignments');
+    await expect(page.locator('.content')).toContainText('Chapter 7 worksheet');
+    await expect(page.locator('.content')).toContainText('Chapter 7 quiz');
+    // The malformed line must not have been posted.
+    await expect(page.locator('.content')).not.toContainText('Broken row');
+  });
+
+  test('a weekly repeat creates one dated assignment per week', async ({ page }) => {
+    await page.goto('/courses/c-alg2/assignments');
+    await signInAs(page, USERS.anderson);
+    await page.click('button:has-text("Add several")');
+    await page.click('.toggle:has-text("Repeats weekly")');
+
+    await page.fill('#repeat-title', 'Weekly vocab quiz');
+    await page.selectOption('#repeat-day', '5'); // Friday
+    await page.fill('#repeat-from', '2026-11-02'); // Monday
+    await page.fill('#repeat-until', '2026-11-30');
+
+    // Fridays in that window: Nov 6, 13, 20, 27.
+    await expect(page.locator('.bulk-preview')).toContainText('Creates 4 Fridays');
+    await page.click('button:has-text("Post 4 dates")');
+
+    await expect(page.locator('.card')).toContainText('Posted 4 assignments');
+    await expect(page.locator('.content')).toContainText('Weekly vocab quiz 1');
+    await expect(page.locator('.content')).toContainText('Weekly vocab quiz 4');
+  });
+
+  test('students never see the bulk tools', async ({ page }) => {
+    await page.goto('/courses/c-alg2/assignments');
+    await signInAs(page, USERS.mina);
+    await expect(page.locator('button:has-text("Add several")')).toHaveCount(0);
+  });
+});

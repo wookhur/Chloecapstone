@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { dueLabel, today } from '../../lib/dates';
 import * as repo from '../../lib/repository';
 import DoneCheckbox from '../../components/DoneCheckbox';
+import BulkAssignments from './BulkAssignments';
 import {
   ASSIGNMENT_TYPES,
   type Assignment,
@@ -22,6 +23,7 @@ const TYPE_EMOJI: Record<Assignment['type'], string> = {
 export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
   const { currentUser, assignments, isDone, refresh } = useApp();
   const [showForm, setShowForm] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
 
   const isCourseTeacher = currentUser?.id === cls.teacher_id;
 
@@ -63,14 +65,30 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
       <div className="row-between" style={{ marginBottom: '1rem' }}>
         <h2 className="section-title">Assignments</h2>
         {isCourseTeacher && (
-          <button
-            className={`btn small ${showForm ? "secondary" : ""}`}
-            onClick={() => setShowForm((v) => !v)}
-          >
-            {showForm ? 'Cancel' : '+ Assignment'}
-          </button>
+          <div className="inline" style={{ gap: '0.4rem' }}>
+            <button
+              className={`btn secondary small ${showBulk ? "on" : ""}`}
+              onClick={() => { setShowBulk((v) => !v); setShowForm(false); }}
+            >
+              {showBulk ? 'Cancel' : '⚡ Add several'}
+            </button>
+            <button
+              className={`btn small ${showForm ? "secondary" : ""}`}
+              onClick={() => { setShowForm((v) => !v); setShowBulk(false); }}
+            >
+              {showForm ? 'Cancel' : '+ Assignment'}
+            </button>
+          </div>
         )}
       </div>
+
+      {showBulk && (
+        <BulkAssignments
+          cls={cls}
+          teacherId={currentUser!.id}
+          onDone={refresh}
+        />
+      )}
 
       {showForm && (
         <NewAssignmentForm

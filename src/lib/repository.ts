@@ -150,6 +150,28 @@ export const createClass = (cls: Omit<ClassInfo, 'id' | 'created_at'>) =>
 export const createAssignment = (a: Omit<Assignment, 'id' | 'created_at'>) =>
   insertRow<Assignment>(mem.assignments, 'assignments', a);
 
+/**
+ * Insert several assignments at once. Teachers plan a unit in one sitting, so a
+ * single round trip beats one request per row.
+ */
+export async function createAssignments(
+  rows: Omit<Assignment, 'id' | 'created_at'>[],
+): Promise<Assignment[]> {
+  if (rows.length === 0) return [];
+  if (!isSupabaseConfigured) {
+    const created = rows.map((r) => ({
+      ...r,
+      id: uuid(),
+      created_at: nowISO(),
+    })) as Assignment[];
+    mem.assignments.push(...created);
+    return created;
+  }
+  const { data, error } = await supabase!.from('assignments').insert(rows).select();
+  if (error) throw error;
+  return data as Assignment[];
+}
+
 export async function updateAssignment(
   id: string,
   patch: Partial<Assignment>,
