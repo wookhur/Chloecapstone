@@ -14,6 +14,7 @@ import {
   type CalendarEvent,
   type CalendarEventCategory,
 } from '../lib/types';
+import Icon, { type IconName } from '../components/Icon';
 
 export default function CalendarPage() {
   const { currentUser, assignments, calendarEvents, classById, myClassIds, refresh } = useApp();
@@ -199,7 +200,10 @@ function EventCard({
     <div className="card" style={{ borderLeft: `4px solid ${cat.color}` }}>
       <div className="row-between">
         <div>
-          <h3 style={{ margin: 0 }}>{cat.emoji} {event.title}</h3>
+          <h3 style={{ margin: 0 }} className="inline">
+            <Icon name={cat.icon as IconName} />
+            {event.title}
+          </h3>
           <p className="sub" style={{ marginTop: 2 }}>
             <span className="subject-chip">
               <span className="legend-dot" style={{ background: cat.color }} />
@@ -217,7 +221,7 @@ function EventCard({
       {event.note && <p className="sub" style={{ marginTop: '0.6rem' }}>{event.note}</p>}
       {scheduledByName && (
         <p className="meta" style={{ marginTop: '0.5rem' }}>
-          🧭 Scheduled by {scheduledByName}
+          <Icon name="compass" /> Scheduled by {scheduledByName}
         </p>
       )}
     </div>
@@ -276,7 +280,7 @@ aria-label="What is it?"             value={title}
           <label>Type</label>
           <select aria-label="Type" value={category} onChange={(e) => setCategory(e.target.value as CalendarEventCategory)}>
             {CALENDAR_CATEGORIES.filter((c) => c.key !== 'counseling').map((c) => (
-              <option key={c.key} value={c.key}>{c.emoji} {c.label}</option>
+              <option key={c.key} value={c.key}>{c.label}</option>
             ))}
           </select>
         </div>

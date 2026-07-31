@@ -5,6 +5,7 @@ import * as repo from '../../lib/repository';
 import type { ClassInfo, PracticeQuestion } from '../../lib/types';
 import { displayName, initial } from '../../lib/names';
 import { bankFor, cardKey, dedupe } from '../../lib/quizBank';
+import Icon from '../../components/Icon';
 
 /**
  * Quizlet-style practice quizzes. Any student (or the teacher) can create a
@@ -39,7 +40,7 @@ export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: 
       </div>
       <p className="sub" style={{ marginBottom: '1rem' }}>
         Made by students, for students. Create a quiz to help your classmates study,
-        or practice one below — it's not graded, so practice as much as you like. 📚
+        or practice one below — it's not graded, so practice as much as you like.
       </p>
 
       {/* One quiz is one person's twelve cards. The night before a test you
@@ -47,14 +48,14 @@ export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: 
       {bank.length > 0 && (
         <div className="card bank-card">
           <div>
-            <strong>🎴 Class question bank</strong>
+            <strong>Class question bank</strong>
             <p className="sub" style={{ margin: '2px 0 0' }}>
               {bank.length} card{bank.length === 1 ? '' : 's'} from every quiz in{' '}
               {cls.name}, shuffled together.
             </p>
           </div>
           <Link to="../quizzes/bank/practice" className="btn small">
-            ▶ Practice the bank
+            <Icon name="play" size="0.8em" /> Practice the bank
           </Link>
         </div>
       )}
@@ -94,7 +95,7 @@ export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: 
                 <div className="inline" style={{ gap: '0.4rem', marginTop: '0.75rem' }}>
                   {count > 0 ? (
                     <Link to={`../quizzes/${q.id}/practice`} className="btn small">
-                      ▶ Practice
+                      <Icon name="play" size="0.8em" /> Practice
                     </Link>
                   ) : (
                     <span className="chip">No cards yet</span>

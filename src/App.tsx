@@ -4,6 +4,7 @@ import { useApp } from './context/AppContext';
 import Dashboard from './pages/Dashboard';
 import Feed from './pages/Feed';
 import SignIn from './pages/SignIn';
+import Icon, { BrandMark, type IconName } from './components/Icon';
 
 // Everything past the two screens students open first is split out, so a phone
 // on school wifi downloads a fraction of the app up front.
@@ -17,21 +18,27 @@ const Counselor = lazy(() => import('./pages/Counselor'));
 const Family = lazy(() => import('./pages/Family'));
 const CourseLayout = lazy(() => import('./pages/course/CourseLayout'));
 
-const STUDENT_TEACHER_NAV = [
-  { to: '/dashboard', glyph: '🏠', label: 'Dashboard' },
-  { to: '/courses', glyph: '📚', label: 'Courses' },
-  { to: '/calendar', glyph: '🗓️', label: 'Calendar' },
-  { to: '/discussions', glyph: '💬', label: 'Discussions' },
-  { to: '/homework', glyph: '✅', label: 'To Do' },
+interface NavItem {
+  to: string;
+  glyph: IconName;
+  label: string;
+}
+
+const STUDENT_TEACHER_NAV: NavItem[] = [
+  { to: '/dashboard', glyph: 'home', label: 'Dashboard' },
+  { to: '/courses', glyph: 'courses', label: 'Courses' },
+  { to: '/calendar', glyph: 'calendar', label: 'Calendar' },
+  { to: '/discussions', glyph: 'discussions', label: 'Discussions' },
+  { to: '/homework', glyph: 'checklist', label: 'To Do' },
 ];
 
-const COUNSELOR_NAV = [
-  { to: '/counselor', glyph: '🧭', label: 'Counselor' },
-  { to: '/calendar', glyph: '🗓️', label: 'Calendar' },
+const COUNSELOR_NAV: NavItem[] = [
+  { to: '/counselor', glyph: 'compass', label: 'Counselor' },
+  { to: '/calendar', glyph: 'calendar', label: 'Calendar' },
 ];
 
 // Guardians get one read-only screen; nothing here is theirs to edit.
-const PARENT_NAV = [{ to: '/family', glyph: '👪', label: 'Family' }];
+const PARENT_NAV: NavItem[] = [{ to: '/family', glyph: 'family', label: 'Family' }];
 
 export default function App() {
   const {
@@ -79,7 +86,7 @@ export default function App() {
     <div className="app-shell rail-layout">
       <aside className="global-rail">
         <div className="rail-brand" title="Homework Hub">
-          🗓️
+          <BrandMark />
         </div>
         {nav.map((item) => (
           <NavLink
@@ -87,7 +94,7 @@ export default function App() {
             to={item.to}
             className={({ isActive }) => `rail-item ${isActive ? 'active' : ''}`}
           >
-            <span className="rail-glyph">{item.glyph}</span>
+            <span className="rail-glyph"><Icon name={item.glyph} size="1.3rem" /></span>
             <span className="rail-label">{item.label}</span>
           </NavLink>
         ))}
@@ -96,6 +103,7 @@ export default function App() {
       <div className="rail-main">
         <header className="topbar">
           <div className="brand">
+            <BrandMark size="20" />
             <span className="name">Homework Hub</span>
             <span className="chip" style={{ marginLeft: '0.5rem' }}>
               {currentUser?.role ?? '—'}

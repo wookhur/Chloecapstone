@@ -109,7 +109,7 @@ export default function RequestMeeting() {
   return (
     <section className="section">
       <div className="row-between" style={{ marginBottom: '0.6rem' }}>
-        <h2 className="section-title">🧭 Counselor</h2>
+        <h2 className="section-title">Counselor</h2>
         <button
           className={`btn small ${open ? 'secondary' : ''}`}
           onClick={() => setOpen((v) => !v)}

@@ -2,14 +2,8 @@ import { Link, useParams } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import DoneCheckbox from '../../components/DoneCheckbox';
 import { dueLabel, parseISO } from '../../lib/dates';
-import type { Assignment, ClassInfo } from '../../lib/types';
-
-const TYPE_EMOJI: Record<Assignment['type'], string> = {
-  homework: '📝',
-  quiz: '❓',
-  test: '📄',
-  project: '📦',
-};
+import type { ClassInfo } from '../../lib/types';
+import Icon, { ASSIGNMENT_ICON } from '../../components/Icon';
 
 /** Read-only assignment detail — this site tracks homework, it isn't a submission portal. */
 export default function AssignmentDetail({ cls }: { cls: ClassInfo }) {
@@ -30,7 +24,7 @@ export default function AssignmentDetail({ cls }: { cls: ClassInfo }) {
         ← All assignments
       </Link>
       <h2 style={{ margin: '0.5rem 0 0.25rem' }}>
-        {TYPE_EMOJI[assignment.type]} {assignment.title}
+        <Icon name={ASSIGNMENT_ICON[assignment.type]} /> {assignment.title}
       </h2>
       <p className="sub inline">
         <DoneCheckbox assignment={assignment} label />

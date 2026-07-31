@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { sendMagicLink } from '../lib/auth';
+import { BrandMark } from '../components/Icon';
 
 /**
  * Sign-in gate, shown only when Supabase is connected. Ask for the school
@@ -29,7 +30,7 @@ export default function SignIn() {
   return (
     <div className="center-screen">
       <div className="card signin-card">
-        <div className="rail-brand" aria-hidden="true">🗓️</div>
+        <div className="signin-mark" aria-hidden="true"><BrandMark size="34" /></div>
         <h1 style={{ margin: '0.5rem 0 0.25rem' }}>Homework Hub</h1>
         <p className="meta" style={{ marginTop: 0 }}>
           Every class's due dates in one place.

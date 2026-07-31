@@ -1,46 +1,71 @@
 /* ===========================================================================
    Homework Hub — design tokens
-   Every value below is a token. Components should reference these rather than
-   hard-coding sizes or colors, so light/dark and future re-skins stay in sync.
+
+   Direction: quiet and dense. Colour carries meaning (a subject, a state) and
+   nothing else, so the interface itself stays near-monochrome and the content
+   is the only thing competing for attention.
+
+   Every value below is a token. Components reference these rather than
+   hard-coding sizes or colours, so light/dark and future re-skins stay in sync.
    ===========================================================================*/
 :root {
   color-scheme: light dark;
 
-  /* Surfaces & ink */
-  --bg: #f6f7fb;
+  /* Surfaces & ink. Warm neutrals rather than blue-greys — a cold grey page
+     with a blue button is the default look of every unstyled template. */
+  --bg: #fbfaf8;
   --surface: #ffffff;
-  --surface-2: #eef1f7;
-  --ink: #1f2430;
-  --ink-soft: #5c6577;
-  --line: #e3e7ef;
+  --surface-2: #f4f2ef;
+  --surface-3: #ebe8e3;
+  --ink: #17171b;
+  --ink-soft: #6e6e78;
+  --ink-faint: #9a9aa4;
+  --line: #e7e4df;
+  --line-strong: #d6d2cb;
 
-  /* Brand & status */
-  --brand: #3b6fd4;
-  --brand-soft: #e4ecfb;
+  /* One accent, used only for links, focus, active nav and selected state.
+     Primary buttons are ink, not accent — a page where every important control
+     is the same blue rectangle reads as a wireframe. */
+  --brand: #2b5bd0;
+  --brand-soft: #eaf0fd;
   --brand-ink: #ffffff;
-  --accent: #2f9e6b;
-  --accent-soft: #e2f4ea;
-  --warn: #a9772a;
-  --warn-soft: #fff3da;
-  --warn-ink: #7a5a16;
-  --danger: #d24b45;
-  --danger-soft: #fbe3e1;
-  --danger-ink: #a1332c;
 
-  /* Rail (always dark) */
-  --rail-bg: #1f3550;
-  --rail-ink: rgba(255, 255, 255, 0.82);
+  /* Primary action surface. */
+  --btn-bg: #1c1c22;
+  --btn-fg: #ffffff;
+  --btn-bg-hover: #33333d;
+
+  --accent: #1e7d5a;
+  --accent-soft: #e4f2ec;
+  --warn: #93701f;
+  --warn-soft: #fbf1d9;
+  --warn-ink: #6d5316;
+  --danger: #c0392f;
+  --danger-soft: #fbe8e6;
+  --danger-ink: #96291f;
+
+  /* Nav rail — a surface, not a coloured slab. */
+  --rail-bg: #f4f2ef;
+  --rail-ink: #5d5d67;
+  --rail-ink-active: #17171b;
 
   /* Tint strength for subject/category chips — raised in dark mode */
   --tint: 1a;
 
-  /* Type scale */
-  --text-xs: 0.72rem;
-  --text-sm: 0.8rem;
-  --text-base: 0.9rem;
-  --text-md: 1rem;
-  --text-lg: 1.12rem;
-  --text-xl: 1.45rem;
+  /* Type. Bigger base and a real line-height: the old 0.9rem/normal made
+     every screen look like a settings dialog. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.825rem;
+  --text-base: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+
+  --leading-tight: 1.25;
+  --leading: 1.55;
+  /* Headings tighten as they grow; body text never does. */
+  --tracking-tight: -0.014em;
 
   /* Spacing scale */
   --space-1: 0.25rem;
@@ -51,10 +76,19 @@
   --space-6: 2rem;
 
   --radius: 14px;
-  --radius-sm: 10px;
-  --shadow: 0 1px 2px rgba(31, 36, 48, 0.05), 0 8px 24px rgba(31, 36, 48, 0.06);
-  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-    Arial, sans-serif;
+  --radius-sm: 9px;
+  --radius-xs: 6px;
+
+  /* Elevation is a signal, not decoration. Flat by default; the raised token
+     is for things that genuinely float (hover, menus, dialogs). */
+  --shadow: 0 1px 2px rgba(23, 23, 27, 0.04);
+  --shadow-raised: 0 2px 4px rgba(23, 23, 27, 0.06), 0 12px 28px rgba(23, 23, 27, 0.08);
+
+  --font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Inter, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
 
   /* Minimum comfortable tap target */
   --tap: 44px;
@@ -63,50 +97,73 @@
 /* Dark theme: follows the OS by default, with an explicit override hook. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #12151c;
-    --surface: #1a1f29;
-    --surface-2: #232936;
-    --ink: #e8ecf4;
-    --ink-soft: #a3adc0;
-    --line: #2d3542;
+    --bg: #101014;
+    --surface: #17171d;
+    --surface-2: #1f1f27;
+    --surface-3: #2a2a34;
+    --ink: #ececf1;
+    --ink-soft: #9b9baa;
+    --ink-faint: #6d6d7c;
+    --line: #2a2a33;
+    --line-strong: #3a3a46;
 
-    --brand: #7ba5ee;
-    --brand-soft: #22304a;
-    --brand-ink: #10141c;
-    --accent: #57c295;
-    --accent-soft: #16352a;
-    --warn: #d9a441;
-    --warn-soft: #33280f;
-    --warn-ink: #e7c88a;
-    --danger: #e97b74;
-    --danger-soft: #3a1f1e;
-    --danger-ink: #f0a9a4;
+    --brand: #7fa4f5;
+    --brand-soft: #1c2537;
+    --brand-ink: #0f1219;
+
+    --btn-bg: #ececf1;
+    --btn-fg: #17171b;
+    --btn-bg-hover: #ffffff;
+
+    --accent: #4fbb92;
+    --accent-soft: #13291f;
+    --warn: #d3ab53;
+    --warn-soft: #2c2411;
+    --warn-ink: #e3c88e;
+    --danger: #e8837a;
+    --danger-soft: #33191a;
+    --danger-ink: #f0aaa4;
+
+    --rail-bg: #15151a;
+    --rail-ink: #9b9baa;
+    --rail-ink-active: #ececf1;
 
     --tint: 33;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-raised: 0 2px 4px rgba(0, 0, 0, 0.5), 0 12px 28px rgba(0, 0, 0, 0.45);
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #12151c;
-  --surface: #1a1f29;
-  --surface-2: #232936;
-  --ink: #e8ecf4;
-  --ink-soft: #a3adc0;
-  --line: #2d3542;
-  --brand: #7ba5ee;
-  --brand-soft: #22304a;
-  --brand-ink: #10141c;
-  --accent: #57c295;
-  --accent-soft: #16352a;
-  --warn: #d9a441;
-  --warn-soft: #33280f;
-  --warn-ink: #e7c88a;
-  --danger: #e97b74;
-  --danger-soft: #3a1f1e;
-  --danger-ink: #f0a9a4;
+  --bg: #101014;
+  --surface: #17171d;
+  --surface-2: #1f1f27;
+  --surface-3: #2a2a34;
+  --ink: #ececf1;
+  --ink-soft: #9b9baa;
+  --ink-faint: #6d6d7c;
+  --line: #2a2a33;
+  --line-strong: #3a3a46;
+  --brand: #7fa4f5;
+  --brand-soft: #1c2537;
+  --brand-ink: #0f1219;
+  --btn-bg: #ececf1;
+  --btn-fg: #17171b;
+  --btn-bg-hover: #ffffff;
+  --accent: #4fbb92;
+  --accent-soft: #13291f;
+  --warn: #d3ab53;
+  --warn-soft: #2c2411;
+  --warn-ink: #e3c88e;
+  --danger: #e8837a;
+  --danger-soft: #33191a;
+  --danger-ink: #f0aaa4;
+  --rail-bg: #15151a;
+  --rail-ink: #9b9baa;
+  --rail-ink-active: #ececf1;
   --tint: 33;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-raised: 0 2px 4px rgba(0, 0, 0, 0.5), 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
 * { box-sizing: border-box; }
@@ -114,9 +171,19 @@
 body {
   margin: 0;
   font-family: var(--font);
+  font-size: var(--text-base);
+  line-height: var(--leading);
   background: var(--bg);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-weight: 650;
 }
 
 a { color: var(--brand); text-decoration: none; }
@@ -124,12 +191,23 @@ a:hover { text-decoration: underline; }
 
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
+/* Icons inherit the text colour and sit on the text baseline, which is what
+   makes them read as part of a label rather than as pasted-in artwork. */
+.icon { flex: 0 0 auto; vertical-align: -0.16em; }
+
 /* One focus treatment for the whole app — keyboard users can always see where
    they are, and it never fires on mouse clicks. */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Shared typography helpers ------------------------------------------------*/
@@ -142,11 +220,14 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .topbar {
   position: sticky; top: 0; z-index: 10;
   display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;
-  padding: var(--space-3) var(--space-5); background: var(--surface);
+  padding: var(--space-3) var(--space-5);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: saturate(1.4) blur(12px);
   border-bottom: 1px solid var(--line);
 }
 .brand { display: flex; align-items: center; gap: var(--space-2); min-width: 0; flex-wrap: wrap; }
-.brand .name { font-weight: 700; letter-spacing: 0.01em; }
+.brand .name { font-weight: 650; letter-spacing: var(--tracking-tight); font-size: var(--text-md); }
+.brand .icon, .brand svg { color: var(--ink); }
 .topbar-spacer { flex: 1; }
 
 .user-switcher { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
@@ -163,21 +244,34 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   max-width: 1080px; margin: 0 auto; width: 100%;
 }
 
-.page-head { margin-bottom: 1.25rem; }
-.page-head h1 { margin: 0 0 var(--space-1); font-size: var(--text-xl); }
-.page-head p { margin: 0; color: var(--ink-soft); }
+/* A page introduces itself once, in a size that actually reads as a title. */
+.page-head { margin-bottom: var(--space-5); }
+.page-head h1 { margin: 0 0 var(--space-1); font-size: var(--text-2xl); }
+.page-head p { margin: 0; color: var(--ink-soft); max-width: 60ch; }
 
 /* Banner -------------------------------------------------------------------*/
+/* Block, not flex. As a flex row every bare text node between the dot and the
+   <code> became its own flex item, so on a phone the sentence broke into three
+   ragged columns instead of wrapping like a sentence. */
 .banner {
-  display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.9rem;
-  border-radius: var(--radius-sm); font-size: var(--text-sm); margin-bottom: 1.25rem;
+  display: block; padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-sm); font-size: var(--text-sm);
+  margin-bottom: var(--space-5); line-height: 1.5;
 }
 .banner.demo { background: var(--warn-soft); color: var(--warn-ink); }
 .banner.demo .dot { background: var(--warn); }
 .banner.error { background: var(--danger-soft); color: var(--danger-ink); }
 .banner.error .dot { background: var(--danger); }
-.banner .dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
-.banner code { background: rgba(127, 127, 127, 0.18); padding: 0 var(--space-1); border-radius: 4px; }
+.banner .dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  margin-right: 0.55rem; vertical-align: middle;
+}
+/* The sign-in "check your email" banner nests a block, so keep that readable. */
+.banner > div { display: inline-block; vertical-align: middle; max-width: 92%; }
+.banner code {
+  font-family: var(--font-mono); font-size: 0.95em;
+  background: rgba(127, 127, 127, 0.18); padding: 0.05rem 0.3rem; border-radius: 4px;
+}
 
 /* Toolbar ------------------------------------------------------------------*/
 .toolbar {
@@ -189,11 +283,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .grid { display: grid; gap: var(--space-4); }
 .grid.cols-2 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 
+/* Flat by default. A border already separates a card from the page; adding a
+   drop shadow to every one of them just makes the page look buttoned. */
 .card {
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.1rem 1.2rem;
+  border-radius: var(--radius); padding: 1.15rem 1.25rem;
 }
-.card.subtle { box-shadow: none; background: var(--surface-2); }
+.card.subtle { background: var(--surface-2); border-color: transparent; }
 .card h3 { font-size: var(--text-md); }
 .card .sub { color: var(--ink-soft); font-size: var(--text-sm); margin: 0; }
 
@@ -205,38 +301,50 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* Chips & buttons ----------------------------------------------------------*/
 .chip {
-  display: inline-block; font-size: var(--text-xs); padding: 0.12rem var(--space-2);
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: var(--text-xs); font-weight: 500; padding: 0.15rem 0.55rem;
   border-radius: 99px; background: var(--surface-2); color: var(--ink-soft);
-  border: 1px solid var(--line);
+  border: 1px solid transparent; white-space: nowrap;
 }
 
+/* Primary actions are ink, not accent. When every important control is the
+   same blue rectangle the page reads as a wireframe, and nothing stands out
+   because everything does. */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
-  padding: 0.55rem 0.95rem; border-radius: var(--radius-sm);
-  font-size: 0.88rem; font-weight: 600;
-  background: var(--brand); color: var(--brand-ink); transition: filter 0.15s ease;
+  padding: 0.5rem 0.9rem; border-radius: var(--radius-sm);
+  font-size: var(--text-sm); font-weight: 600; letter-spacing: -0.005em;
+  border: 1px solid transparent;
+  background: var(--btn-bg); color: var(--btn-fg);
+  transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease),
+    color 0.15s var(--ease);
 }
-.btn:hover { filter: brightness(1.06); text-decoration: none; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn.secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
-.btn.ghost { background: transparent; color: var(--brand); padding: 0.4rem var(--space-2); }
-.btn.danger { background: var(--danger); color: #fff; }
-.btn.small { padding: 0.35rem 0.65rem; font-size: var(--text-sm); }
+.btn:hover { background: var(--btn-bg-hover); text-decoration: none; }
+.btn:active { transform: translateY(0.5px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:disabled:hover { background: var(--btn-bg); }
+.btn.secondary {
+  background: var(--surface); color: var(--ink); border-color: var(--line-strong);
+}
+.btn.secondary:hover { background: var(--surface-2); border-color: var(--ink-faint); }
+.btn.ghost {
+  background: transparent; color: var(--ink-soft); padding: 0.4rem var(--space-2);
+}
+.btn.ghost:hover { background: var(--surface-2); color: var(--ink); }
+.btn.danger { background: transparent; color: var(--danger); border-color: var(--line-strong); }
+.btn.danger:hover { background: var(--danger-soft); border-color: var(--danger); color: var(--danger-ink); }
+.btn.small { padding: 0.34rem 0.6rem; font-size: var(--text-xs); }
 
 /* The "practice everything the class wrote" call-out above the quiz grid. */
 .bank-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-  border-left: 3px solid var(--brand);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4);
+  background: var(--surface-2); border-color: transparent;
 }
 
 /* The email preview. Bordered and inset so it reads as "this is a message",
    not as another panel of the app. */
-.digest-preview { border-left: 3px solid var(--brand); }
+.digest-preview { background: var(--surface-2); border-color: transparent; }
 .digest-subject {
   display: flex;
   gap: 0.5rem;
@@ -253,22 +361,33 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* Toggles ------------------------------------------------------------------*/
 .toggle-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+/* Segmented rather than a row of loose pills: one continuous track reads as a
+   single choice, which is what it is. */
+.toggle-group { background: var(--surface-2); border-radius: 99px; padding: 3px; gap: 2px; }
 .toggle {
-  font-size: 0.82rem; padding: 0.4rem var(--space-3); border-radius: 99px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft);
+  font-size: var(--text-sm); font-weight: 550; padding: 0.35rem 0.8rem;
+  border-radius: 99px; border: 1px solid transparent;
+  background: transparent; color: var(--ink-soft);
+  transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
 }
 .toggle:hover { color: var(--ink); }
-.toggle.on { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.toggle.on {
+  background: var(--surface); color: var(--ink);
+  border-color: var(--line); box-shadow: var(--shadow);
+}
 
 /* Forms --------------------------------------------------------------------*/
 .field { margin-bottom: 0.85rem; }
 .field label { display: block; font-size: var(--text-sm); font-weight: 600; margin-bottom: 0.3rem; }
 .field .hint { font-weight: 400; color: var(--ink-soft); }
 .field input, .field select, .field textarea {
-  width: 100%; font-family: inherit; font-size: var(--text-base); padding: var(--space-2) 0.65rem;
-  border-radius: var(--radius-sm); border: 1px solid var(--line);
-  background: var(--surface); color: var(--ink);
+  width: 100%; font-family: inherit; font-size: var(--text-base);
+  padding: 0.55rem 0.7rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+  transition: border-color 0.15s var(--ease);
 }
+.field input:hover, .field select:hover, .field textarea:hover { border-color: var(--ink-faint); }
+.field input::placeholder, .field textarea::placeholder { color: var(--ink-faint); }
 .field textarea { min-height: 64px; resize: vertical; }
 
 /* Feed groups --------------------------------------------------------------*/
@@ -354,8 +473,9 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .section { margin-bottom: var(--space-6); }
 .section > h2 { font-size: var(--text-lg); margin: 0 0 var(--space-3); }
 .empty {
-  text-align: center; padding: var(--space-6) var(--space-4); color: var(--ink-soft);
-  border: 1px dashed var(--line); border-radius: var(--radius); background: var(--surface);
+  text-align: center; padding: var(--space-6) var(--space-4);
+  color: var(--ink-soft); font-size: var(--text-sm);
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2);
 }
 .center-screen { display: grid; place-items: center; min-height: 60vh; color: var(--ink-soft); }
 
@@ -371,23 +491,31 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* Global nav rail ----------------------------------------------------------*/
 .rail-layout { flex-direction: row; }
+/* A neutral surface, not a coloured slab. The navy block was the loudest thing
+   on screen and it never says anything. */
 .global-rail {
-  width: 84px; flex-shrink: 0; background: var(--rail-bg); color: #fff;
-  display: flex; flex-direction: column; align-items: stretch;
+  width: 88px; flex-shrink: 0; background: var(--rail-bg);
+  border-right: 1px solid var(--line);
+  display: flex; flex-direction: column; align-items: stretch; gap: 2px;
+  padding: var(--space-2) var(--space-2) var(--space-4);
   position: sticky; top: 0; height: 100vh; z-index: 20;
 }
 .rail-brand {
-  font-size: 1.6rem; text-align: center; padding: 0.9rem 0 0.7rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid; place-items: center; height: 44px; margin-bottom: var(--space-2);
+  color: var(--ink);
 }
 .rail-item {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  padding: 0.7rem var(--space-1); color: var(--rail-ink); font-size: 0.66rem; font-weight: 600;
-  text-align: center; border-left: 3px solid transparent; min-height: var(--tap);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  padding: 0.55rem var(--space-1); border-radius: var(--radius-sm);
+  color: var(--rail-ink); font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.005em; text-align: center; min-height: var(--tap);
+  transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
 }
-.rail-item:hover { background: rgba(255, 255, 255, 0.08); color: #fff; text-decoration: none; }
-.rail-item.active { background: var(--surface); color: var(--ink); border-left-color: var(--brand); }
-.rail-glyph { font-size: 1.15rem; }
+.rail-item:hover { background: var(--surface-3); color: var(--rail-ink-active); text-decoration: none; }
+.rail-item.active { background: var(--surface); color: var(--rail-ink-active); box-shadow: var(--shadow); }
+.rail-item.active .rail-glyph { color: var(--brand); }
+.rail-glyph { display: grid; place-items: center; font-size: 1.15rem; line-height: 1; }
+.rail-glyph .icon { vertical-align: 0; }
 .rail-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
 /* Dashboard ----------------------------------------------------------------*/
@@ -397,10 +525,16 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .course-card {
   display: flex; flex-direction: column; background: var(--surface);
   border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
-  box-shadow: var(--shadow); color: var(--ink); transition: transform 0.12s ease;
+  color: var(--ink);
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
+    border-color 0.18s var(--ease);
 }
-.course-card:hover { text-decoration: none; transform: translateY(-2px); }
-.course-card-hero { height: 84px; }
+.course-card:hover {
+  text-decoration: none; transform: translateY(-2px);
+  box-shadow: var(--shadow-raised); border-color: var(--line-strong);
+}
+/* A band of the subject colour, not a full block of it. */
+.course-card-hero { height: 5px; }
 .course-card-body { padding: var(--space-3) var(--space-4) 0.4rem; }
 .course-card-body h3 { margin: 0 0 0.2rem; font-size: var(--text-md); }
 .course-card-body .sub { margin: 0; font-size: var(--text-sm); color: var(--ink-soft); }
@@ -425,11 +559,11 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* Course shell -------------------------------------------------------------*/
 .course-header {
-  border-left: 5px solid var(--brand); padding: var(--space-1) 0 var(--space-1) var(--space-4);
-  margin-bottom: 1.25rem;
+  padding: 0 0 var(--space-4); border-bottom: 1px solid var(--line);
+  margin-bottom: var(--space-5);
   display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap;
 }
-.course-header h1 { margin: 0 0 0.2rem; font-size: var(--text-xl); }
+.course-header h1 { margin: 0 0 0.2rem; font-size: var(--text-2xl); }
 .course-header .sub { margin: 0; color: var(--ink-soft); font-size: var(--text-sm); }
 
 .course-body { display: grid; grid-template-columns: 168px 1fr; gap: var(--space-5); align-items: start; }
@@ -438,11 +572,12 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   border-right: 1px solid var(--line); padding-right: var(--space-1);
 }
 .course-nav a {
-  padding: 0.45rem 0.7rem; font-size: 0.88rem; color: var(--brand);
-  border-radius: 8px; white-space: nowrap;
+  padding: 0.45rem 0.7rem; font-size: var(--text-sm); font-weight: 550;
+  color: var(--ink-soft); border-radius: var(--radius-xs); white-space: nowrap;
+  transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
 }
-.course-nav a:hover { background: var(--surface-2); text-decoration: none; }
-.course-nav a.active { font-weight: 700; color: var(--ink); background: var(--surface-2); }
+.course-nav a:hover { background: var(--surface-2); color: var(--ink); text-decoration: none; }
+.course-nav a.active { font-weight: 650; color: var(--ink); background: var(--surface-2); }
 .course-content { min-width: 0; }
 
 /* Lists & tables -----------------------------------------------------------*/
@@ -455,8 +590,8 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .plain-list:not(.boxed) .list-row { padding-left: 0; padding-right: 0; }
 .list-row:last-child { border-bottom: none; }
 .group-label {
-  font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.05em;
-  color: var(--ink-soft); margin: 0 0 var(--space-2);
+  font-size: var(--text-xs); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--ink-faint); margin: 0 0 var(--space-2);
 }
 
 /* Tables can outgrow a phone — always give them their own scroller. */
@@ -467,15 +602,16 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .data-table th {
   text-align: left; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.04em;
-  color: var(--ink-soft); background: var(--surface-2); padding: 0.55rem var(--space-2);
+  font-weight: 600; color: var(--ink-soft); background: var(--surface-2);
+  padding: 0.6rem var(--space-3);
 }
-.data-table td { padding: 0.6rem var(--space-2); border-top: 1px solid var(--line); vertical-align: top; }
+.data-table td { padding: 0.7rem var(--space-3); border-top: 1px solid var(--line); vertical-align: top; }
 
 .avatar {
   display: inline-flex; align-items: center; justify-content: center;
   width: 26px; height: 26px; border-radius: 50%;
-  background: var(--brand-soft); color: var(--brand);
-  font-size: var(--text-sm); font-weight: 700; margin-right: 4px; flex: 0 0 auto;
+  background: var(--surface-3); color: var(--ink-soft);
+  font-size: var(--text-xs); font-weight: 650; margin-right: 4px; flex: 0 0 auto;
 }
 
 /* Practice quizzes ---------------------------------------------------------*/
@@ -504,7 +640,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .practice-scoreboard {
   display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;
-  border-left: 4px solid var(--brand); margin-bottom: var(--space-4);
+  background: var(--surface-2); border-color: transparent; margin-bottom: var(--space-4);
 }
 
 /* Discussions hub ----------------------------------------------------------*/
@@ -544,14 +680,14 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* Callouts -----------------------------------------------------------------*/
 .callout {
   display: flex; gap: 0.7rem; align-items: flex-start;
-  background: var(--brand-soft); border: 1px solid var(--line);
-  border-left: 4px solid var(--brand);
-  border-radius: 12px; padding: 0.85rem var(--space-4);
-  margin-bottom: 1.25rem; font-size: var(--text-base);
+  background: var(--brand-soft); border: 1px solid transparent;
+  border-radius: var(--radius); padding: 0.85rem var(--space-4);
+  margin-bottom: var(--space-5); font-size: var(--text-base);
 }
+.callout > strong { font-weight: 650; }
 .callout .callout-icon { font-size: 1.1rem; line-height: 1.4; }
 .callout p { color: var(--ink-soft); font-size: 0.86rem; }
-.subtle-callout { background: var(--surface-2); border-left-color: var(--accent); }
+.subtle-callout { background: var(--surface-2); }
 
 /* ===========================================================================
    Responsive
@@ -587,7 +723,14 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .user-switcher select { flex: 1; }
 
   .toolbar { flex-direction: column; align-items: stretch; }
-  .toolbar .toggle-group { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  /* A flex item won't shrink below its content unless min-width is cleared, so
+     without this the segmented track pushes the whole page sideways instead of
+     scrolling inside itself. */
+  .toolbar .toggle-group {
+    flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    min-width: 0; max-width: 100%; scrollbar-width: none;
+  }
+  .toolbar .toggle-group::-webkit-scrollbar { display: none; }
   .toolbar .toggle { flex: 0 0 auto; min-height: var(--tap); }
   .toolbar .select { width: 100%; }
 
@@ -607,16 +750,12 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .global-rail {
     order: 2; flex-direction: row; width: 100%; height: auto;
     position: fixed; bottom: 0; left: 0; top: auto; z-index: 30;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    justify-content: space-around;
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    border-right: none; border-top: 1px solid var(--line);
+    justify-content: space-around; gap: 0; padding: var(--space-1) var(--space-1);
+    padding-bottom: calc(var(--space-1) + env(safe-area-inset-bottom, 0));
   }
   .rail-brand { display: none; }
-  .rail-item {
-    flex: 1; border-left: none; border-top: 3px solid transparent;
-    padding: var(--space-2) 0.15rem; min-height: 52px;
-  }
-  .rail-item.active { border-left: none; border-top-color: var(--brand); }
+  .rail-item { flex: 1; padding: var(--space-2) 0.15rem; min-height: 52px; }
   .rail-glyph { font-size: 1.25rem; }
   .rail-label { font-size: 0.6rem; }
   /* Clear the fixed tab bar on every page. */
@@ -678,3 +817,88 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .chip.request-pending { background: var(--warn-soft); color: var(--warn-ink); border-color: var(--warn); }
 .chip.request-accepted { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
 .chip.request-declined { background: var(--surface-2); color: var(--ink-soft); }
+
+/* Redesign additions ========================================================*/
+
+/* Score, shown as a number rather than a reaction emoji. The old 🎉/👍/📖
+   guessed at how the student should feel about a practice round. */
+.score-ring {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 62px; height: 62px; border-radius: 50%;
+  font-size: 1.25rem; font-weight: 650; letter-spacing: var(--tracking-tight);
+  border: 2px solid var(--line-strong); background: var(--surface); color: var(--ink);
+}
+.score-ring span { font-size: 0.7rem; font-weight: 600; color: var(--ink-soft); }
+.score-ring[data-tier='high'] { border-color: var(--accent); color: var(--accent); }
+.score-ring[data-tier='mid'] { border-color: var(--warn); color: var(--warn-ink); }
+
+/* File-type glyph in the files table. */
+.file-glyph { color: var(--ink-faint); }
+
+/* Sign-in and import confirmations get a mark, not a giant emoji. */
+.signin-mark, .success-mark {
+  display: grid; place-items: center; width: 46px; height: 46px;
+  border-radius: 13px; background: var(--surface-2); color: var(--ink);
+  flex: 0 0 auto;
+}
+.success-mark { background: var(--accent-soft); color: var(--accent); }
+
+/* Callout icons are now SVG, so they need alignment rather than a font size. */
+.callout-icon { display: grid; place-items: center; color: var(--ink-soft); padding-top: 1px; }
+.callout .callout-icon .icon { vertical-align: 0; }
+
+/* The Google Classroom tile. */
+.gc-logo { color: var(--ink-soft); font-size: 1.5rem; }
+
+/* Buttons that contain an icon shouldn't let it drift off the text baseline. */
+.btn .icon { vertical-align: 0; }
+
+/* Discussion titles carried a 💬 on every row, which turned a list into a
+   column of identical icons saying nothing. The weight does that job. */
+.disc-title { font-weight: 600; letter-spacing: -0.006em; }
+
+/* Section rhythm: headings sit closer to what they label than to what came
+   before, which is what makes a long page scannable. */
+.section { margin-bottom: var(--space-6); }
+.section > h2, .section > .row-between:first-child { margin-bottom: var(--space-3); }
+
+/* Nav rail labels ----------------------------------------------------------*/
+/* "Discussions" is 11 characters in a 78px rail. Let it hyphenate and shrink
+   rather than run out past the edge of its own sidebar. */
+/* "Discussions" has to fit on one line — breaking it gives you "Discussi/ons",
+   which is worse than the overflow it was meant to fix. The rail is sized to
+   the longest label instead. */
+.rail-label {
+  display: block; max-width: 100%;
+  font-size: 0.6rem; line-height: 1.2; letter-spacing: -0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Course cards -------------------------------------------------------------*/
+/* Subject colour lives in the band and the dot, never in the heading — four
+   courses on a dashboard meant four differently-coloured titles. */
+.course-card-body h3 { color: var(--ink); }
+.course-card-icons { color: var(--ink-faint); gap: 0.6rem; }
+
+/* Assignment-type glyph in list rows. */
+.type-glyph { color: var(--ink-faint); margin-right: 6px; }
+
+/* Due-soon and Coming-up rows: ink titles that reveal the accent on hover.
+   A list where every title is already blue has nothing left to signal with. */
+.due-soon .list-row a, .todo-list a .todo-title { color: var(--ink); }
+.due-soon .list-row a:hover, .todo-list a:hover .todo-title { color: var(--brand); }
+
+/* "Coming up" rows: dot and title share a line, the due date sits after them.
+   The title was set to flex: 1 1 100%, which forced the dot onto a line of its
+   own and left every row looking like two broken fragments. */
+/* Every row is the same two lines: dot + title, then the due date indented
+   under it. Letting the date sit beside short titles and drop below long ones
+   made a column of eight rows look like eight different layouts. */
+.todo-list a { flex-wrap: wrap; align-items: baseline; row-gap: 1px; }
+.todo-list .feed-date-dot { align-self: center; }
+.todo-title { flex: 1 1 0; min-width: 0; font-size: var(--text-sm); font-weight: 600; }
+.todo-meta { flex: 1 1 100%; margin-left: 0; padding-left: 0.95rem; }
+
+/* Course cards were mostly empty space below the text. */
+.course-card-body { padding: var(--space-4) var(--space-4) var(--space-2); }
+.course-card-icons { padding: 0 var(--space-4) var(--space-4); }

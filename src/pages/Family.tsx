@@ -5,6 +5,7 @@ import { displayName } from '../lib/names';
 import { subjectColor } from '../lib/subjectColor';
 import { dueSoon } from '../lib/reminders';
 import { CALENDAR_CATEGORIES } from '../lib/types';
+import Icon, { type IconName } from '../components/Icon';
 
 /**
  * A guardian's read-only view of their student: what's coming up and any
@@ -101,7 +102,7 @@ export default function Family() {
 
       {urgent.length > 0 && (
         <div className="callout">
-          <span className="callout-icon">⏰</span>
+          <span className="callout-icon"><Icon name="clock" /></span>
           <div>
             <strong>
               {urgent.length} thing{urgent.length === 1 ? '' : 's'} due in the next couple of days
@@ -153,7 +154,10 @@ export default function Family() {
               return (
                 <li key={m.id} className="list-row">
                   <div>
-                    <strong>{cat?.emoji} {m.title}</strong>
+                    <strong className="inline">
+                      {cat && <Icon name={cat.icon as IconName} />}
+                      {m.title}
+                    </strong>
                     {m.note && <div className="meta">{m.note}</div>}
                   </div>
                   <span className="due">

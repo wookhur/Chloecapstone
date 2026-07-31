@@ -10,6 +10,7 @@ import {
   type Timeframe,
 } from '../lib/dates';
 import { subjectColor } from '../lib/subjectColor';
+import Icon from '../components/Icon';
 
 const TIMEFRAMES: Timeframe[] = ['today', 'week', 'month', 'year', 'upcoming'];
 
@@ -90,7 +91,7 @@ export default function Feed() {
 
       {isStudent && (
         <div className="callout subtle-callout">
-          <span className="callout-icon">📄</span>
+          <span className="callout-icon"><Icon name="checklist" /></span>
           <div>
             Got <strong>paper homework</strong> that isn't listed here? Ask your teacher
             to post its due date in Homework Hub — accurate dates keep everyone on track
@@ -141,7 +142,7 @@ export default function Feed() {
 
       {groups.length === 0 ? (
         <div className="empty">
-          Nothing due {TIMEFRAME_LABELS[timeframe].toLowerCase()}. 🎉
+          Nothing due {TIMEFRAME_LABELS[timeframe].toLowerCase()}.
         </div>
       ) : (
         <div className="stack">

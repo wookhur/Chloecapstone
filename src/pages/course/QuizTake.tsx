@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import type { ClassInfo } from '../../lib/types';
 import { displayName } from '../../lib/names';
 import { bankFor, dedupe, shuffle, type BankCard } from '../../lib/quizBank';
+import Icon from '../../components/Icon';
 
 /**
  * Practice mode (Quizlet-style). Answer the cards, get instant per-question
@@ -68,7 +69,7 @@ export default function QuizTake({
         ← All practice quizzes
       </Link>
       <h2 style={{ margin: '0.5rem 0 0.25rem' }}>
-        {mode === 'bank' ? `🎴 ${cls.name} question bank` : `📚 ${quiz!.title}`}
+        {mode === 'bank' ? `${cls.name} question bank` : quiz!.title}
       </h2>
       <p className="sub" style={{ marginBottom: '1.25rem' }}>
         {questions.length} card{questions.length === 1 ? '' : 's'} ·{' '}
@@ -80,7 +81,9 @@ export default function QuizTake({
 
       {submitted && (
         <div className="card practice-scoreboard">
-          <div style={{ fontSize: '2rem' }}>{pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📖'}</div>
+          <div className="score-ring" data-tier={pct >= 80 ? 'high' : pct >= 60 ? 'mid' : 'low'}>
+            {pct}<span>%</span>
+          </div>
           <div>
             <strong style={{ fontSize: '1.4rem' }}>
               {score} / {questions.length}
@@ -91,7 +94,7 @@ export default function QuizTake({
             </p>
           </div>
           <button className="btn small" onClick={retry} style={{ marginLeft: 'auto' }}>
-            {mode === 'bank' ? '↻ Reshuffle' : '↻ Try again'}
+            <><Icon name="refresh" />{mode === 'bank' ? 'Reshuffle' : 'Try again'}</>
           </button>
         </div>
       )}

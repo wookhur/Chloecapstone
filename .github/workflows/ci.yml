@@ -1,0 +1,113 @@
+name: CI
+
+# The test suite only ever ran when someone remembered to run it. Now every
+# push and pull request runs it, so a change that breaks the calendar or the
+# schema says so before it reaches the site.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  app:
+    name: Typecheck, build, browser tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      # The suite runs two production builds (demo mode on :4173, Supabase
+      # configured on :4174) and drives a real browser against them.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser tests
+        run: npm test
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  database:
+    name: Schema and seed on Postgres
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # The SQL never runs during the browser tests — demo mode has no database —
+    # so a broken column or a seed row that violates a constraint would only
+    # surface when someone set up a real Supabase project. This catches it here.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create the roles Supabase provides
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "create role anon;" -c "create role authenticated;"
+
+      - name: schema.sql
+        run: psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
+
+      - name: seed.sql
+        run: psql -v ON_ERROR_STOP=1 -f supabase/seed.sql
+
+      - name: rls-auth.sql
+        run: |
+          # rls-auth.sql also locks the storage bucket, and the `storage` schema
+          # only exists inside a real Supabase project. Stub the one table it
+          # touches so the rest of the script — every table policy — is checked.
+          psql -v ON_ERROR_STOP=1 \
+            -c "create schema storage;" \
+            -c "create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text);" \
+            -c "alter table storage.objects enable row level security;"
+          psql -v ON_ERROR_STOP=1 -f supabase/rls-auth.sql
+
+      - name: Every table ends up locked to signed-in users
+        run: |
+          psql -v ON_ERROR_STOP=1 -t -c "
+            select case
+              when count(*) = 0 then 'ok'
+              else 'still reachable by anon: ' || string_agg(tablename, ', ')
+            end
+            from pg_policies
+            where schemaname = 'public'
+              and 'anon' = any(roles)
+              -- Sign-in has to look up which profile an email belongs to before
+              -- a session exists, so this one anon read is deliberate.
+              and policyname <> 'sign-in lookup — profiles';
+          " | grep -q 'ok'

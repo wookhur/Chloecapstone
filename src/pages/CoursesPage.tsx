@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { subjectColor } from '../lib/subjectColor';
 import { displayName } from '../lib/names';
 import { SCHOOL_YEAR } from '../lib/types';
+import Icon from '../components/Icon';
 
 /** Canvas "All Courses" — the flat list of everything you're enrolled in / teach. */
 export default function CoursesPage() {
@@ -29,7 +30,7 @@ export default function CoursesPage() {
         </span>
         <div className="inline" style={{ gap: '0.4rem' }}>
           <Link to="/courses/import" className="btn small secondary">
-            🎓 Import from Google Classroom
+            <Icon name="download" /> Import from Google Classroom
           </Link>
           {isTeacher ? (
             <Link to="/courses/manage" className="btn small">

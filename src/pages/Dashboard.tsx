@@ -7,6 +7,7 @@ import DueSoon from '../components/DueSoon';
 import RequestMeeting from '../components/RequestMeeting';
 import WeeklyDigest from '../components/WeeklyDigest';
 import { displayName } from '../lib/names';
+import Icon from '../components/Icon';
 
 export default function Dashboard() {
   const {
@@ -85,17 +86,17 @@ export default function Dashboard() {
                   <Link key={c.id} to={`/courses/${c.id}`} className="course-card">
                     <div className="course-card-hero" style={{ background: color }} />
                     <div className="course-card-body">
-                      <h3 style={{ color }}>{c.name}</h3>
+                      <h3>{c.name}</h3>
                       <p className="sub">
                         {c.subject} · {c.period} · Room {c.room ?? '—'}
                       </p>
                       <p className="sub">{displayName(teacher)}</p>
                     </div>
                     <div className="course-card-icons">
-                      <span title="Announcements">📣</span>
-                      <span title="Assignments">📝</span>
-                      <span title="Discussions">💬</span>
-                      <span title="Practice quizzes">📚</span>
+                      <Icon name="pin" title="Announcements" />
+                      <Icon name="checklist" title="Assignments" />
+                      <Icon name="discussions" title="Discussions" />
+                      <Icon name="cards" title="Practice quizzes" />
                     </div>
                   </Link>
                 );
@@ -141,7 +142,7 @@ export default function Dashboard() {
           <h2>Coming up</h2>
           {todo.length === 0 ? (
             <p className="meta">
-              Nothing due soon. 🎉
+              Nothing due soon.
             </p>
           ) : (
             <ul className="todo-list">
