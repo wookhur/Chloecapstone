@@ -14,6 +14,7 @@ import type {
   Assignment,
   CalendarEvent,
   ClassInfo,
+  Completion,
   CourseFile,
   DiscussionPost,
   DiscussionTopic,
@@ -31,6 +32,7 @@ interface AppState {
   classes: ClassInfo[];
   enrollments: Enrollment[];
   assignments: Assignment[];
+  completions: Completion[];
   announcements: Announcement[];
   discussionTopics: DiscussionTopic[];
   discussionPosts: DiscussionPost[];
@@ -48,6 +50,10 @@ interface AppState {
   myClassIds: string[];
   /** Enrolled student ids for a class (sorted by name). */
   rosterFor: (classId: string) => Profile[];
+  /** Has the signed-in student ticked this assignment off their own list? */
+  isDone: (assignmentId: string) => boolean;
+  /** Toggle that tick. Updates immediately, then persists. */
+  toggleDone: (assignmentId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -62,6 +68,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [completions, setCompletions] = useState<Completion[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [discussionTopics, setDiscussionTopics] = useState<DiscussionTopic[]>([]);
   const [discussionPosts, setDiscussionPosts] = useState<DiscussionPost[]>([]);
@@ -82,11 +89,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setError(null);
     try {
-      const [p, c, e, a, an, dt, dp, pq, pqq, fi, ce] = await Promise.all([
+      const [p, c, e, a, cp, an, dt, dp, pq, pqq, fi, ce] = await Promise.all([
         repo.fetchProfiles(),
         repo.fetchClasses(),
         repo.fetchEnrollments(),
         repo.fetchAssignments(),
+        repo.fetchCompletions(),
         repo.fetchAnnouncements(),
         repo.fetchDiscussionTopics(),
         repo.fetchDiscussionPosts(),
@@ -99,6 +107,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setClasses(c);
       setEnrollments(e);
       setAssignments(a);
+      setCompletions(cp);
       setAnnouncements(an);
       setDiscussionTopics(dt);
       setDiscussionPosts(dp);
@@ -160,6 +169,53 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .map((e) => e.class_id);
   }, [currentUser, classes, enrollments]);
 
+  const isDone = useCallback(
+    (assignmentId: string) =>
+      completions.some(
+        (c) => c.assignment_id === assignmentId && c.student_id === currentUserId,
+      ),
+    [completions, currentUserId],
+  );
+
+  // Ticking a box has to feel instant, so update local state first and reconcile
+  // with the server after; on failure we put the old state back.
+  const toggleDone = useCallback(
+    async (assignmentId: string) => {
+      if (!currentUserId) return;
+      const wasDone = completions.some(
+        (c) => c.assignment_id === assignmentId && c.student_id === currentUserId,
+      );
+      const optimisticId = `pending-${assignmentId}`;
+
+      setCompletions((prev) =>
+        wasDone
+          ? prev.filter(
+              (c) => !(c.assignment_id === assignmentId && c.student_id === currentUserId),
+            )
+          : [
+              ...prev,
+              {
+                id: optimisticId,
+                assignment_id: assignmentId,
+                student_id: currentUserId,
+                completed_at: new Date().toISOString(),
+              },
+            ],
+      );
+
+      try {
+        await repo.setCompleted(assignmentId, currentUserId, !wasDone);
+        const fresh = await repo.fetchCompletions();
+        setCompletions(fresh);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+        const fresh = await repo.fetchCompletions().catch(() => null);
+        if (fresh) setCompletions(fresh);
+      }
+    },
+    [completions, currentUserId],
+  );
+
   const rosterFor = useCallback(
     (classId: string) =>
       enrollments
@@ -178,6 +234,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     classes,
     enrollments,
     assignments,
+    completions,
     announcements,
     discussionTopics,
     discussionPosts,
@@ -193,6 +250,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     profileById,
     myClassIds,
     rosterFor,
+    isDone,
+    toggleDone,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -51,6 +51,12 @@ test.describe('assignments', () => {
     await page.goto('/courses/c-alg2/assignments');
     await signInAs(page, USERS.mina);
     await expect(page.locator('.content')).toContainText('Factoring warm-up');
+
+    // Overdue styling needs work that is past due AND not ticked off — Mina has
+    // already checked the old Algebra work, and a ticked item stops nagging on
+    // purpose, so use the English reading log she hasn't touched.
+    await page.goto('/courses/c-eng/assignments');
+    await expect(page.locator('.content')).toContainText('Reading log');
     await expect(page.locator('.due.overdue').first()).toBeVisible();
   });
 
@@ -204,5 +210,58 @@ test.describe('resilience', () => {
 
     await expect(page.locator('body')).toContainText('Something went wrong');
     await expect(page.locator('button:has-text("Reload")')).toBeVisible();
+  });
+});
+
+test.describe('personal done checklist', () => {
+  test('ticking an assignment marks it done and removes it from Coming up', async ({ page }) => {
+    await page.goto('/homework');
+    await signInAs(page, USERS.mina);
+
+    const row = page.locator('.assignment', { hasText: 'Quadratics worksheet' }).first();
+    await expect(row).not.toHaveClass(/is-done/);
+    await row.locator('.done-check input').check();
+    await expect(row).toHaveClass(/is-done/);
+
+    // The dashboard's "Coming up" list is a to-do list, so it drops ticked work.
+    await navTo(page, 'Dashboard');
+    await expect(page.locator('.todo-panel')).not.toContainText('Quadratics worksheet');
+  });
+
+  test('the tick can be undone', async ({ page }) => {
+    await page.goto('/homework');
+    await signInAs(page, USERS.mina);
+
+    // Pin the timeframe so the row is present whatever weekday the suite runs.
+    await page.click('.toggle:has-text("All upcoming")');
+    const row = page.locator('.assignment', { hasText: 'Essay draft' }).first();
+    await row.locator('.done-check input').check();
+    await expect(row).toHaveClass(/is-done/);
+    await row.locator('.done-check input').uncheck();
+    await expect(row).not.toHaveClass(/is-done/);
+  });
+
+  test('"Hide done" filters the list and the count tracks progress', async ({ page }) => {
+    await page.goto('/homework');
+    await signInAs(page, USERS.mina);
+    await page.click('.toggle:has-text("All upcoming")');
+
+    // The demo seeds some work as already done, so derive the baseline.
+    const before = await page.locator('.assignment').count();
+    const alreadyDone = await page.locator('.assignment.is-done').count();
+
+    await page.locator('.assignment:not(.is-done) .done-check input').first().check();
+    await expect(page.locator('.progress-row')).toContainText(
+      String(alreadyDone + 1) + ' of ' + String(before),
+    );
+
+    await page.locator('.progress-row input[type=checkbox]').check();
+    await expect(page.locator('.assignment')).toHaveCount(before - alreadyDone - 1);
+  });
+
+  test('teachers do not see student checkboxes', async ({ page }) => {
+    await page.goto('/courses/c-alg2/assignments');
+    await signInAs(page, USERS.anderson);
+    await expect(page.locator('.done-check')).toHaveCount(0);
   });
 });

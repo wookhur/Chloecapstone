@@ -56,6 +56,18 @@ export interface Assignment {
   created_at: string;
 }
 
+/**
+ * A student ticking their own checklist. Private to that student and never a
+ * grade — teachers don't see it. It exists so the app can replace the paper
+ * planner students are already crossing things off in.
+ */
+export interface Completion {
+  id: string;
+  assignment_id: string;
+  student_id: string;
+  completed_at: string;
+}
+
 export interface Announcement {
   id: string;
   class_id: string;

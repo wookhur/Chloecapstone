@@ -5,6 +5,7 @@ import {
   type Assignment,
   type CalendarEvent,
   type ClassInfo,
+  type Completion,
   type CourseFile,
   type DiscussionPost,
   type DiscussionTopic,
@@ -94,6 +95,16 @@ export const demoAssignments: Assignment[] = [
   { id: 'a12', class_id: 'c-alg2', title: 'Unit 3 test — polynomials', description: null, assigned_date: iso(-14), due_date: iso(-7), type: 'test', link: null, created_by: 't-anders', created_at: now },
   { id: 'a13', class_id: 'c-bio', title: 'Microscope lab worksheet', description: 'Complete during lab.', assigned_date: iso(-9), due_date: iso(-4), type: 'homework', link: null, created_by: 't-chen', created_at: now },
   { id: 'a14', class_id: 'c-eng', title: 'Reading log — weeks 1–2', description: null, assigned_date: iso(-12), due_date: iso(-5), type: 'homework', link: null, created_by: 't-brooks', created_at: now },
+];
+
+// A few things Mina has already ticked off, so the checked state is visible
+// immediately without the demo looking like nothing has been done.
+export const demoCompletions: Completion[] = [
+  { id: 'cp1', assignment_id: 'a11', student_id: 's-mina', completed_at: ts(-7, 20) },
+  { id: 'cp2', assignment_id: 'a12', student_id: 's-mina', completed_at: ts(-8, 18) },
+  { id: 'cp3', assignment_id: 'a13', student_id: 's-mina', completed_at: ts(-5, 16) },
+  { id: 'cp4', assignment_id: 'a3', student_id: 's-mina', completed_at: ts(0, 8) },
+  { id: 'cp5', assignment_id: 'a11', student_id: 's-leo', completed_at: ts(-6, 21) },
 ];
 
 export const demoAnnouncements: Announcement[] = [

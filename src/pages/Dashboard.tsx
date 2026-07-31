@@ -13,6 +13,7 @@ export default function Dashboard() {
     myClassIds,
     assignments,
     announcements,
+    isDone,
   } = useApp();
 
   const isTeacher = currentUser?.role === 'teacher';
@@ -27,13 +28,15 @@ export default function Dashboard() {
   );
 
   // To Do: upcoming assignments across the courses you're in / teach.
+  // "Coming up" is a to-do list, so anything already ticked drops off it.
   const todo = useMemo(() => {
     const mine = new Set(myClassIds);
     return assignments
       .filter((a) => mine.has(a.class_id) && a.due_date >= today())
+      .filter((a) => !isDone(a.id))
       .sort((a, b) => a.due_date.localeCompare(b.due_date))
       .slice(0, 8);
-  }, [assignments, myClassIds]);
+  }, [assignments, myClassIds, isDone]);
 
   const recentAnnouncements = useMemo(() => {
     const mine = new Set(myClassIds);

@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import DoneCheckbox from '../../components/DoneCheckbox';
 import { dueLabel, parseISO } from '../../lib/dates';
 import type { Assignment, ClassInfo } from '../../lib/types';
 
@@ -13,14 +14,15 @@ const TYPE_EMOJI: Record<Assignment['type'], string> = {
 /** Read-only assignment detail — this site tracks homework, it isn't a submission portal. */
 export default function AssignmentDetail({ cls }: { cls: ClassInfo }) {
   const { assignmentId } = useParams<{ assignmentId: string }>();
-  const { assignments } = useApp();
+  const { assignments, isDone } = useApp();
 
   const assignment = assignments.find((a) => a.id === assignmentId);
   if (!assignment || assignment.class_id !== cls.id) {
     return <div className="empty">Assignment not found.</div>;
   }
 
-  const overdue = dueLabel(assignment.due_date).startsWith('Overdue');
+  // A ticked-off assignment no longer needs an overdue warning.
+  const overdue = !isDone(assignment.id) && dueLabel(assignment.due_date).startsWith('Overdue');
 
   return (
     <div>
@@ -30,7 +32,8 @@ export default function AssignmentDetail({ cls }: { cls: ClassInfo }) {
       <h2 style={{ margin: '0.5rem 0 0.25rem' }}>
         {TYPE_EMOJI[assignment.type]} {assignment.title}
       </h2>
-      <p className="sub">
+      <p className="sub inline">
+        <DoneCheckbox assignment={assignment} label />
         <span className="chip" style={{ textTransform: 'capitalize' }}>{assignment.type}</span>{' '}
         <span className={overdue ? 'due overdue' : 'due'}>
           Due {parseISO(assignment.due_date).toLocaleDateString(undefined, {

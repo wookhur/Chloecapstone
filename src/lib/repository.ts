@@ -4,6 +4,7 @@ import {
   demoAssignments,
   demoCalendarEvents,
   demoClasses,
+  demoCompletions,
   demoDiscussionPosts,
   demoDiscussionTopics,
   demoEnrollments,
@@ -17,6 +18,7 @@ import type {
   Assignment,
   CalendarEvent,
   ClassInfo,
+  Completion,
   CourseFile,
   DiscussionPost,
   DiscussionTopic,
@@ -37,6 +39,7 @@ const mem = {
   classes: [...demoClasses],
   enrollments: [...demoEnrollments],
   assignments: [...demoAssignments],
+  completions: [...demoCompletions],
   announcements: [...demoAnnouncements],
   discussionTopics: [...demoDiscussionTopics],
   discussionPosts: [...demoDiscussionPosts],
@@ -66,6 +69,7 @@ export const fetchProfiles = () => fetchTable<Profile>(mem.profiles, 'profiles',
 export const fetchClasses = () => fetchTable<ClassInfo>(mem.classes, 'classes', 'name');
 export const fetchEnrollments = () => fetchTable<Enrollment>(mem.enrollments, 'enrollments');
 export const fetchAssignments = () => fetchTable<Assignment>(mem.assignments, 'assignments');
+export const fetchCompletions = () => fetchTable<Completion>(mem.completions, 'completions');
 export const fetchAnnouncements = () =>
   fetchTable<Announcement>(mem.announcements, 'announcements');
 export const fetchDiscussionTopics = () =>
@@ -174,6 +178,47 @@ export async function deleteAssignment(id: string): Promise<void> {
   }
   const { error } = await supabase!.from('assignments').delete().eq('id', id);
   if (error) throw error;
+}
+
+// --- Completions (a student's private checklist) -----------------------------
+/** Tick or untick an assignment for one student. Returns the new state. */
+export async function setCompleted(
+  assignmentId: string,
+  studentId: string,
+  done: boolean,
+): Promise<boolean> {
+  if (!isSupabaseConfigured) {
+    if (done) {
+      if (!mem.completions.some((c) => c.assignment_id === assignmentId && c.student_id === studentId)) {
+        mem.completions.push({
+          id: uuid(),
+          assignment_id: assignmentId,
+          student_id: studentId,
+          completed_at: nowISO(),
+        });
+      }
+    } else {
+      mem.completions = mem.completions.filter(
+        (c) => !(c.assignment_id === assignmentId && c.student_id === studentId),
+      );
+    }
+    return done;
+  }
+
+  if (done) {
+    const { error } = await supabase!
+      .from('completions')
+      .insert({ assignment_id: assignmentId, student_id: studentId });
+    if (error && error.code !== '23505') throw error; // ignore double-tick
+  } else {
+    const { error } = await supabase!
+      .from('completions')
+      .delete()
+      .eq('assignment_id', assignmentId)
+      .eq('student_id', studentId);
+    if (error) throw error;
+  }
+  return done;
 }
 
 // --- Announcements -----------------------------------------------------------

@@ -67,6 +67,14 @@ insert into assignments (id, class_id, title, description, assigned_date, due_da
   ('00000000-0000-0000-0000-00000000ab13', '00000000-0000-0000-0000-0000000000c3', 'Microscope lab worksheet', 'Complete during lab.', current_date - 9, current_date - 4, 'homework', null, '00000000-0000-0000-0000-0000000000d3'),
   ('00000000-0000-0000-0000-00000000ab14', '00000000-0000-0000-0000-0000000000c5', 'Reading log — weeks 1–2', null, current_date - 12, current_date - 5, 'homework', null, '00000000-0000-0000-0000-0000000000d2');
 
+-- A few things students have already ticked off their own lists ---------------
+insert into completions (assignment_id, student_id, completed_at) values
+  ('00000000-0000-0000-0000-00000000ab11', '00000000-0000-0000-0000-0000000000e1', now() - interval '7 days'),
+  ('00000000-0000-0000-0000-00000000ab12', '00000000-0000-0000-0000-0000000000e1', now() - interval '8 days'),
+  ('00000000-0000-0000-0000-00000000ab13', '00000000-0000-0000-0000-0000000000e1', now() - interval '5 days'),
+  ('00000000-0000-0000-0000-00000000ab03', '00000000-0000-0000-0000-0000000000e1', now() - interval '2 hours'),
+  ('00000000-0000-0000-0000-00000000ab11', '00000000-0000-0000-0000-0000000000e3', now() - interval '6 days');
+
 -- Practice quizzes (Quizlet-style, made by students) --------------------------
 insert into practice_quizzes (id, class_id, author_id, title, description, created_at) values
   ('00000000-0000-0000-0000-00000000fb01', '00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000e1', 'Quadratics self-check', 'Made this while studying for Unit 4 — good luck!', now() - interval '2 days'),

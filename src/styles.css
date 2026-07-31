@@ -594,3 +594,29 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   border: 1px solid var(--line);
 }
 .subject-chip .legend-dot { width: 7px; height: 7px; }
+
+/* Personal "done" checklist ------------------------------------------------*/
+.done-check {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: var(--text-sm); color: var(--ink-soft); cursor: pointer;
+  flex: 0 0 auto;
+}
+.done-check input {
+  width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; margin: 0;
+}
+.done-check.is-done { color: var(--accent); font-weight: 600; }
+
+/* A ticked item settles down instead of disappearing, so the student can still
+   see it and untick if they were wrong. */
+.is-done .calendar-item-label,
+.assignment.is-done h3,
+.assignment-row.is-done a { text-decoration: line-through; }
+.assignment.is-done, .assignment-row.is-done { opacity: 0.62; }
+
+.progress-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.progress-row input { accent-color: var(--brand); }
+
+@media (max-width: 640px) {
+  .progress-row { justify-content: space-between; }
+  .done-check input { width: 22px; height: 22px; }
+}

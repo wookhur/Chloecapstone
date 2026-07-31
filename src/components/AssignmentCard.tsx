@@ -1,4 +1,6 @@
 import { dueLabel } from '../lib/dates';
+import { useApp } from '../context/AppContext';
+import DoneCheckbox from './DoneCheckbox';
 import { subjectColor } from '../lib/subjectColor';
 import type { Assignment, ClassInfo } from '../lib/types';
 
@@ -17,14 +19,18 @@ interface Props {
 }
 
 export default function AssignmentCard({ assignment, cls, onEdit, onDelete }: Props) {
+  const { isDone } = useApp();
   const color = cls ? subjectColor(cls.subject) : '#6f655b';
-  const overdue = dueLabel(assignment.due_date).startsWith('Overdue');
+  const done = isDone(assignment.id);
+  // Once ticked, overdue is no longer news — stop shouting about it.
+  const overdue = !done && dueLabel(assignment.due_date).startsWith('Overdue');
 
   return (
-    <div className="card assignment" style={{ borderLeft: `4px solid ${color}` }}>
+    <div className={`card assignment ${done ? 'is-done' : ''}`} style={{ borderLeft: `4px solid ${color}` }}>
       <div className="row-between">
         <div>
           <div className="inline" style={{ gap: '0.4rem' }}>
+            <DoneCheckbox assignment={assignment} />
             <span>{TYPE_EMOJI[assignment.type]}</span>
             <h3 style={{ margin: 0 }}>{assignment.title}</h3>
           </div>

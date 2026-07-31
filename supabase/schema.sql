@@ -7,6 +7,7 @@
 -- or via psql -f supabase/schema.sql
 -- ============================================================================
 
+drop table if exists completions cascade;
 drop table if exists calendar_events cascade;
 drop table if exists files cascade;
 drop table if exists practice_questions cascade;
@@ -70,6 +71,17 @@ create table assignments (
 );
 create index assignments_class_idx on assignments (class_id);
 create index assignments_due_idx   on assignments (due_date);
+
+-- A student ticking their own checklist. Private to that student, never a
+-- grade — the school system of record owns grading.
+create table completions (
+  id            uuid primary key default gen_random_uuid(),
+  assignment_id uuid not null references assignments (id) on delete cascade,
+  student_id    uuid not null references profiles (id) on delete cascade,
+  completed_at  timestamptz not null default now(),
+  unique (assignment_id, student_id)
+);
+create index completions_student_idx on completions (student_id);
 
 -- Class-wide announcements from the teacher -----------------------------------
 create table announcements (
@@ -161,7 +173,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'profiles', 'classes', 'enrollments', 'assignments',
+    'profiles', 'classes', 'enrollments', 'assignments', 'completions',
     'announcements', 'discussion_topics', 'discussion_posts',
     'practice_quizzes', 'practice_questions', 'files', 'calendar_events'
   ]
