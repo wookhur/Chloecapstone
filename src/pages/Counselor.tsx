@@ -52,7 +52,7 @@ export default function Counselor() {
         created_by: currentUser.id,
       });
       await refresh();
-      const who = displayName(profileById(studentId)) ?? 'student';
+      const who = displayName(profileById(studentId));
       setFlash(`Added to ${who}'s calendar ✓`);
       setNote('');
       setTime('');
@@ -131,7 +131,7 @@ export default function Counselor() {
             {upcoming.map((m) => (
               <li key={m.id} className="list-row">
                 <div>
-                  <strong>🧭 {displayName(profileById(m.owner_id)) ?? 'Student'}</strong>
+                  <strong>🧭 {displayName(profileById(m.owner_id))}</strong>
                   <div className="meta" style={{ marginTop: 2 }}>
                     {parseISO(m.date).toLocaleDateString(undefined, {
                       weekday: 'short',
@@ -155,7 +155,7 @@ export default function Counselor() {
             {past.map((m) => (
               <li key={m.id} className="list-row">
                 <span className="muted">
-                  🧭 {displayName(profileById(m.owner_id)) ?? 'Student'} ·{' '}
+                  🧭 {displayName(profileById(m.owner_id))} ·{' '}
                   {parseISO(m.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                 </span>
                 <button className="btn danger small" onClick={() => cancel(m.id)}>Remove</button>

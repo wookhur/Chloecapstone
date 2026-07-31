@@ -119,16 +119,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })();
   }, [refresh]);
 
-  // Default to the demo persona who actually has content. Picking "the first
-  // student" would depend on row order, which differs between demo mode
-  // (declaration order) and Supabase (ordered by name) — landing the user on an
-  // empty dashboard.
+  // Pick who's signed in. Defaults to the demo persona who actually has content
+  // — "the first student" would depend on row order, which differs between demo
+  // mode (declaration order) and Supabase (ordered by name).
+  //
+  // Also self-heals a saved id that no longer resolves: switching demo ->
+  // Supabase, or reseeding the database, changes every id, and a stale one
+  // leaves the app stuck showing "Select a user to begin" while the account
+  // switcher misleadingly displays the first person in the list.
   useEffect(() => {
-    if (!currentUserId && profiles.length > 0) {
-      const students = profiles.filter((p) => p.role === 'student');
-      const seeded = students.find((p) => p.name.startsWith(DEMO_PERSONA));
-      setCurrentUserId(seeded?.id ?? students[0]?.id ?? profiles[0].id);
-    }
+    if (profiles.length === 0) return;
+    const stillExists = currentUserId && profiles.some((p) => p.id === currentUserId);
+    if (stillExists) return;
+    const students = profiles.filter((p) => p.role === 'student');
+    const seeded = students.find((p) => p.name.startsWith(DEMO_PERSONA));
+    setCurrentUserId(seeded?.id ?? students[0]?.id ?? profiles[0].id);
   }, [profiles, currentUserId, setCurrentUserId]);
 
   const classById = useCallback(

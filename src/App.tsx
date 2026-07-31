@@ -1,15 +1,19 @@
+import { Suspense, lazy } from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { useApp } from './context/AppContext';
-import ClassPicker from './pages/ClassPicker';
-import Feed from './pages/Feed';
-import CalendarPage from './pages/CalendarPage';
-import TeacherClasses from './pages/TeacherClasses';
 import Dashboard from './pages/Dashboard';
-import CoursesPage from './pages/CoursesPage';
-import Discussions from './pages/Discussions';
-import ImportClassroom from './pages/ImportClassroom';
-import Counselor from './pages/Counselor';
-import CourseLayout from './pages/course/CourseLayout';
+import Feed from './pages/Feed';
+
+// Everything past the two screens students open first is split out, so a phone
+// on school wifi downloads a fraction of the app up front.
+const CalendarPage = lazy(() => import('./pages/CalendarPage'));
+const CoursesPage = lazy(() => import('./pages/CoursesPage'));
+const Discussions = lazy(() => import('./pages/Discussions'));
+const ClassPicker = lazy(() => import('./pages/ClassPicker'));
+const TeacherClasses = lazy(() => import('./pages/TeacherClasses'));
+const ImportClassroom = lazy(() => import('./pages/ImportClassroom'));
+const Counselor = lazy(() => import('./pages/Counselor'));
+const CourseLayout = lazy(() => import('./pages/course/CourseLayout'));
 
 const STUDENT_TEACHER_NAV = [
   { to: '/dashboard', glyph: '🏠', label: 'Dashboard' },
@@ -109,6 +113,7 @@ export default function App() {
             </div>
           )}
 
+          <Suspense fallback={<div className="center-screen">Loading…</div>}>
           <Routes>
             <Route
               path="/"
@@ -132,6 +137,7 @@ export default function App() {
               element={<Navigate to={isCounselor ? '/counselor' : '/dashboard'} replace />}
             />
           </Routes>
+          </Suspense>
         </main>
       </div>
     </div>

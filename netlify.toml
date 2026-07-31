@@ -1,4 +1,4 @@
-# Netlify build & deploy configuration for the Yeon (Vite + React SPA)
+# Netlify build & deploy configuration for Homework Hub (Vite + React SPA)
 
 [build]
   command = "npm run build"
@@ -9,7 +9,7 @@
   NODE_VERSION = "20"
 
 # Single-page-app fallback: let React Router handle all routes so that
-# direct navigation / refresh on paths like /coordinator doesn't 404.
+# direct navigation / refresh on paths like /calendar doesn't 404.
 [[redirects]]
   from = "/*"
   to = "/index.html"
