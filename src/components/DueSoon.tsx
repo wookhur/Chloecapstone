@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { subjectColor } from '../lib/subjectColor';
 import {
   disableNotifications,
   dueSoon,
@@ -79,10 +78,6 @@ export default function DueSoon() {
           return (
             <li key={a.id} className="list-row">
               <div className="inline" style={{ gap: '0.5rem' }}>
-                <span
-                  className="feed-date-dot"
-                  style={{ background: subjectColor(cls?.subject ?? '') }}
-                />
                 <div>
                   <Link to={`/courses/${a.class_id}/assignments/${a.id}`} style={{ fontWeight: 600 }}>
                     {a.title}

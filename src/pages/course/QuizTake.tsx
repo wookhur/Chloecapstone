@@ -66,7 +66,7 @@ export default function QuizTake({
   return (
     <div>
       <Link to="../quizzes" className="meta">
-        ← All practice quizzes
+        <Icon name="chevron-left" size="0.9em" /> All practice quizzes
       </Link>
       <h2 style={{ margin: '0.5rem 0 0.25rem' }}>
         {mode === 'bank' ? `${cls.name} question bank` : quiz!.title}
@@ -139,10 +139,10 @@ export default function QuizTake({
                         />
                         {c}
                         {submitted && ci === q.correct_index && (
-                          <span className="mark">✓</span>
+                          <span className="mark"><Icon name="check" size="0.95em" /></span>
                         )}
                         {submitted && ci === chosen && ci !== q.correct_index && (
-                          <span className="mark">✗</span>
+                          <span className="mark"><Icon name="x" size="0.95em" /></span>
                         )}
                       </label>
                     );

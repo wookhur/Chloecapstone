@@ -55,7 +55,7 @@ export default function Counselor() {
       });
       await refresh();
       const who = displayName(profileById(studentId));
-      setFlash(`Added to ${who}'s calendar ✓`);
+      setFlash(`Added to ${who}'s calendar`);
       setNote('');
       setTime('');
       setLocation('');

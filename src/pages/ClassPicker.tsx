@@ -4,6 +4,7 @@ import * as repo from '../lib/repository';
 import { subjectColor } from '../lib/subjectColor';
 import { SCHOOL_YEAR, SUBJECTS } from '../lib/types';
 import { displayName } from '../lib/names';
+import Icon from '../components/Icon';
 
 export default function ClassPicker() {
   const { currentUser, classes, enrollments, profileById, refresh } = useApp();
@@ -102,7 +103,7 @@ export default function ClassPicker() {
                   disabled={busy === c.id}
                   onClick={() => toggle(c.id)}
                 >
-                  {selected ? '✓ Selected' : 'Add'}
+                  {selected ? <><Icon name="check" size="0.9em" /> Selected</> : 'Add'}
                 </button>
               </div>
             </div>

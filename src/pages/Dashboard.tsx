@@ -68,12 +68,12 @@ export default function Dashboard() {
               {isTeacher ? (
                 <>
                   You don't teach any classes yet.{' '}
-                  <Link to="/courses/manage">Create one →</Link>
+                  <Link to="/courses/manage">Create one <Icon name="arrow-right" size="0.9em" /></Link>
                 </>
               ) : (
                 <>
                   You aren't enrolled in any courses yet.{' '}
-                  <Link to="/courses/browse">Browse the catalog →</Link>
+                  <Link to="/courses/browse">Browse the catalog <Icon name="arrow-right" size="0.9em" /></Link>
                 </>
               )}
             </div>
@@ -82,22 +82,30 @@ export default function Dashboard() {
               {myClasses.map((c) => {
                 const color = subjectColor(c.subject);
                 const teacher = profileById(c.teacher_id);
+                const openCount = assignments.filter(
+                  (a) => a.class_id === c.id && a.due_date >= today() && !isDone(a.id),
+                ).length;
                 return (
                   <Link key={c.id} to={`/courses/${c.id}`} className="course-card">
-                    <div className="course-card-hero" style={{ background: color }} />
                     <div className="course-card-body">
+                      <p className="eyebrow">
+                        <span className="dot-sm" style={{ background: color }} />
+                        {c.subject}
+                      </p>
                       <h3>{c.name}</h3>
                       <p className="sub">
-                        {c.subject} · {c.period} · Room {c.room ?? '—'}
+                        {c.period} · Room {c.room ?? '—'}
                       </p>
                       <p className="sub">{displayName(teacher)}</p>
                     </div>
-                    <div className="course-card-icons">
-                      <Icon name="pin" title="Announcements" />
-                      <Icon name="checklist" title="Assignments" />
-                      <Icon name="discussions" title="Discussions" />
-                      <Icon name="cards" title="Practice quizzes" />
-                    </div>
+                    {/* Counts, not a row of identical icons. Four bare glyphs
+                        repeated on every card told a student nothing they
+                        couldn't already see. */}
+                    <p className="course-card-stat">
+                      {openCount === 0
+                        ? 'Nothing due'
+                        : `${openCount} due`}
+                    </p>
                   </Link>
                 );
               })}
@@ -149,12 +157,10 @@ export default function Dashboard() {
               {todo.map((a) => (
                 <li key={a.id}>
                   <Link to={`/courses/${a.class_id}/assignments/${a.id}`}>
-                    <span
-                      className="feed-date-dot"
-                      style={{ background: subjectColor(classById(a.class_id)?.subject ?? '') }}
-                    />
                     <span className="todo-title">{a.title}</span>
-                    <span className="todo-meta">{dueLabel(a.due_date)}</span>
+                    <span className="todo-meta">
+                      {classById(a.class_id)?.name} · {dueLabel(a.due_date)}
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -162,7 +168,7 @@ export default function Dashboard() {
           )}
           <div className="divider" />
           <Link to="/homework" className="btn ghost small">
-            View all upcoming work →
+            View all upcoming work <Icon name="arrow-right" size="0.9em" />
           </Link>
         </aside>
       </div>

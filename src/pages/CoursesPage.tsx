@@ -49,7 +49,7 @@ export default function CoursesPage() {
           {isTeacher
             ? 'You don\'t teach any classes yet.'
             : 'You aren\'t enrolled in any courses yet.'}{' '}
-          <Link to="/courses/import">Import from Google Classroom →</Link>
+          <Link to="/courses/import">Import from Google Classroom <Icon name="arrow-right" size="0.9em" /></Link>
         </div>
       ) : (
         <div className="table-scroll">

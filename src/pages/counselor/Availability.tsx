@@ -54,7 +54,7 @@ export default function Availability({ counselorId }: { counselorId: string }) {
       setTime('');
       setFlash(
         created.length === dates.length
-          ? `Posted ${created.length} time${created.length === 1 ? '' : 's'} ✓`
+          ? `Posted ${created.length} time${created.length === 1 ? '' : 's'}`
           : `Posted ${created.length} — the rest were already on your list.`,
       );
     } finally {

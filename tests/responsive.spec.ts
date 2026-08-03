@@ -134,3 +134,41 @@ test.describe('accessibility', () => {
     expect(nameless).toEqual([]);
   });
 });
+
+test.describe('visual consistency', () => {
+  // Emoji were the thing that made this look assembled rather than designed:
+  // full-colour artwork at a stroke weight nobody chose, different on every
+  // platform. They came back twice after being removed by hand, so this fails
+  // the build instead of waiting for someone to notice in a screenshot.
+  const PICTOGRAPHIC = /[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/u;
+
+  const PAGES = [
+    '/dashboard',
+    '/homework',
+    '/calendar',
+    '/discussions',
+    '/courses',
+    '/courses/c-alg2/quizzes',
+    '/courses/c-alg2/assignments',
+    '/courses/c-alg2/files',
+  ];
+
+  for (const path of PAGES) {
+    test(`no emoji in the interface on ${path}`, async ({ page }) => {
+      await page.goto(path);
+      await page.locator('.rail-item').first().waitFor();
+
+      const text = await page.locator('.rail-main').innerText();
+      const found = [...text].filter((ch) => PICTOGRAPHIC.test(ch));
+      expect(found, `emoji rendered on ${path}: ${found.join(' ')}`).toEqual([]);
+    });
+  }
+
+  test('icons are drawn, not typed', async ({ page }) => {
+    await page.goto('/dashboard');
+    // The nav is the most visible place an emoji would land, so assert
+    // positively that each item carries a real SVG.
+    const glyphs = page.locator('.rail-item .rail-glyph svg');
+    expect(await glyphs.count()).toBeGreaterThanOrEqual(5);
+  });
+});

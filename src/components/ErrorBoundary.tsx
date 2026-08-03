@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import Icon from './Icon';
 
 interface Props {
   children: ReactNode;
@@ -31,7 +32,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     return (
       <div className="center-screen">
         <div className="card" style={{ maxWidth: 460, textAlign: 'center' }}>
-          <div style={{ fontSize: '2rem' }}>😕</div>
+          <div className="signin-mark"><Icon name="alert" size="1.4rem" /></div>
           <h1 style={{ fontSize: 'var(--text-lg)', margin: '0.5rem 0 0.25rem' }}>
             Something went wrong
           </h1>

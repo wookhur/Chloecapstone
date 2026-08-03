@@ -280,7 +280,7 @@ export default function ImportClassroom() {
       )}
 
       <p className="meta" style={{ marginTop: '1.25rem' }}>
-        ← Back to <Link to="/courses">Courses</Link>
+        <Icon name="chevron-left" size="0.9em" /> Back to <Link to="/courses">Courses</Link>
       </p>
     </div>
   );

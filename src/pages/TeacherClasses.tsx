@@ -12,6 +12,7 @@ import {
   type AssignmentType,
   type ClassInfo,
 } from '../lib/types';
+import Icon from '../components/Icon';
 
 export default function TeacherClasses() {
   const { currentUser, classes, assignments, refresh } = useApp();
@@ -32,7 +33,7 @@ export default function TeacherClasses() {
       </div>
 
       <div className="callout">
-        <span className="callout-icon">💡</span>
+        <span className="callout-icon"><Icon name="info" /></span>
         <div>
           <strong>Post a due date for every assignment — even paper handouts.</strong>
           <p style={{ margin: '4px 0 0' }}>

@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import * as repo from '../../lib/repository';
 import type { ClassInfo } from '../../lib/types';
 import { displayName, initial } from '../../lib/names';
+import Icon from '../../components/Icon';
 
 /** Discussions: topic list, or a single thread when :topicId is present. */
 export default function DiscussionsTab({
@@ -154,7 +155,7 @@ function TopicThread({
   return (
     <div>
       <Link to="../discussions" className="meta">
-        ← All discussions
+        <Icon name="chevron-left" size="0.9em" /> All discussions
       </Link>
       <h2 style={{ margin: '0.5rem 0 0.25rem' }}>{topic.title}</h2>
 

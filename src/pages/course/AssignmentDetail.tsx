@@ -21,7 +21,7 @@ export default function AssignmentDetail({ cls }: { cls: ClassInfo }) {
   return (
     <div>
       <Link to="../assignments" className="meta">
-        ← All assignments
+        <Icon name="chevron-left" size="0.9em" /> All assignments
       </Link>
       <h2 style={{ margin: '0.5rem 0 0.25rem' }}>
         <Icon name={ASSIGNMENT_ICON[assignment.type]} /> {assignment.title}
@@ -50,7 +50,7 @@ export default function AssignmentDetail({ cls }: { cls: ClassInfo }) {
       {assignment.link && (
         <p>
           <a href={assignment.link} target="_blank" rel="noreferrer" className="btn ghost small">
-            🔗 Resource
+            <Icon name="link" /> Resource
           </a>
         </p>
       )}

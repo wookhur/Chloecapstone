@@ -64,7 +64,7 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
               className={`btn secondary small ${showBulk ? "on" : ""}`}
               onClick={() => { setShowBulk((v) => !v); setShowForm(false); }}
             >
-              {showBulk ? 'Cancel' : '⚡ Add several'}
+              {showBulk ? 'Cancel' : <><Icon name="layers" size="0.9em" /> Add several</>}
             </button>
             <button
               className={`btn small ${showForm ? "secondary" : ""}`}

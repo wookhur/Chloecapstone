@@ -49,7 +49,7 @@ export default function AssignmentCard({ assignment, cls, onEdit, onDelete }: Pr
         <div className="row-between" style={{ marginTop: '0.7rem' }}>
           {assignment.link ? (
             <a href={assignment.link} target="_blank" rel="noreferrer" className="btn ghost small">
-              🔗 Resource
+              <Icon name="link" /> Resource
             </a>
           ) : (
             <span />

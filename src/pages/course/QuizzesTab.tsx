@@ -172,7 +172,7 @@ aria-label="Quiz title"             value={title}
         <div className="row-between">
           <span />
           <button className="btn small" disabled={!title.trim() || busy} onClick={createQuiz}>
-            {busy ? 'Creating…' : 'Create & add questions →'}
+            {busy ? 'Creating…' : <>Create &amp; add questions <Icon name="arrow-right" size="0.9em" /></>}
           </button>
         </div>
       </div>
@@ -195,7 +195,7 @@ aria-label="Quiz title"             value={title}
         <div key={q.id} className="quiz-question-row">
           <div>
             <strong>Q{i + 1}.</strong> {q.question}
-            <div className="meta">✓ {q.choices[q.correct_index]}</div>
+            <div className="meta"><Icon name="check" size="0.9em" /> {q.choices[q.correct_index]}</div>
           </div>
           <button
             className="btn danger small"
@@ -290,7 +290,7 @@ function BankPicker({
             <li key={c.id} className="quiz-question-row">
               <div>
                 {c.question}
-                <div className="meta">✓ {c.choices[c.correct_index]} · {c.quizTitle}</div>
+                <div className="meta"><Icon name="check" size="0.9em" /> {c.choices[c.correct_index]} · {c.quizTitle}</div>
               </div>
               <button
                 className="btn small"
