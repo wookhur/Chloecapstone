@@ -75,7 +75,7 @@ export default function CalendarPage() {
           </div>
           <div className="inline" style={{ gap: '0.4rem' }}>
             <button className="btn secondary small" onClick={exportCalendar}>
-              📤 Export (.ics)
+              <><Icon name="upload" /> Export (.ics)</>
             </button>
             <button
               className={`btn small ${showForm ? "secondary" : ""}`}
@@ -133,7 +133,7 @@ export default function CalendarPage() {
         <div className="empty">
           Nothing on your calendar yet. Add an event above
           {currentUser.role === 'student' && (
-            <>, or <Link to="/courses/browse">pick your classes →</Link></>
+            <>, or <Link to="/courses/browse">pick your classes <Icon name="arrow-right" size="0.9em" /></Link></>
           )}
           .
         </div>

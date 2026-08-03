@@ -38,7 +38,14 @@ export type IconName =
   | 'users'
   | 'pin'
   | 'chevron-left'
-  | 'chevron-right';
+  | 'chevron-right'
+  | 'arrow-right'
+  | 'link'
+  | 'upload'
+  | 'x'
+  | 'alert'
+  | 'info'
+  | 'layers';
 
 const PATHS: Record<IconName, string> = {
   home: 'M3 10.5 12 3l9 7.5M5.5 9.5V20h13V9.5M9.5 20v-6h5v6',
@@ -68,6 +75,13 @@ const PATHS: Record<IconName, string> = {
   pin: 'M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
   'chevron-left': 'M14.5 5.5 8 12l6.5 6.5',
   'chevron-right': 'M9.5 5.5 16 12l-6.5 6.5',
+  'arrow-right': 'M4.5 12h15M13.5 6l6 6-6 6',
+  link: 'M10.5 13.5a4 4 0 0 0 5.7 0l3.3-3.3a4 4 0 1 0-5.7-5.7l-1.6 1.6M13.5 10.5a4 4 0 0 0-5.7 0l-3.3 3.3a4 4 0 1 0 5.7 5.7l1.6-1.6',
+  upload: 'M12 16V4M7.5 8.5 12 4l4.5 4.5M4.5 20h15',
+  x: 'M6 6l12 12M18 6 6 18',
+  alert: 'M12 3.5 21.5 20H2.5zM12 10v4.5M12 17.2v.1',
+  info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5.5M12 7.6v.1',
+  layers: 'M12 3.5 21 8l-9 4.5L3 8zM3 12.5 12 17l9-4.5M3 16.8 12 21.3l9-4.5',
 };
 
 /** Icons that read better filled than stroked. */

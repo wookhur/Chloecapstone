@@ -68,7 +68,7 @@ export default function Feed() {
           {isStudent ? (
             <>
               You haven't picked any classes yet.{' '}
-              <Link to="/classes">Choose your classes →</Link>
+              <Link to="/classes">Choose your classes <Icon name="arrow-right" size="0.9em" /></Link>
             </>
           ) : (
             <>You don't teach any classes yet. Create one from “My Classes”.</>

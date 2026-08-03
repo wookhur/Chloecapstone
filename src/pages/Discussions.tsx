@@ -5,6 +5,7 @@ import * as repo from '../lib/repository';
 import { subjectColor } from '../lib/subjectColor';
 import type { DiscussionTopic } from '../lib/types';
 import { displayName, initial } from '../lib/names';
+import Icon from '../components/Icon';
 
 type SortOrder = 'new' | 'old';
 
@@ -91,7 +92,7 @@ export default function Discussions() {
         </select>
 
         <div className="search-wrap">
-          <span className="search-icon" aria-hidden="true">🔍</span>
+          <span className="search-icon" aria-hidden="true"><Icon name="search" size="0.95em" /></span>
           <input
             className="search-input"
             type="search"
@@ -102,7 +103,7 @@ export default function Discussions() {
           />
           {query && (
             <button className="search-clear" onClick={() => setQuery('')} aria-label="Clear search">
-              ✕
+              <Icon name="x" size="0.8em" />
             </button>
           )}
         </div>
@@ -275,13 +276,13 @@ function Thread({ topic, onBack }: { topic: DiscussionTopic; onBack: () => void 
   return (
     <div>
       <button className="btn ghost small" onClick={onBack} style={{ paddingLeft: 0 }}>
-        ← All discussions
+        <Icon name="chevron-left" size="0.9em" /> All discussions
       </button>
       <div className="row-between" style={{ margin: '0.25rem 0 0.25rem', flexWrap: 'wrap' }}>
         <h1 style={{ margin: 0, fontSize: 'var(--text-xl)' }}>{topic.title}</h1>
         {cls && (
           <Link to={`/courses/${cls.id}/discussions`} className="chip">
-            {cls.name} →
+            {cls.name} <Icon name="arrow-right" size="0.9em" />
           </Link>
         )}
       </div>

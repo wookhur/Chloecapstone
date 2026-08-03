@@ -101,7 +101,10 @@ test.describe('practice quizzes', () => {
     await page.click('button:has-text("Add card")');
 
     // Compacting drops the blank choice, so the stored index must be re-mapped.
-    await expect(page.locator('.quiz-question-row')).toContainText('✓ Rome');
+    // The .meta line names the correct answer; it must be Rome, not the blank.
+    const stored = page.locator('.quiz-question-row .meta');
+    await expect(stored).toContainText('Rome');
+    await expect(stored).not.toContainText('Paris');
   });
 
   test('practicing gives instant feedback and a retry', async ({ page }) => {
@@ -168,7 +171,7 @@ test.describe('counselor', () => {
     await text.nth(1).fill('2:00pm');
     await form.locator('input[type=date]').fill(new Intl.DateTimeFormat('en-CA').format(new Date()));
     await page.click('button:has-text("Add to student calendar")');
-    await expect(form).toContainText('calendar ✓');
+    await expect(form).toContainText("Added to Zoe's calendar");
 
     await signInAs(page, USERS.zoe);
     await navTo(page, 'Calendar');

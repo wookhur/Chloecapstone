@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import * as repo from '../../lib/repository';
 import { WEEKDAY_LABELS, today, parseISO, weeklyDates } from '../../lib/dates';
 import { ASSIGNMENT_TYPES, type AssignmentType, type ClassInfo } from '../../lib/types';
+import Icon from '../../components/Icon';
 
 type Mode = 'list' | 'repeat';
 
@@ -94,7 +95,7 @@ export default function BulkAssignments({
           created_by: teacherId,
         })),
       );
-      setResult(`Posted ${rows.length} assignment${rows.length === 1 ? '' : 's'} ✓`);
+      setResult(`Posted ${rows.length} assignment${rows.length === 1 ? '' : 's'}`);
       setPasted('');
       setRepeatTitle('');
       setUntil('');
@@ -155,7 +156,10 @@ export default function BulkAssignments({
               <ul className="plain-list">
                 {drafts.map((d, i) => (
                   <li key={i} className={`bulk-row ${d.error ? 'has-error' : ''}`}>
-                    <span>{d.error ? '⚠️' : '✓'} {d.title || <em>(no title)</em>}</span>
+                    <span>
+                <Icon name={d.error ? 'alert' : 'check'} size="0.9em" />{' '}
+                {d.title || <em>(no title)</em>}
+              </span>
                     <span className="meta">{d.error ?? d.due}</span>
                   </li>
                 ))}

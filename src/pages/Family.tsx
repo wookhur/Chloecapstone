@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { dueLabel, parseISO, today } from '../lib/dates';
 import { displayName } from '../lib/names';
-import { subjectColor } from '../lib/subjectColor';
 import { dueSoon } from '../lib/reminders';
 import { CALENDAR_CATEGORIES } from '../lib/types';
 import Icon, { type IconName } from '../components/Icon';
@@ -125,10 +124,6 @@ export default function Family() {
               return (
                 <li key={a.id} className={`list-row ${a.done ? 'is-done' : ''}`}>
                   <div className="inline" style={{ gap: '0.5rem' }}>
-                    <span
-                      className="feed-date-dot"
-                      style={{ background: subjectColor(cls?.subject ?? '') }}
-                    />
                     <div>
                       <strong>{a.title}</strong>
                       <div className="meta">{cls?.name}</div>
