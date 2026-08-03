@@ -98,7 +98,13 @@ layout, dark mode, and keyboard/screen-reader accessibility.
    cp .env.example .env.local
    # edit .env.local: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
    ```
-4. Restart `npm run dev`. The "Demo mode" banner disappears, data is live, and
+4. Check it landed:
+   ```bash
+   npm run check:supabase
+   ```
+   It verifies the keys, every table, the seed data and the storage bucket, and
+   names the missing piece if something isn't there.
+5. Restart `npm run dev`. The "Demo mode" banner disappears, data is live, and
    the app now asks people to sign in.
 
 > Connecting Supabase also turns on **sign-in** — see below. The starting RLS
