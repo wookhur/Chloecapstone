@@ -102,6 +102,7 @@ export default function App() {
 
   return (
     <div className="app-shell rail-layout">
+      <a className="skip-link" href="#main">Skip to content</a>
       <aside className="global-rail">
         <div className="rail-brand" title="Homework Hub">
           <BrandMark />
@@ -166,7 +167,7 @@ export default function App() {
           )}
         </header>
 
-        <main className="content">
+        <main className="content" id="main" tabIndex={-1}>
           {error && (
             <div className="banner error" role="alert">
               <span className="dot" />
