@@ -37,3 +37,43 @@ test.describe('sign-in gate', () => {
     await expect(page.locator('.banner.demo')).toHaveCount(0);
   });
 });
+
+test.describe('sign-in screen', () => {
+  test('the button stays out of reach until an address is typed', async ({ page }) => {
+    await page.goto('/');
+    const submit = page.locator('button[type=submit]');
+
+    // Disabled, but styled as a quiet surface rather than a dead grey slab —
+    // full opacity is the tell that it reads as "waiting", not "broken".
+    await expect(submit).toBeDisabled();
+    await expect(submit).toHaveCSS('opacity', '1');
+
+    await page.fill('#signin-email', 'mina@school.org');
+    await expect(submit).toBeEnabled();
+  });
+
+  test('the card is centred in the viewport, not floating near the top', async ({ page }) => {
+    await page.goto('/');
+    const card = page.locator('.signin-card');
+    const box = (await card.boundingBox())!;
+    const viewport = page.viewportSize()!;
+
+    // The old layout left the card high with a large dead area beneath it.
+    const above = box.y;
+    const below = viewport.height - (box.y + box.height);
+    expect(Math.abs(above - below), `top ${above}px vs bottom ${below}px`).toBeLessThan(90);
+  });
+
+  test('a failure explains itself instead of printing "Failed to fetch"', async ({ page }) => {
+    await page.goto('/');
+    await page.fill('#signin-email', 'mina@school.org');
+    await page.click('button[type=submit]');
+
+    // The Supabase URL points at a closed port here, so this is the real
+    // network-failure path a student would hit offline.
+    const banner = page.locator('.banner.error');
+    await expect(banner).toBeVisible();
+    await expect(banner).toContainText("Couldn't reach the server");
+    await expect(banner).not.toContainText('fetch');
+  });
+});

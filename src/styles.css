@@ -497,15 +497,91 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .center-screen { display: grid; place-items: center; min-height: 60vh; color: var(--ink-soft); }
 
-/* Sign-in / "your email isn't set up yet" card. Narrow on purpose: one thing
-   to read, one thing to type. */
-.signin-card {
-  width: min(28rem, calc(100vw - 2rem));
-  margin: var(--space-5) auto;
-  color: var(--ink);
-  text-align: left;
+/* Sign-in screen -----------------------------------------------------------*/
+/* Its own layout, not a card dropped into a page. This is the first thing
+   anyone sees — and for a teacher being shown the app, possibly the only thing
+   they judge it by. */
+.signin-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+  background: var(--bg);
 }
-.signin-card .btn { width: 100%; justify-content: center; }
+
+.signin-card {
+  width: min(25rem, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow-raised);
+  padding: var(--space-6) 1.75rem;
+  text-align: left;
+  color: var(--ink);
+}
+
+/* Mark and wordmark on one line, so the header reads as a lockup rather than
+   a loose icon with a heading under it. */
+.signin-lockup { display: flex; align-items: center; gap: 0.6rem; }
+.signin-lockup h1 {
+  margin: 0; font-size: 1.4rem; font-weight: 650;
+  letter-spacing: var(--tracking-tight);
+}
+.signin-mark {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 40px; height: 40px; border-radius: 11px;
+  background: var(--surface-2); color: var(--ink);
+}
+.signin-tagline {
+  margin: 0.6rem 0 0; color: var(--ink-soft); font-size: var(--text-sm);
+}
+
+.signin-form { margin-top: var(--space-5); }
+.signin-form .field { margin-bottom: var(--space-3); }
+.signin-form .field input { padding: 0.65rem 0.75rem; }
+
+.signin-submit { width: 100%; padding: 0.65rem 1rem; font-size: var(--text-base); }
+/* A disabled primary button at low opacity reads as broken rather than as
+   waiting for you. Make it a quiet surface instead. */
+.signin-submit:disabled {
+  opacity: 1;
+  background: var(--surface-2);
+  color: var(--ink-faint);
+  border-color: var(--line);
+}
+.signin-hint {
+  margin: 0.7rem 0 0; font-size: var(--text-xs); color: var(--ink-faint);
+  text-align: center; text-wrap: pretty;
+}
+
+/* Confirmation replaces the form outright — a second link would invalidate the
+   first, so the form must not still be sitting there inviting another click. */
+.signin-sent { margin-top: var(--space-5); text-align: center; }
+.signin-sent-mark {
+  display: inline-grid; place-items: center;
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent); margin-bottom: var(--space-3);
+}
+.signin-sent h2 { margin: 0 0 var(--space-2); font-size: var(--text-md); }
+.signin-sent p { margin: 0 0 var(--space-4); color: var(--ink-soft); font-size: var(--text-sm); }
+.signin-sent strong { color: var(--ink); overflow-wrap: anywhere; }
+
+.signin-card .banner { margin: var(--space-4) 0 0; }
+
+.signin-foot {
+  width: min(25rem, 100%);
+  margin: 0; text-align: center;
+  font-size: var(--text-xs); color: var(--ink-faint); line-height: 1.5;
+  text-wrap: pretty;
+}
+
+/* The "your email isn't set up yet" card reuses the same shell. */
+.center-screen .signin-card { margin: 0 auto; box-shadow: var(--shadow); }
+.center-screen .signin-card .btn { width: 100%; justify-content: center; }
 
 /* Global nav rail ----------------------------------------------------------*/
 .rail-layout { flex-direction: row; }
