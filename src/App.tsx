@@ -77,6 +77,11 @@ export default function App() {
     );
   }
 
+  // The fix for demo mode differs by where the app is running: a local dev
+  // server reads .env.local, but a deployed site never sees that file — telling
+  // a visitor on duesis.com to add one sends them somewhere with no effect.
+  const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname);
+
   const isCounselor = currentUser?.role === 'counselor';
   const isParent = currentUser?.role === 'parent';
   const home = isCounselor ? '/counselor' : isParent ? '/family' : '/dashboard';
@@ -159,8 +164,16 @@ export default function App() {
           {!supabaseConnected && (
             <div className="banner demo">
               <span className="dot" />
-              Demo mode — Supabase isn't connected, so changes live in memory only.
-              Add <code>.env.local</code> to use your database.
+              Demo mode — no database connected, so changes live in memory only.{' '}
+              {isLocal ? (
+                <>Add <code>.env.local</code> to use your database.</>
+              ) : (
+                <>
+                  Set <code>VITE_SUPABASE_URL</code> and{' '}
+                  <code>VITE_SUPABASE_ANON_KEY</code> in this site's hosting
+                  settings, then redeploy.
+                </>
+              )}
             </div>
           )}
 
