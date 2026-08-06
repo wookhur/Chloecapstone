@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Homework Hub \u2014 pick your classes and see all your homework in one feed + calendar",
+  "description": "Homework Hub — pick your classes and see all your homework in one feed + calendar",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -14,6 +14,7 @@
     "check:supabase": "node scripts/check-supabase.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/geist": "^5.3.0",
     "@supabase/supabase-js": "^2.45.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

@@ -77,3 +77,46 @@ test.describe('sign-in screen', () => {
     await expect(banner).not.toContainText('fetch');
   });
 });
+
+test.describe('demo link for showing the app to someone', () => {
+  // These run against the CONFIGURED build, which normally demands sign-in.
+  // The point of ?demo is that it gets past that door without an account.
+  test('?demo skips the sign-in gate entirely', async ({ page }) => {
+    await page.goto('/?demo');
+    await expect(page.locator('.signin-card')).toHaveCount(0);
+    await expect(page.locator('.rail-item').first()).toBeVisible();
+    await expect(page.locator('.content')).toContainText('Sample data');
+  });
+
+  test('every role is reachable without an account', async ({ page }) => {
+    await page.goto('/?demo');
+    // The account switcher is what makes a demo worth giving someone: a
+    // teacher can see the teacher view without one being created for them.
+    const options = await page.locator('#user option').allTextContents();
+    expect(options.some((o) => o.includes('Ms. Anderson'))).toBe(true);
+    expect(options.some((o) => o.includes('Rivera'))).toBe(true);
+    expect(options.some((o) => o.includes('Kim'))).toBe(true);
+  });
+
+  test('demo mode survives navigating around', async ({ page }) => {
+    await page.goto('/?demo');
+    // The query string is gone after a client-side route change, so without
+    // the remembered flag the next click would bounce back to sign-in.
+    await page.click('.rail-item:has-text("Calendar")');
+    await expect(page.locator('.calendar-grid')).toBeVisible();
+    await expect(page.locator('.signin-card')).toHaveCount(0);
+  });
+
+  test('?demo=0 hands the door back', async ({ page }) => {
+    await page.goto('/?demo');
+    await expect(page.locator('.rail-item').first()).toBeVisible();
+
+    await page.goto('/?demo=0');
+    await expect(page.locator('.signin-card')).toBeVisible();
+  });
+
+  test('the sign-in gate still holds for anyone who did not ask', async ({ page }) => {
+    await page.goto('/dashboard');
+    await expect(page.locator('.signin-card')).toBeVisible();
+  });
+});

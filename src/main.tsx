@@ -1,3 +1,7 @@
+// Self-hosted, so there is no CDN request on a school network and no
+// third party learning which students opened the app. unicode-range means a
+// browser only fetches the latin subset it needs (~32 kB).
+import '@fontsource-variable/geist';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
