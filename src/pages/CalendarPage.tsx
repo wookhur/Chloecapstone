@@ -5,7 +5,7 @@ import Calendar from '../components/Calendar';
 import AssignmentCard from '../components/AssignmentCard';
 import * as repo from '../lib/repository';
 import { today } from '../lib/dates';
-import { subjectColor } from '../lib/subjectColor';
+import { accent, subjectColor } from '../lib/subjectColor';
 import { displayName } from '../lib/names';
 import { buildICS, downloadICS } from '../lib/ical';
 import {
@@ -73,7 +73,7 @@ export default function CalendarPage() {
             <h1>Calendar</h1>
             <p>Your course assignments plus anything you add yourself.</p>
           </div>
-          <div className="inline" style={{ gap: '0.4rem' }}>
+          <div className="inline gap-1">
             <button className="btn secondary small" onClick={exportCalendar}>
               <><Icon name="upload" /> Export (.ics)</>
             </button>
@@ -149,7 +149,7 @@ export default function CalendarPage() {
       )}
 
       {selected && (
-        <div className="section" style={{ marginTop: '1.25rem' }}>
+        <div className="section mt-5">
           <div className="row-between">
             <h2>Selected assignment</h2>
             <button className="btn ghost small" onClick={() => setSelected(null)}>Clear</button>
@@ -159,7 +159,7 @@ export default function CalendarPage() {
       )}
 
       {selectedEvent && (
-        <div className="section" style={{ marginTop: '1.25rem' }}>
+        <div className="section mt-5">
           <div className="row-between">
             <h2>Selected event</h2>
             <button className="btn ghost small" onClick={() => setSelectedEvent(null)}>Clear</button>
@@ -197,14 +197,14 @@ function EventCard({
       ? displayName(profileById(event.created_by))
       : null;
   return (
-    <div className="card" style={{ borderLeft: `4px solid ${cat.color}` }}>
+    <div className="card accent-left" style={accent(cat.color)}>
       <div className="row-between">
         <div>
-          <h3 style={{ margin: 0 }} className="inline">
+          <h3 className="inline m-0">
             <Icon name={cat.icon as IconName} />
             {event.title}
           </h3>
-          <p className="sub" style={{ marginTop: 2 }}>
+          <p className="sub mt-1">
             <span className="subject-chip">
               <span className="legend-dot" style={{ background: cat.color }} />
               {cat.label}
@@ -218,9 +218,9 @@ function EventCard({
         </div>
         {canDelete && <button className="btn danger small" onClick={onDelete}>Delete</button>}
       </div>
-      {event.note && <p className="sub" style={{ marginTop: '0.6rem' }}>{event.note}</p>}
+      {event.note && <p className="sub mt-3">{event.note}</p>}
       {scheduledByName && (
-        <p className="meta" style={{ marginTop: '0.5rem' }}>
+        <p className="meta mt-2">
           <Icon name="compass" /> Scheduled by {scheduledByName}
         </p>
       )}
@@ -262,9 +262,9 @@ function EventForm({
   };
 
   return (
-    <div className="card" style={{ marginBottom: '1.25rem' }}>
-      <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div className="field" style={{ flex: '1 1 220px' }}>
+    <div className="card mb-5">
+      <div className="inline form-row">
+        <div className="field">
           <label>What is it?</label>
           <input
 aria-label="What is it?"             value={title}
@@ -272,11 +272,11 @@ aria-label="What is it?"             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
-        <div className="field" style={{ flex: '0 0 160px' }}>
+        <div className="field w-date">
           <label>Date</label>
           <input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
-        <div className="field" style={{ flex: '0 0 150px' }}>
+        <div className="field w-mid">
           <label>Type</label>
           <select aria-label="Type" value={category} onChange={(e) => setCategory(e.target.value as CalendarEventCategory)}>
             {CALENDAR_CATEGORIES.filter((c) => c.key !== 'counseling').map((c) => (
@@ -290,7 +290,7 @@ aria-label="What is it?"             value={title}
         <input aria-label="Note" value={note} onChange={(e) => setNote(e.target.value)} />
       </div>
       <div className="row-between">
-        <span className="muted" style={{ fontSize: '0.8rem' }}>
+        <span className="muted text-xs">
           Events are personal — only you see them on your calendar.
         </span>
         <button className="btn small" disabled={!title.trim() || !date || busy} onClick={submit}>

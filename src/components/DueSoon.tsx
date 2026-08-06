@@ -46,7 +46,7 @@ export default function DueSoon() {
     return (
       <div className="callout subtle-callout">
         <span className="callout-icon"><Icon name="check" /></span>
-        <div className="row-between" style={{ flex: 1 }}>
+        <div className="row-between grow">
           <span>Nothing due in the next couple of days. Nice.</span>
           {notificationsSupported && (
             <button className="btn secondary small" onClick={toggleReminders}>
@@ -60,7 +60,7 @@ export default function DueSoon() {
 
   return (
     <section className="due-soon" aria-labelledby="due-soon-heading">
-      <div className="row-between" style={{ marginBottom: '0.6rem' }}>
+      <div className="row-between mb-3">
         <h2 id="due-soon-heading" className="section-title">
           Due soon ({urgent.length})
         </h2>
@@ -77,9 +77,9 @@ export default function DueSoon() {
           const overdue = a.due_date < new Date().toISOString().slice(0, 10);
           return (
             <li key={a.id} className="list-row">
-              <div className="inline" style={{ gap: '0.5rem' }}>
+              <div className="inline gap-2">
                 <div>
-                  <Link to={`/courses/${a.class_id}/assignments/${a.id}`} style={{ fontWeight: 600 }}>
+                  <Link to={`/courses/${a.class_id}/assignments/${a.id}`} className="semibold">
                     {a.title}
                   </Link>
                   <div className="meta">{cls?.name}</div>
@@ -94,7 +94,7 @@ export default function DueSoon() {
       </ul>
 
       {!remindersOn && notificationsSupported && (
-        <p className="meta" style={{ marginTop: '0.5rem' }}>
+        <p className="meta mt-2">
           Turn on reminders and your device will tell you about these even when
           Homework Hub isn't open.
         </p>

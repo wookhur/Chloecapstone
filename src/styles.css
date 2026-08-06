@@ -467,7 +467,17 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .calendar-item:hover { filter: brightness(0.97); }
 .calendar-item-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .calendar-item-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
-.calendar-item.is-event { background: var(--surface); border-style: dashed; }
+/* Both take their hue from --subject. How far the fill is knocked back, and how
+   much softer the dashed outline sits, are tuning decisions — they belong next
+   to the rest of the tuning rather than in the middle of a map() in JSX. */
+.calendar-item.is-assignment {
+  border-color: var(--subject);
+  background: color-mix(in srgb, var(--subject) 12%, transparent);
+}
+.calendar-item.is-event {
+  background: var(--surface); border-style: dashed;
+  border-color: color-mix(in srgb, var(--subject) 53%, transparent);
+}
 .calendar-more {
   font-size: var(--text-xs); color: var(--ink-soft); padding: 0.2rem;
   text-align: left; text-decoration: underline; min-height: 24px;
@@ -510,7 +520,53 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   color: var(--ink-soft); font-size: var(--text-sm);
   border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2);
 }
+/* The composed version, for tabs that are simply new rather than broken. */
+.empty.is-composed { display: grid; justify-items: center; gap: var(--space-2); }
+.empty-mark {
+  display: grid; place-items: center; width: 2.5rem; height: 2.5rem;
+  border-radius: 50%; background: var(--surface); border: 1px solid var(--line);
+  color: var(--ink-faint);
+}
+.empty-title { margin: 0; color: var(--ink); font-weight: 600; font-size: var(--text-base); }
+.empty-body { max-width: 34ch; display: grid; justify-items: center; gap: var(--space-3); }
+.empty-body p { margin: 0; }
 .center-screen { display: grid; place-items: center; min-height: 60vh; color: var(--ink-soft); }
+
+/* Loading ------------------------------------------------------------------*/
+/* The word "Loading…" centred in an empty page tells you nothing except that
+   the app hasn't failed. Blocking out the shape that's coming does the same job
+   and leaves the eye already in the right place when the data lands, so the
+   first paint isn't a jump. */
+.skel {
+  background: var(--surface-2); border-radius: var(--radius-xs);
+  position: relative; overflow: hidden;
+}
+.skel::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(
+    90deg, transparent, color-mix(in srgb, var(--ink) 5%, transparent), transparent
+  );
+  transform: translateX(-100%);
+  animation: skel-sweep 1.4s ease-in-out infinite;
+}
+@keyframes skel-sweep { to { transform: translateX(100%); } }
+
+/* A sweep that never stops is the wrong thing to put in front of someone who
+   asked the system to calm down. The blocks stay; only the motion goes. */
+@media (prefers-reduced-motion: reduce) {
+  .skel::after { animation: none; }
+}
+
+.skel-line { height: 0.7rem; }
+.skel-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 1.15rem 1.25rem; background: var(--surface); }
+/* Ragged line lengths, because real text is ragged — equal bars read as a
+   loading graphic, uneven ones read as a paragraph about to arrive. */
+.skel-w-25 { width: 25%; }
+.skel-w-40 { width: 40%; }
+.skel-w-55 { width: 55%; }
+.skel-w-70 { width: 70%; }
+.skel-w-90 { width: 90%; }
+.skel-title { height: 1.5rem; border-radius: var(--radius-xs); }
 
 /* Sign-in screen -----------------------------------------------------------*/
 /* Its own layout, not a card dropped into a page. This is the first thing
@@ -648,6 +704,17 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   text-decoration: none; transform: translateY(-2px);
   box-shadow: var(--shadow-raised); border-color: var(--line-strong);
 }
+/* Hover doesn't exist on a phone, and this app is mostly opened on one. Without
+   a pressed state the tap between the finger going down and the next screen
+   arriving is silent, which is exactly the moment that gets tapped twice. */
+.course-card:active { transform: translateY(0); box-shadow: none; }
+.calendar-item:active,
+.class-card:active,
+.gc-course:active,
+.announcement-row:active,
+.quiz-choice:active { filter: brightness(0.95); }
+.rail-item:active { background: var(--surface-3); }
+
 /* A band of the subject colour, not a full block of it. */
 .course-card-hero { height: 5px; }
 .course-card-body { padding: var(--space-3) var(--space-4) 0.4rem; }
@@ -1036,3 +1103,116 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   transition: transform 0.15s var(--ease);
 }
 .skip-link:focus-visible { transform: translateY(0); text-decoration: none; }
+
+/* Present to a screen reader, absent to the eye. `display: none` would take it
+   out of the accessibility tree too, which is the opposite of the point. */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0; padding: 0; margin: -1px;
+}
+
+/* ===========================================================================
+   Spacing utilities and form rows
+
+   These replace ~230 inline style objects. Most were spacing, and the repeats
+   were the tell: `gap / alignItems / flexWrap` appeared verbatim ten times,
+   which is a component asking to exist rather than ten independent decisions.
+
+   Every value maps to the --space-* scale, so spacing that had drifted to
+   0.6rem / 0.35rem / 2px by hand now lands on the same rhythm as everything
+   else.
+   ===========================================================================*/
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mt-auto { margin-top: auto; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-5 { margin-bottom: var(--space-5); }
+
+.m-0 { margin: 0; }
+.ml-auto { margin-left: auto; }
+
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+
+.grow { flex: 1; min-width: 0; }
+.nowrap { white-space: nowrap; }
+.capitalize { text-transform: capitalize; }
+.text-sm { font-size: var(--text-sm); }
+.text-lg { font-size: var(--text-lg); }
+.semibold { font-weight: 600; }
+
+/* A row of form fields that wraps on narrow screens. This exact combination
+   was written out by hand ten times. */
+.form-row {
+  display: flex; flex-wrap: wrap; gap: var(--space-3);
+  align-items: flex-start;
+}
+/* Fixed-width fields inside it — a date picker doesn't want to be as wide as
+   a title. Sized by role rather than by a pixel count repeated per usage. */
+.form-row .field { flex: 1 1 200px; margin-bottom: 0; }
+.form-row .field.w-date { flex: 0 0 160px; }
+.form-row .field.w-short { flex: 0 0 130px; }
+.form-row .field.w-mid { flex: 0 0 150px; }
+.form-row + .form-row { margin-top: var(--space-3); }
+@media (max-width: 640px) {
+  /* Fixed widths stop being helpful once there is only one column. */
+  .form-row .field, .form-row .field.w-date,
+  .form-row .field.w-short, .form-row .field.w-mid { flex: 1 1 100%; }
+}
+
+/* Remaining shapes that were written inline more than once. */
+.pre-wrap { white-space: pre-wrap; }
+.text-xs { font-size: var(--text-xs); }
+.text-md { font-size: var(--text-md); }
+.text-center { text-align: center; }
+.w-auto { width: auto; }
+.pl-0 { padding-left: 0; }
+
+/* A heading immediately under a back-link, then its subtitle. Three screens
+   spelled this out as two separate margin objects. */
+.detail-head { margin: var(--space-2) 0 var(--space-1); }
+.detail-sub { margin: 0 0 var(--space-5); }
+
+/* Body copy that must keep the author's line breaks — discussion posts,
+   announcements, assignment descriptions. */
+.post-body { margin: 0; white-space: pre-wrap; }
+
+/* A caption sitting tight under the thing it describes. */
+.caption { margin: var(--space-1) 0 0; }
+
+/* The paste-a-list textarea in bulk entry wants monospace and room to work. */
+.code-input {
+  min-height: 120px; font-family: var(--font-mono); font-size: var(--text-sm);
+}
+
+/* Narrow centred column for confirmations and summaries. */
+.narrow-centre { max-width: 460px; text-align: center; margin-inline: auto; }
+.my-4 { margin-block: var(--space-4); }
+.justify-center { justify-content: center; }
+.form-row .field.w-tiny { flex: 0 0 100px; }
+.form-row .field.w-wide { flex: 0 0 200px; }
+.my-1 { margin-block: var(--space-1); }
+.ml-2 { margin-left: var(--space-2); }
+.text-xl { font-size: var(--text-xl); }
+.w-cap { max-width: 180px; }
+
+/* Subject colour as a stripe down the left of a card. The component supplies
+   --subject (see accent() in lib/subjectColor); the thickness lives here, so
+   changing it is one edit rather than five. */
+.accent-left { border-left: 4px solid var(--subject, var(--line)); }
+
+/* An inline colour dot in running text or a table cell, as opposed to the
+   flex-child dots elsewhere, which get their spacing from the parent's gap. */
+.dot-inline { display: inline-block; margin-right: var(--space-2); }

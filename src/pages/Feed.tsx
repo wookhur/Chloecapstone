@@ -117,7 +117,7 @@ export default function Feed() {
             <span className="meta">
               {doneCount} of {inScope.length} done
             </span>
-            <label className="inline meta" style={{ gap: '0.35rem' }}>
+            <label className="inline meta gap-1">
               <input
                 type="checkbox"
                 checked={hideDone}

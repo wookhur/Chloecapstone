@@ -209,16 +209,16 @@ function NewTopicForm({
 
   if (classes.length === 0) {
     return (
-      <div className="empty" style={{ marginBottom: '1rem' }}>
+      <div className="empty mb-4">
         Join a course first to start a discussion.
       </div>
     );
   }
 
   return (
-    <div className="card" style={{ marginBottom: '1rem' }}>
-      <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div className="field" style={{ flex: '0 0 220px' }}>
+    <div className="card mb-4">
+      <div className="inline form-row">
+        <div className="field w-wide">
           <label>Course</label>
           <select aria-label="Course" value={classId} onChange={(e) => setClassId(e.target.value)}>
             {classes.map((c) => (
@@ -226,7 +226,7 @@ function NewTopicForm({
             ))}
           </select>
         </div>
-        <div className="field" style={{ flex: '1 1 240px' }}>
+        <div className="field">
           <label>Topic title</label>
           <input aria-label="Topic title" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
@@ -275,11 +275,11 @@ function Thread({ topic, onBack }: { topic: DiscussionTopic; onBack: () => void 
 
   return (
     <div>
-      <button className="btn ghost small" onClick={onBack} style={{ paddingLeft: 0 }}>
+      <button className="btn ghost small pl-0" onClick={onBack}>
         <Icon name="chevron-left" size="0.9em" /> All discussions
       </button>
-      <div className="row-between" style={{ margin: '0.25rem 0 0.25rem', flexWrap: 'wrap' }}>
-        <h1 style={{ margin: 0, fontSize: 'var(--text-xl)' }}>{topic.title}</h1>
+      <div className="row-between my-1">
+        <h1 className="m-0 text-xl">{topic.title}</h1>
         {cls && (
           <Link to={`/courses/${cls.id}/discussions`} className="chip">
             {cls.name} <Icon name="arrow-right" size="0.9em" />
@@ -287,24 +287,24 @@ function Thread({ topic, onBack }: { topic: DiscussionTopic; onBack: () => void 
         )}
       </div>
 
-      <div className="card" style={{ margin: '0.75rem 0 1.25rem' }}>
-        <div className="inline" style={{ gap: '0.5rem', marginBottom: '0.4rem' }}>
+      <div className="card detail-sub">
+        <div className="inline gap-2 mb-1">
           <span className="avatar">{initial(author)}</span>
           <strong>{displayName(author)}</strong>
           {author?.role === 'teacher' && <span className="chip">Teacher</span>}
         </div>
-        <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{topic.body}</p>
+        <p className="post-body">{topic.body}</p>
       </div>
 
-      <h3 style={{ fontSize: '0.95rem', margin: '0 0 0.6rem' }}>
+      <h3 className="text-sm mb-2">
         {posts.length} repl{posts.length === 1 ? 'y' : 'ies'}
       </h3>
-      <div className="stack" style={{ gap: '0.6rem' }}>
+      <div className="stack gap-2">
         {posts.map((p) => {
           const who = profileById(p.author_id);
           return (
             <div key={p.id} className="card subtle discussion-post">
-              <div className="inline" style={{ gap: '0.5rem', marginBottom: '0.3rem' }}>
+              <div className="inline gap-2 mb-1">
                 <span className="avatar">{initial(who)}</span>
                 <strong>{displayName(who)}</strong>
                 {who?.role === 'teacher' && <span className="chip">Teacher</span>}
@@ -317,13 +317,13 @@ function Thread({ topic, onBack }: { topic: DiscussionTopic; onBack: () => void 
                   })}
                 </span>
               </div>
-              <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{p.body}</p>
+              <p className="post-body">{p.body}</p>
             </div>
           );
         })}
       </div>
 
-      <div className="card" style={{ marginTop: '1rem' }}>
+      <div className="card mt-4">
         <div className="field">
           <label>Reply</label>
           <textarea

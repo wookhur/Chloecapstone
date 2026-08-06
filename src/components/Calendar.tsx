@@ -5,7 +5,7 @@ import {
   monthGrid,
   parseISO,
 } from '../lib/dates';
-import { subjectColor } from '../lib/subjectColor';
+import { accent, subjectColor } from '../lib/subjectColor';
 import {
   CALENDAR_CATEGORIES,
   type Assignment,
@@ -85,7 +85,7 @@ export default function Calendar({
     <div className="calendar">
       <div className="calendar-head">
         <button className="btn ghost small" onClick={() => step(-1)}>‹ Prev</button>
-        <div className="inline" style={{ gap: '0.5rem' }}>
+        <div className="inline gap-2">
           <h2>{MONTH_NAMES[month]} {year}</h2>
           <button className="btn secondary small" onClick={goToday}>Today</button>
         </div>
@@ -138,7 +138,7 @@ export default function Calendar({
                       key={a.id}
                       // Assignments read as solid chips; personal events are outlined.
                       className="calendar-item is-assignment"
-                      style={{ borderColor: color, background: `${color}1f` }}
+                      style={accent(color)}
                       title={`Assignment · ${a.title}${cls ? ' · ' + cls.name : ''}`}
                       onClick={() => onSelectAssignment?.(a)}
                     >
@@ -153,7 +153,7 @@ export default function Calendar({
                     <button
                       key={e.id}
                       className="calendar-item is-event"
-                      style={{ borderColor: `${s.color}88` }}
+                      style={accent(s.color)}
                       title={`${s.label} · ${e.title}`}
                       onClick={() => onSelectEvent?.(e)}
                     >

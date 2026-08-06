@@ -4,6 +4,7 @@ import * as repo from '../../lib/repository';
 import type { ClassInfo, CourseFile } from '../../lib/types';
 import { displayName } from '../../lib/names';
 import Icon, { type IconName } from '../../components/Icon';
+import EmptyState from '../../components/EmptyState';
 import {
   MAX_UPLOAD_MB,
   downloadUrl,
@@ -95,11 +96,11 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
 
   return (
     <div>
-      <h2 className="section-title" style={{ marginBottom: '1rem' }}>Files</h2>
+      <h2 className="section-title mb-4">Files</h2>
 
       {isCourseTeacher && (
-        <div className="card subtle" style={{ marginBottom: '1rem' }}>
-          <label className="field" style={{ marginBottom: 0 }}>
+        <div className="card subtle mb-4">
+          <label className="field mb-0">
             <span>Upload a handout</span>
             <input
               ref={inputRef}
@@ -108,21 +109,23 @@ export default function FilesTab({ cls }: { cls: ClassInfo }) {
               onChange={(e) => onPick(e.target.files)}
             />
           </label>
-          <p className="meta" style={{ margin: '0.5rem 0 0' }}>
+          <p className="meta mt-2 mb-0">
             {busy ? 'Uploading…' : `Up to ${MAX_UPLOAD_MB} MB. Everyone in ${cls.name} can open it.`}
           </p>
         </div>
       )}
 
       {problem && (
-        <div className="banner error" role="alert" style={{ marginBottom: '1rem' }}>
+        <div className="banner error mb-4" role="alert">
           <span className="dot" />
           {problem}
         </div>
       )}
 
       {list.length === 0 ? (
-        <div className="empty">No files yet.</div>
+        <EmptyState icon="paperclip" title="No files yet">
+          <p>Handouts and slides posted for this course sit here, next to the work they belong to.</p>
+        </EmptyState>
       ) : (
         <div className="table-scroll">
         <table className="data-table">

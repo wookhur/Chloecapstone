@@ -106,7 +106,7 @@ export default function Family() {
             <strong>
               {urgent.length} thing{urgent.length === 1 ? '' : 's'} due in the next couple of days
             </strong>
-            <p style={{ margin: '4px 0 0' }}>
+            <p className="caption">
               {urgent.slice(0, 3).map((a) => a.title).join(' · ')}
             </p>
           </div>
@@ -123,13 +123,13 @@ export default function Family() {
               const cls = classById(a.class_id);
               return (
                 <li key={a.id} className={`list-row ${a.done ? 'is-done' : ''}`}>
-                  <div className="inline" style={{ gap: '0.5rem' }}>
+                  <div className="inline gap-2">
                     <div>
                       <strong>{a.title}</strong>
                       <div className="meta">{cls?.name}</div>
                     </div>
                   </div>
-                  <span className="inline" style={{ gap: '0.5rem' }}>
+                  <span className="inline gap-2">
                     {a.done && <span className="chip request-accepted">Done</span>}
                     <span className="due">{dueLabel(a.due_date)}</span>
                   </span>

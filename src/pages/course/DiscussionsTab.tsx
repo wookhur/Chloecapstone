@@ -5,6 +5,7 @@ import * as repo from '../../lib/repository';
 import type { ClassInfo } from '../../lib/types';
 import { displayName, initial } from '../../lib/names';
 import Icon from '../../components/Icon';
+import EmptyState from '../../components/EmptyState';
 
 /** Discussions: topic list, or a single thread when :topicId is present. */
 export default function DiscussionsTab({
@@ -53,7 +54,7 @@ function TopicList({ cls, canPost }: { cls: ClassInfo; canPost: boolean }) {
 
   return (
     <div>
-      <div className="row-between" style={{ marginBottom: '1rem' }}>
+      <div className="row-between mb-4">
         <h2 className="section-title">Discussions</h2>
         {canPost && (
           <button
@@ -66,7 +67,7 @@ function TopicList({ cls, canPost }: { cls: ClassInfo; canPost: boolean }) {
       </div>
 
       {showForm && (
-        <div className="card" style={{ marginBottom: '1rem' }}>
+        <div className="card mb-4">
           <div className="field">
             <label>Topic title</label>
             <input aria-label="Topic title" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -85,7 +86,13 @@ function TopicList({ cls, canPost }: { cls: ClassInfo; canPost: boolean }) {
       )}
 
       {topics.length === 0 ? (
-        <div className="empty">No discussions yet — start one!</div>
+        <EmptyState icon="discussions" title="No discussions yet">
+          <p>
+            {canPost
+              ? 'Start one with a question about the homework — someone else almost certainly has the same one.'
+              : 'Anyone in the class can start a topic. Nothing has been posted yet.'}
+          </p>
+        </EmptyState>
       ) : (
         <ul className="plain-list boxed">
           {topics.map((t) => {
@@ -93,10 +100,10 @@ function TopicList({ cls, canPost }: { cls: ClassInfo; canPost: boolean }) {
             return (
               <li key={t.id} className="list-row">
                 <div>
-                  <Link to={`../discussions/${t.id}`} style={{ fontWeight: 600 }}>
+                  <Link to={`../discussions/${t.id}`} className="semibold">
                     {t.title}
                   </Link>
-                  <div className="meta" style={{ marginTop: 2 }}>
+                  <div className="meta mt-1">
                     {displayName(profileById(t.author_id))} ·{' '}
                     {new Date(t.created_at).toLocaleDateString(undefined, {
                       month: 'short',
@@ -157,26 +164,26 @@ function TopicThread({
       <Link to="../discussions" className="meta">
         <Icon name="chevron-left" size="0.9em" /> All discussions
       </Link>
-      <h2 style={{ margin: '0.5rem 0 0.25rem' }}>{topic.title}</h2>
+      <h2 className="detail-head">{topic.title}</h2>
 
-      <div className="card" style={{ margin: '0.75rem 0 1.25rem' }}>
-        <div className="inline" style={{ gap: '0.5rem', marginBottom: '0.4rem' }}>
+      <div className="card detail-sub">
+        <div className="inline gap-2 mb-1">
           <span className="avatar">{initial(author)}</span>
           <strong>{displayName(author)}</strong>
           {author?.role === 'teacher' && <span className="chip">Teacher</span>}
         </div>
-        <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{topic.body}</p>
+        <p className="post-body">{topic.body}</p>
       </div>
 
-      <h3 style={{ fontSize: '0.95rem', margin: '0 0 0.6rem' }}>
+      <h3 className="text-sm mb-2">
         {posts.length} repl{posts.length === 1 ? 'y' : 'ies'}
       </h3>
-      <div className="stack" style={{ gap: '0.6rem' }}>
+      <div className="stack gap-2">
         {posts.map((p) => {
           const who = profileById(p.author_id);
           return (
             <div key={p.id} className="card subtle discussion-post">
-              <div className="inline" style={{ gap: '0.5rem', marginBottom: '0.3rem' }}>
+              <div className="inline gap-2 mb-1">
                 <span className="avatar">{initial(who)}</span>
                 <strong>{displayName(who)}</strong>
                 {who?.role === 'teacher' && <span className="chip">Teacher</span>}
@@ -189,14 +196,14 @@ function TopicThread({
                   })}
                 </span>
               </div>
-              <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{p.body}</p>
+              <p className="post-body">{p.body}</p>
             </div>
           );
         })}
       </div>
 
       {canPost ? (
-        <div className="card" style={{ marginTop: '1rem' }}>
+        <div className="card mt-4">
           <div className="field">
             <label htmlFor={`reply-${topic.id}`}>Reply</label>
             <textarea
@@ -214,7 +221,7 @@ function TopicThread({
           </div>
         </div>
       ) : (
-        <p className="meta" style={{ marginTop: '1rem' }}>
+        <p className="meta mt-4">
           You're reading this course as a visitor — join the course to reply.
         </p>
       )}

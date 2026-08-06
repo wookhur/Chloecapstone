@@ -1,7 +1,7 @@
 import { dueLabel } from '../lib/dates';
 import { useApp } from '../context/AppContext';
 import DoneCheckbox from './DoneCheckbox';
-import { subjectColor } from '../lib/subjectColor';
+import { accent, subjectColor } from '../lib/subjectColor';
 import type { Assignment, ClassInfo } from '../lib/types';
 import Icon, { ASSIGNMENT_ICON } from './Icon';
 
@@ -20,33 +20,33 @@ export default function AssignmentCard({ assignment, cls, onEdit, onDelete }: Pr
   const overdue = !done && dueLabel(assignment.due_date).startsWith('Overdue');
 
   return (
-    <div className={`card assignment ${done ? 'is-done' : ''}`} style={{ borderLeft: `4px solid ${color}` }}>
+    <div className={`card assignment accent-left ${done ? 'is-done' : ''}`} style={accent(color)}>
       <div className="row-between">
         <div>
-          <div className="inline" style={{ gap: '0.4rem' }}>
+          <div className="inline gap-1">
             <DoneCheckbox assignment={assignment} />
             <Icon name={ASSIGNMENT_ICON[assignment.type]} />
-            <h3 style={{ margin: 0 }}>{assignment.title}</h3>
+            <h3 className="m-0">{assignment.title}</h3>
           </div>
-          <p className="sub" style={{ marginTop: 2 }}>
+          <p className="sub mt-1">
             {cls ? (
               <span className="subject-chip">
                 <span className="legend-dot" style={{ background: color }} />
                 {cls.name}
               </span>
             ) : null}{' '}
-            <span className="muted" style={{ textTransform: 'capitalize' }}>{assignment.type}</span>
+            <span className="muted capitalize">{assignment.type}</span>
           </p>
         </div>
         <span className={`due ${overdue ? 'overdue' : ''}`}>{dueLabel(assignment.due_date)}</span>
       </div>
 
       {assignment.description && (
-        <p className="sub" style={{ marginTop: '0.6rem' }}>{assignment.description}</p>
+        <p className="sub mt-3">{assignment.description}</p>
       )}
 
       {(assignment.link || onEdit || onDelete) && (
-        <div className="row-between" style={{ marginTop: '0.7rem' }}>
+        <div className="row-between mt-3">
           {assignment.link ? (
             <a href={assignment.link} target="_blank" rel="noreferrer" className="btn ghost small">
               <Icon name="link" /> Resource
@@ -55,7 +55,7 @@ export default function AssignmentCard({ assignment, cls, onEdit, onDelete }: Pr
             <span />
           )}
           {(onEdit || onDelete) && (
-            <div className="inline" style={{ gap: '0.4rem' }}>
+            <div className="inline gap-1">
               {onEdit && (
                 <button className="btn secondary small" onClick={onEdit}>Edit</button>
               )}

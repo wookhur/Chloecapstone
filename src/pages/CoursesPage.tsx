@@ -28,7 +28,7 @@ export default function CoursesPage() {
         <span className="muted">
           {myClasses.length} course{myClasses.length === 1 ? '' : 's'}
         </span>
-        <div className="inline" style={{ gap: '0.4rem' }}>
+        <div className="inline gap-1">
           <Link to="/courses/import" className="btn small secondary">
             <Icon name="download" /> Import from Google Classroom
           </Link>
@@ -70,8 +70,8 @@ export default function CoursesPage() {
               return (
                 <tr key={c.id}>
                   <td>
-                    <Link to={`/courses/${c.id}`} style={{ fontWeight: 600 }}>
-                      <span className="feed-date-dot" style={{ background: color, display: 'inline-block', marginRight: 8 }} />
+                    <Link to={`/courses/${c.id}`} className="semibold">
+                      <span className="feed-date-dot dot-inline" style={{ background: color }} />
                       {c.name}
                     </Link>
                   </td>

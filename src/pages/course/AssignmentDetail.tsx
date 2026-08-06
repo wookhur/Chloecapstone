@@ -23,12 +23,12 @@ export default function AssignmentDetail({ cls }: { cls: ClassInfo }) {
       <Link to="../assignments" className="meta">
         <Icon name="chevron-left" size="0.9em" /> All assignments
       </Link>
-      <h2 style={{ margin: '0.5rem 0 0.25rem' }}>
+      <h2 className="detail-head">
         <Icon name={ASSIGNMENT_ICON[assignment.type]} /> {assignment.title}
       </h2>
       <p className="sub inline">
         <DoneCheckbox assignment={assignment} label />
-        <span className="chip" style={{ textTransform: 'capitalize' }}>{assignment.type}</span>{' '}
+        <span className="chip capitalize">{assignment.type}</span>{' '}
         <span className={overdue ? 'due overdue' : 'due'}>
           Due {parseISO(assignment.due_date).toLocaleDateString(undefined, {
             weekday: 'long',
@@ -40,11 +40,11 @@ export default function AssignmentDetail({ cls }: { cls: ClassInfo }) {
       </p>
 
       {assignment.description ? (
-        <div className="card subtle" style={{ margin: '1rem 0', whiteSpace: 'pre-wrap' }}>
+        <div className="card subtle post-body my-4">
           {assignment.description}
         </div>
       ) : (
-        <p className="muted" style={{ margin: '1rem 0' }}>No further details.</p>
+        <p className="muted my-4">No further details.</p>
       )}
 
       {assignment.link && (

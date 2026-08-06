@@ -68,10 +68,10 @@ export default function QuizTake({
       <Link to="../quizzes" className="meta">
         <Icon name="chevron-left" size="0.9em" /> All practice quizzes
       </Link>
-      <h2 style={{ margin: '0.5rem 0 0.25rem' }}>
+      <h2 className="detail-head">
         {mode === 'bank' ? `${cls.name} question bank` : quiz!.title}
       </h2>
-      <p className="sub" style={{ marginBottom: '1.25rem' }}>
+      <p className="sub mb-5">
         {questions.length} card{questions.length === 1 ? '' : 's'} ·{' '}
         {mode === 'bank'
           ? `shuffled from ${sourceCount} ${sourceCount === 1 ? 'quiz' : 'quizzes'} the class made`
@@ -85,15 +85,15 @@ export default function QuizTake({
             {pct}<span>%</span>
           </div>
           <div>
-            <strong style={{ fontSize: '1.4rem' }}>
+            <strong className="text-xl">
               {score} / {questions.length}
             </strong>{' '}
             <span className="muted">({pct}%)</span>
-            <p className="sub" style={{ margin: '2px 0 0' }}>
+            <p className="sub caption">
               {pct >= 80 ? 'Great job!' : 'Keep practicing — try again!'}
             </p>
           </div>
-          <button className="btn small" onClick={retry} style={{ marginLeft: 'auto' }}>
+          <button className="btn small ml-auto" onClick={retry}>
             <><Icon name="refresh" />{mode === 'bank' ? 'Reshuffle' : 'Try again'}</>
           </button>
         </div>
@@ -106,12 +106,12 @@ export default function QuizTake({
             : 'This quiz has no cards yet.'}
         </div>
       ) : (
-        <div className="stack" style={{ gap: '0.85rem' }}>
+        <div className="stack gap-3">
           {questions.map((q, i) => {
             const chosen = answers[q.id];
             return (
               <div key={q.id} className="card">
-                <div className="row-between" style={{ marginBottom: '0.5rem' }}>
+                <div className="row-between mb-2">
                   <strong>
                     {i + 1}. {q.question}
                   </strong>

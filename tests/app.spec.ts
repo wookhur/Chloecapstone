@@ -750,3 +750,81 @@ test.describe('weekly digest', () => {
     await expect(page.locator('.section', { hasText: 'Weekly email' })).toHaveCount(0);
   });
 });
+
+/**
+ * The subject colour used to be written straight into a `style` attribute at
+ * every call site. It now travels as a `--accent` custom property and the rule
+ * that uses it lives in the stylesheet — a refactor a typecheck can't catch,
+ * since a stripe that silently stops being drawn is still valid TypeScript.
+ */
+test.describe('subject colour', () => {
+  // Both rules carry a fallback, which is right for the stylesheet and useless
+  // for a test: with --accent missing the stripe is still 4px, just grey. So
+  // these assert the subject's own hue arrives, not merely that something did.
+  const MATHS = 'rgb(58, 98, 168)'; // #3a62a8, the Math swatch
+
+  test('assignment cards still carry their subject stripe', async ({ page }) => {
+    await page.goto('/homework');
+    await signInAs(page, USERS.mina);
+
+    const card = page.locator('.assignment', { hasText: 'Quadratics worksheet' }).first();
+    await expect(card).toHaveClass(/accent-left/);
+    await expect(card).toHaveCSS('border-left-width', '4px');
+    // Algebra II is a Math course, so the stripe is the Math swatch and nothing
+    // else — this is the whole chain: value set, property resolved, rule fired.
+    await expect(card).toHaveCSS('border-left-color', MATHS);
+  });
+
+  test('calendar chips are tinted from the same property', async ({ page }) => {
+    await page.goto('/calendar');
+    await signInAs(page, USERS.mina);
+
+    const chip = page
+      .locator('.calendar-item.is-assignment', { hasText: 'Quadratics worksheet' })
+      .first();
+    await expect(chip).toHaveCSS('border-color', MATHS);
+
+    // The fill is color-mix()'d, which computes to a color(srgb …) string
+    // rather than rgba(), so paint it and read the pixel back.
+    const [r, g, b, a] = await chip.evaluate((el) => {
+      const c = document.createElement('canvas').getContext('2d')!;
+      c.fillStyle = getComputedStyle(el).backgroundColor;
+      c.fillRect(0, 0, 1, 1);
+      return Array.from(c.getImageData(0, 0, 1, 1).data);
+    });
+    // Same hue as the stripe, laid on as a wash rather than a flat block.
+    // Within a few points per channel: the canvas round-trips through 8-bit
+    // premultiplied alpha, so an exact match would be testing the rounding.
+    for (const [got, want] of [[r, 58], [g, 98], [b, 168]]) {
+      expect(Math.abs(got - want)).toBeLessThan(5);
+    }
+    expect(a / 255).toBeGreaterThan(0.05);
+    expect(a / 255).toBeLessThan(0.4);
+  });
+});
+
+test.describe('empty states', () => {
+  test('a tab with nothing in it says what belongs there', async ({ page }) => {
+    // Spanish III has no quizzes, which is the ordinary "nobody has made one
+    // yet" case rather than an error.
+    await page.goto('/courses/c-span/quizzes');
+    await signInAs(page, USERS.mina);
+
+    const empty = page.locator('.empty.is-composed');
+    await expect(empty).toBeVisible();
+    await expect(empty.locator('.empty-title')).toHaveText('No practice quizzes yet');
+    // The mark is decoration; it must not be read out as content.
+    await expect(empty.locator('.empty-mark')).toHaveAttribute('aria-hidden', 'true');
+    // And the way out is right there, not somewhere else on the page.
+    await expect(page.locator('button:has-text("Make a quiz")')).toBeVisible();
+  });
+
+  test('a genuine error stays a plain line, not a decorated panel', async ({ page }) => {
+    await page.goto('/courses/c-nope');
+    await signInAs(page, USERS.mina);
+    // Dressing "not found" up the same way would make a broken link look like
+    // a normal, expected state.
+    await expect(page.locator('.empty')).toContainText('Course not found');
+    await expect(page.locator('.empty.is-composed')).toHaveCount(0);
+  });
+});
