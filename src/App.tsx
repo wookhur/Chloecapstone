@@ -64,18 +64,35 @@ export default function App() {
   // than to show an app with no classes in it and let them wonder.
   if (authEnabled && authUser && !currentUser) {
     return (
-      <div className="center-screen">
-        <div className="card signin-card">
-          <h1 style={{ marginTop: 0 }}>Almost there</h1>
-          <p>
-            {authUser.email} isn't set up in Homework Hub yet, so there's nothing
-            to show. Ask the school office to add it and try again.
-          </p>
-          <button className="btn secondary" onClick={signOut}>Sign out</button>
-        </div>
+      <div className="signin-screen">
+        <main className="signin-card">
+          <div className="signin-lockup">
+            <span className="signin-mark" aria-hidden="true"><BrandMark size="26" /></span>
+            <h1>Homework Hub</h1>
+          </div>
+          <div className="signin-sent">
+            <span className="signin-sent-mark is-waiting" aria-hidden="true">
+              <Icon name="info" size="1.35rem" />
+            </span>
+            <h2>Not set up yet</h2>
+            {/* The address gets its own line. Inline in centred prose, a long
+                email wraps mid-word and drags the sentence apart. */}
+            <p className="signin-address">{authUser.email}</p>
+            <p>
+              That address isn't on the school's list, so there are no classes
+              to show. Ask the office to add it, then sign in again.
+            </p>
+            <button className="btn secondary" onClick={signOut}>Sign out</button>
+          </div>
+        </main>
       </div>
     );
   }
+
+  // The fix for demo mode differs by where the app is running: a local dev
+  // server reads .env.local, but a deployed site never sees that file — telling
+  // a visitor on duesis.com to add one sends them somewhere with no effect.
+  const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname);
 
   const isCounselor = currentUser?.role === 'counselor';
   const isParent = currentUser?.role === 'parent';
@@ -159,8 +176,16 @@ export default function App() {
           {!supabaseConnected && (
             <div className="banner demo">
               <span className="dot" />
-              Demo mode — Supabase isn't connected, so changes live in memory only.
-              Add <code>.env.local</code> to use your database.
+              Demo mode — no database connected, so changes live in memory only.{' '}
+              {isLocal ? (
+                <>Add <code>.env.local</code> to use your database.</>
+              ) : (
+                <>
+                  Set <code>VITE_SUPABASE_URL</code> and{' '}
+                  <code>VITE_SUPABASE_ANON_KEY</code> in this site's hosting
+                  settings, then redeploy.
+                </>
+              )}
             </div>
           )}
 

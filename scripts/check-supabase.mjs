@@ -70,14 +70,21 @@ if (!key || key.startsWith('your-')) {
   fail('VITE_SUPABASE_ANON_KEY is not set');
 } else if (key.length < 40) {
   fail('VITE_SUPABASE_ANON_KEY looks too short to be a real key');
-} else if (/service_role/.test(Buffer.from(key.split('.')[1] ?? '', 'base64').toString('utf8'))) {
-  // Pasting the service-role key into a VITE_ variable ships full database
-  // access to every visitor in the JS bundle. Worth stopping hard for.
-  fail('That is the SERVICE ROLE key, not the anon key.',
-       'VITE_ variables are compiled into the public bundle. Rotate that key in ' +
-       'Supabase → Project Settings → API, and use the "anon public" key here.');
+} else if (
+  // Two key formats in the wild: the original JWTs (anon / service_role) and
+  // the newer sb_publishable_ / sb_secret_ pair. Only the secret ones are
+  // dangerous here, and each format hides that word in a different place.
+  key.startsWith('sb_secret_') ||
+  /service_role/.test(Buffer.from(key.split('.')[1] ?? '', 'base64').toString('utf8'))
+) {
+  // Pasting a secret key into a VITE_ variable ships full database access to
+  // every visitor in the JS bundle. Worth stopping hard for.
+  fail('That is a SECRET key, not the public one.',
+       'VITE_ variables are compiled into the public bundle, so this would hand ' +
+       'every visitor full database access. Rotate it in Supabase → Project ' +
+       'Settings → API, and use the "publishable" (or "anon public") key here.');
 } else {
-  ok('Anon key present');
+  ok(key.startsWith('sb_publishable_') ? 'Publishable key present' : 'Anon key present');
 }
 
 if (failed) {
