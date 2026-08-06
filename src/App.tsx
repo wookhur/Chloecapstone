@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { useApp } from './context/AppContext';
+import { isDemoRequested } from './lib/supabase';
 import Dashboard from './pages/Dashboard';
 import Feed from './pages/Feed';
 import SignIn from './pages/SignIn';
@@ -176,12 +177,25 @@ export default function App() {
           {!supabaseConnected && (
             <div className="banner demo">
               <span className="dot" />
-              Demo mode — no database connected, so changes live in memory only.{' '}
-              {isLocal ? (
-                <>Add <code>.env.local</code> to use your database.</>
+              {isDemoRequested ? (
+                /* Someone opened this on purpose to look around. Say so plainly
+                   — the worst outcome would be a teacher believing these are
+                   their real classes. */
+                <>
+                  <strong>Sample data.</strong> Everyone and everything here is
+                  made up, and nothing you change is saved. Switch accounts
+                  above to see it as a student, a teacher, a counsellor or a
+                  parent. <a href="?demo=0">Leave the demo</a>
+                </>
+              ) : isLocal ? (
+                <>
+                  Demo mode — no database connected, so changes live in memory
+                  only. Add <code>.env.local</code> to use your database.
+                </>
               ) : (
                 <>
-                  Set <code>VITE_SUPABASE_URL</code> and{' '}
+                  Demo mode — no database connected, so changes live in memory
+                  only. Set <code>VITE_SUPABASE_URL</code> and{' '}
                   <code>VITE_SUPABASE_ANON_KEY</code> in this site's hosting
                   settings, then redeploy.
                 </>

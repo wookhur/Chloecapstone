@@ -127,6 +127,28 @@ In Supabase → **Authentication → URL Configuration**, set the site URL to yo
 deployment so the link comes back to the right place. Without Supabase
 configured, none of this appears and the app stays in demo mode.
 
+### Showing it to someone
+
+Sign-in is the right default — a student's checklist is theirs — but it also
+means a teacher seeing this for the first time can't get past the front door
+until someone creates an account for them, which is a poor way to open the
+conversation.
+
+Add `?demo` to the URL and the whole app runs on the built-in sample data
+instead:
+
+```
+https://duesis.com/?demo
+```
+
+No account, no email, and the account switcher comes back — so a teacher can
+click straight from the student view to the teacher view to the counsellor
+console without anything being set up first. A banner says plainly that the
+data is invented, so nobody mistakes it for their own classes.
+
+It reveals nothing: demo mode never contacts the database at all, and every row
+it shows is compiled into the bundle. `?demo=0` leaves again.
+
 ### Turn on the weekly email
 
 The Sunday digest is the one thing the browser can't do on its own — nothing in
