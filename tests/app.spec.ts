@@ -828,3 +828,25 @@ test.describe('empty states', () => {
     await expect(page.locator('.empty.is-composed')).toHaveCount(0);
   });
 });
+
+test.describe('broken links', () => {
+  test('an address that is nothing says so instead of redirecting', async ({ page }) => {
+    await page.goto('/nowhere-at-all');
+    await signInAs(page, USERS.mina);
+
+    await expect(page.locator('.notfound')).toBeVisible();
+    // The address is echoed back, so you can see what was actually opened.
+    await expect(page.locator('.notfound-path')).toHaveText('/nowhere-at-all');
+    await expect(page.locator('.notfound .btn')).toBeVisible();
+  });
+
+  test('a real page belonging to another role redirects without comment', async ({ page }) => {
+    await page.goto('/dashboard');
+    await signInAs(page, USERS.kim);
+
+    // A guardian switching accounts on /dashboard didn't mistype anything —
+    // the app changed under them, so accusing them of a broken link is wrong.
+    await expect(page).toHaveURL(/\/family$/);
+    await expect(page.locator('.notfound')).toHaveCount(0);
+  });
+});

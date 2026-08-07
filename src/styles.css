@@ -12,11 +12,16 @@
   color-scheme: light dark;
 
   /* Surfaces & ink. Warm neutrals rather than blue-greys — a cold grey page
-     with a blue button is the default look of every unstyled template. */
-  --bg: #fbfaf8;
+     with a blue button is the default look of every unstyled template.
+
+     The page is deliberately a few shades below the panels that sit on it.
+     When the page is near-white, a white panel is invisible unless you draw a
+     box around it — which is how an interface ends up as forty outlined
+     rectangles. Drop the page and the panels separate on their own. */
+  --bg: #efece6;
   --surface: #ffffff;
-  --surface-2: #f4f2ef;
-  --surface-3: #ebe8e3;
+  --surface-2: #e9e5dd;
+  --surface-3: #ddd8cd;
   --ink: #17171b;
   --ink-soft: #6e6e78;
   --ink-faint: #9a9aa4;
@@ -44,8 +49,8 @@
   --danger-soft: #fbe8e6;
   --danger-ink: #96291f;
 
-  /* Nav rail — a surface, not a coloured slab. */
-  --rail-bg: #f4f2ef;
+  /* Nav rail — part of the page, not a panel screwed to the side of it. */
+  --rail-bg: transparent;
   --rail-ink: #5d5d67;
   --rail-ink-active: #17171b;
 
@@ -59,13 +64,14 @@
   --text-base: 0.9375rem;
   --text-md: 1.0625rem;
   --text-lg: 1.1875rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.625rem;
+  --text-xl: 1.4375rem;
+  --text-2xl: 2rem;
 
-  --leading-tight: 1.25;
+  --leading-tight: 1.18;
   --leading: 1.55;
   /* Headings tighten as they grow; body text never does. */
   --tracking-tight: -0.014em;
+  --tracking-display: -0.028em;
 
   /* Spacing scale */
   --space-1: 0.25rem;
@@ -75,9 +81,13 @@
   --space-5: 1.5rem;
   --space-6: 2rem;
 
-  --radius: 14px;
-  --radius-sm: 9px;
+  /* Radius carries scale: a panel is softer than a button, a button softer
+     than a label. One value on everything is why so many interfaces read as
+     the same interface. */
+  --radius: 16px;
+  --radius-sm: 10px;
   --radius-xs: 6px;
+  --radius-tight: 4px;
 
   /* Elevation is a signal, not decoration. Flat by default; the raised token
      is for things that genuinely float (hover, menus, dialogs). */
@@ -102,7 +112,7 @@
 /* Dark theme: follows the OS by default, with an explicit override hook. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #101014;
+    --bg: #0d0d11;
     --surface: #17171d;
     --surface-2: #1f1f27;
     --surface-3: #2a2a34;
@@ -129,7 +139,7 @@
     --danger-soft: #33191a;
     --danger-ink: #f0aaa4;
 
-    --rail-bg: #15151a;
+    --rail-bg: transparent;
     --rail-ink: #9b9baa;
     --rail-ink-active: #ececf1;
 
@@ -140,7 +150,7 @@
 }
 
 :root[data-theme='dark'] {
-  --bg: #101014;
+  --bg: #0d0d11;
   --surface: #17171d;
   --surface-2: #1f1f27;
   --surface-3: #2a2a34;
@@ -163,7 +173,7 @@
   --danger: #e8837a;
   --danger-soft: #33191a;
   --danger-ink: #f0aaa4;
-  --rail-bg: #15151a;
+  --rail-bg: transparent;
   --rail-ink: #9b9baa;
   --rail-ink-active: #ececf1;
   --tint: 33;
@@ -188,6 +198,23 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* A fine grain over the whole page. Perfectly smooth fills are the one thing
+   no printed or painted surface has ever had, and their absence is a large
+   part of why a flat interface reads as generated. Kept at 3.5% — enough that
+   the paper isn't dead, far too little to touch the legibility of text sitting
+   on it. Inline SVG turbulence, so it costs no request and no image file. */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* Grain over a dark page reads as sensor noise if it's the same strength. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) body::before { opacity: 0.045; }
+}
+:root[data-theme='dark'] body::before { opacity: 0.045; }
+
 /* Anywhere numbers line up in a column or tick upward, they need equal-width
    digits — otherwise "11 due" is narrower than "10 due" and the row shifts. */
 .due, .calendar-date, .todo-meta, .course-card-stat, .score-ring,
@@ -199,7 +226,12 @@ h1, h2, h3, h4 {
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   font-weight: 650;
+  /* Stops a heading dropping one lonely word onto its own line. */
+  text-wrap: balance;
 }
+h1 { letter-spacing: var(--tracking-display); font-weight: 680; }
+/* Never leaves a single word stranded at the end of a paragraph. */
+p, li { text-wrap: pretty; }
 
 a { color: var(--brand); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -266,14 +298,16 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 
 .content {
-  flex: 1; padding: 1.75rem var(--space-5) 4rem;
-  max-width: 1080px; margin: 0 auto; width: 100%;
+  flex: 1; padding: 2.25rem var(--space-6) 5rem;
+  max-width: 1140px; margin: 0 auto; width: 100%;
+  /* Above the grain, or the page texture would sit on top of the text. */
+  position: relative; z-index: 2;
 }
 
 /* A page introduces itself once, in a size that actually reads as a title. */
-.page-head { margin-bottom: var(--space-5); }
-.page-head h1 { margin: 0 0 var(--space-1); font-size: var(--text-2xl); }
-.page-head p { margin: 0; color: var(--ink-soft); max-width: 60ch; }
+.page-head { margin-bottom: var(--space-6); }
+.page-head h1 { margin: 0 0 var(--space-2); font-size: var(--text-2xl); }
+.page-head p { margin: 0; color: var(--ink-soft); max-width: 62ch; }
 
 /* Banner -------------------------------------------------------------------*/
 /* Block, not flex. As a flex row every bare text node between the dot and the
@@ -284,10 +318,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   border-radius: var(--radius-sm); font-size: var(--text-sm);
   margin-bottom: var(--space-5); line-height: 1.5;
 }
-.banner.demo {
-  background: var(--surface-2); color: var(--ink-soft);
-  border: 1px solid var(--line);
-}
+.banner.demo { background: var(--surface); color: var(--ink-soft); }
 .banner.demo .dot { background: var(--warn); }
 .banner.error { border: 1px solid transparent; }
 .banner.error { background: var(--danger-soft); color: var(--danger-ink); }
@@ -311,14 +342,17 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* Cards --------------------------------------------------------------------*/
 .grid { display: grid; gap: var(--space-4); }
-.grid.cols-2 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.grid.cols-2 { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
 
-/* Flat by default. A border already separates a card from the page; adding a
-   drop shadow to every one of them just makes the page look buttoned. */
+/* No border and no shadow. The page sits a few shades below the panel, which
+   is enough to separate them — and a page of outlined rectangles reads as a
+   wireframe of itself. Chrome is spent only where something is genuinely
+   lifted off the page, which for a homework list is almost nowhere. */
 .card {
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 1.15rem 1.25rem;
+  background: var(--surface); border: 1px solid transparent;
+  border-radius: var(--radius); padding: 1.25rem 1.35rem;
 }
+/* A panel inside a panel — one step back toward the page, not another box. */
 .card.subtle { background: var(--surface-2); border-color: transparent; }
 .card h3 { font-size: var(--text-md); }
 .card .sub { color: var(--ink-soft); font-size: var(--text-sm); margin: 0; }
@@ -332,8 +366,8 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* Chips & buttons ----------------------------------------------------------*/
 .chip {
   display: inline-flex; align-items: center; gap: 0.3rem;
-  font-size: var(--text-xs); font-weight: 500; padding: 0.15rem 0.55rem;
-  border-radius: 99px; background: var(--surface-2); color: var(--ink-soft);
+  font-size: var(--text-xs); font-weight: 500; padding: 0.18rem 0.5rem;
+  border-radius: var(--radius-tight); background: var(--surface-2); color: var(--ink-soft);
   border: 1px solid transparent; white-space: nowrap;
 }
 
@@ -393,10 +427,10 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .toggle-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 /* Segmented rather than a row of loose pills: one continuous track reads as a
    single choice, which is what it is. */
-.toggle-group { background: var(--surface-2); border-radius: 99px; padding: 3px; gap: 2px; }
+.toggle-group { background: var(--surface-2); border-radius: var(--radius-sm); padding: 3px; gap: 2px; }
 .toggle {
   font-size: var(--text-sm); font-weight: 550; padding: 0.35rem 0.8rem;
-  border-radius: 99px; border: 1px solid transparent;
+  border-radius: var(--radius-xs); border: 1px solid transparent;
   background: transparent; color: var(--ink-soft);
   transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
 }
@@ -501,8 +535,8 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .cal-legend { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
 .legend-chip {
   display: inline-flex; align-items: center; gap: 0.35rem;
-  font-size: var(--text-sm); padding: 0.3rem 0.65rem; border-radius: 99px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft);
+  font-size: var(--text-sm); padding: 0.3rem 0.65rem; border-radius: var(--radius-sm);
+  border: 1px solid transparent; background: var(--surface); color: var(--ink-soft);
 }
 .legend-chip:hover { color: var(--ink); }
 .legend-chip.on { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
@@ -513,12 +547,12 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .divider { height: 1px; background: var(--line); margin: 0.9rem 0; }
 .row-between { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
 .inline { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
-.section { margin-bottom: var(--space-6); }
-.section > h2 { font-size: var(--text-lg); margin: 0 0 var(--space-3); }
+.section { margin-bottom: 2.75rem; }
+.section > h2 { font-size: var(--text-lg); margin: 0 0 var(--space-4); }
 .empty {
   text-align: center; padding: var(--space-6) var(--space-4);
   color: var(--ink-soft); font-size: var(--text-sm);
-  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2);
+  border-radius: var(--radius); background: var(--surface);
 }
 /* The composed version, for tabs that are simply new rather than broken. */
 .empty.is-composed { display: grid; justify-items: center; gap: var(--space-2); }
@@ -666,7 +700,6 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
    on screen and it never says anything. */
 .global-rail {
   width: 88px; flex-shrink: 0; background: var(--rail-bg);
-  border-right: 1px solid var(--line);
   display: flex; flex-direction: column; align-items: stretch; gap: 2px;
   padding: var(--space-2) var(--space-2) var(--space-4);
   position: sticky; top: 0; height: 100vh; height: 100dvh; z-index: 20;
@@ -690,19 +723,23 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .rail-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
 /* Dashboard ----------------------------------------------------------------*/
-.dashboard-layout { display: grid; grid-template-columns: 1fr 260px; gap: var(--space-5); align-items: start; }
+.dashboard-layout {
+  display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 0.85fr);
+  gap: var(--space-6); align-items: start;
+}
 
-.course-card-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.course-card-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 560px) { .course-card-grid { grid-template-columns: 1fr; } }
 .course-card {
   display: flex; flex-direction: column; background: var(--surface);
-  border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  border: 1px solid transparent; border-radius: var(--radius); overflow: hidden;
   color: var(--ink);
   transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
     border-color 0.18s var(--ease);
 }
 .course-card:hover {
   text-decoration: none; transform: translateY(-2px);
-  box-shadow: var(--shadow-raised); border-color: var(--line-strong);
+  box-shadow: var(--shadow-raised); border-color: var(--line);
 }
 /* Hover doesn't exist on a phone, and this app is mostly opened on one. Without
    a pressed state the tap between the finger going down and the next screen
@@ -717,13 +754,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* A band of the subject colour, not a full block of it. */
 .course-card-hero { height: 5px; }
-.course-card-body { padding: var(--space-3) var(--space-4) 0.4rem; }
+.course-card-body { padding: var(--space-4) 1.15rem 1.15rem; }
 .course-card-body h3 { margin: 0 0 0.2rem; font-size: var(--text-md); }
 .course-card-body .sub { margin: 0; font-size: var(--text-sm); color: var(--ink-soft); }
 
 .todo-panel {
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-  padding: var(--space-4) 1.1rem; position: sticky; top: 4.5rem;
+  background: var(--surface); border-radius: var(--radius);
+  padding: 1.35rem 1.25rem; position: sticky; top: 4.5rem;
 }
 .todo-panel h2 { margin: 0 0 0.7rem; font-size: var(--text-md); }
 .todo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
@@ -732,12 +769,16 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .todo-list a:hover .todo-title { text-decoration: underline; color: var(--brand); }
 .todo-title { font-size: 0.84rem; font-weight: 600; flex: 1 1 100%; }
 .todo-meta { font-size: var(--text-xs); color: var(--ink-soft); margin-left: var(--space-4); }
-.announcement-row { color: var(--ink); padding: var(--space-3) var(--space-4); }
-.announcement-row:hover { text-decoration: none; border-color: var(--brand); }
+.announcement-row { color: var(--ink); padding: 0.8rem var(--space-4); }
+.announcement-row:hover { text-decoration: none; background: var(--surface-2); }
+.announcement-row:hover strong { color: var(--brand); }
 
 /* Course shell -------------------------------------------------------------*/
+/* A 2px rule in the subject's colour under the course name — the one place
+   that colour belongs on this page, and enough to tell two courses apart at a
+   glance without painting the heading. */
 .course-header {
-  padding: 0 0 var(--space-4); border-bottom: 1px solid var(--line);
+  padding: 0 0 var(--space-4); border-bottom: 2px solid var(--subject, var(--line));
   margin-bottom: var(--space-5);
   display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap;
 }
@@ -760,7 +801,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* Lists & tables -----------------------------------------------------------*/
 .plain-list { list-style: none; margin: 0; padding: 0; }
-.plain-list.boxed { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.plain-list.boxed { border-radius: var(--radius); overflow: hidden; background: var(--surface); }
 .list-row {
   display: flex; justify-content: space-between; align-items: center; gap: var(--space-4);
   padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--line);
@@ -776,7 +817,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .data-table {
   width: 100%; border-collapse: collapse; background: var(--surface);
-  border: 1px solid var(--line); border-radius: var(--radius); font-size: 0.88rem;
+  border-radius: var(--radius); font-size: 0.88rem; overflow: hidden;
 }
 .data-table th {
   text-align: left; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.04em;
@@ -787,13 +828,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 .avatar {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 26px; height: 26px; border-radius: 50%;
+  width: 26px; height: 26px; border-radius: 34%;
   background: var(--surface-3); color: var(--ink-soft);
   font-size: var(--text-xs); font-weight: 650; margin-right: 4px; flex: 0 0 auto;
 }
 
 /* Practice quizzes ---------------------------------------------------------*/
-.quiz-card-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.quiz-card-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 .quiz-card { display: flex; flex-direction: column; justify-content: space-between; }
 .builder-choice { flex: 1 1 44%; margin-bottom: var(--space-2); }
 
@@ -928,7 +969,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .global-rail {
     order: 2; flex-direction: row; width: 100%; height: auto;
     position: fixed; bottom: 0; left: 0; top: auto; z-index: 30;
-    border-right: none; border-top: 1px solid var(--line);
+    background: var(--bg); border-top: 1px solid var(--line);
     justify-content: space-around; gap: 0; padding: var(--space-1) var(--space-1);
     padding-bottom: calc(var(--space-1) + env(safe-area-inset-bottom, 0));
   }
@@ -944,9 +985,9 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
    so contrast holds in both themes and color is never the only signal. */
 .subject-chip {
   display: inline-flex; align-items: center; gap: 0.35rem;
-  font-size: var(--text-xs); padding: 0.12rem var(--space-2);
-  border-radius: 99px; background: var(--surface-2); color: var(--ink);
-  border: 1px solid var(--line);
+  font-size: var(--text-xs); padding: 0.14rem var(--space-2);
+  border-radius: var(--radius-tight); background: var(--surface-2); color: var(--ink);
+  border: 1px solid transparent;
 }
 .subject-chip .legend-dot { width: 7px; height: 7px; }
 
@@ -1037,8 +1078,8 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* Section rhythm: headings sit closer to what they label than to what came
    before, which is what makes a long page scannable. */
-.section { margin-bottom: var(--space-6); }
-.section > h2, .section > .row-between:first-child { margin-bottom: var(--space-3); }
+.section { margin-bottom: 2.75rem; }
+.section > h2, .section > .row-between:first-child { margin-bottom: var(--space-4); }
 .section > h2 { font-size: var(--text-md); font-weight: 650; }
 
 /* Nav rail labels ----------------------------------------------------------*/
@@ -1061,10 +1102,19 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* Subject colour lives in the band and the dot, never in the heading — four
    courses on a dashboard meant four differently-coloured titles. */
 .course-card-body h3 { color: var(--ink); }
-.course-card-stat {
-  margin: 0; padding: var(--space-3) var(--space-4) var(--space-4);
-  margin-top: auto; font-size: var(--text-sm); color: var(--ink-soft);
+/* Title on the left, the count hard against the right edge. The baseline is
+   shared so the two read as one line rather than two stacked things. */
+.course-card-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--space-3); margin: 0 0 0.15rem;
 }
+.course-card-head h3 { margin: 0; min-width: 0; }
+.course-card-stat {
+  margin: 0; font-size: var(--text-sm); font-weight: 600; color: var(--ink);
+  white-space: nowrap; flex: 0 0 auto;
+}
+/* Nothing outstanding is good news, not a number — it recedes. */
+.course-card-stat.is-clear { font-weight: 500; color: var(--ink-faint); }
 
 /* Assignment-type glyph in list rows. */
 .type-glyph { color: var(--ink-faint); margin-right: 6px; }
@@ -1216,3 +1266,47 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* An inline colour dot in running text or a table cell, as opposed to the
    flex-child dots elsewhere, which get their spacing from the parent's gap. */
 .dot-inline { display: inline-block; margin-right: var(--space-2); }
+
+/* Entry motion --------------------------------------------------------------
+   Rows and tiles arrive in reading order with a few frames between them. A
+   page where everything appears on the same frame reads as a screenshot; a
+   short cascade reads as something being laid out for you. Transform and
+   opacity only, so it runs on the compositor and never reflows.
+
+   The global prefers-reduced-motion rule collapses the duration to nothing,
+   which lands every element at its final position on the first frame. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.course-card-grid > *,
+.plain-list.boxed > li,
+.due-soon .list-row,
+.todo-list > li {
+  animation: rise 0.32s var(--ease) both;
+}
+.course-card-grid > :nth-child(2),
+.plain-list.boxed > :nth-child(2),
+.due-soon .list-row:nth-child(2),
+.todo-list > :nth-child(2) { animation-delay: 0.04s; }
+.course-card-grid > :nth-child(3),
+.plain-list.boxed > :nth-child(3),
+.due-soon .list-row:nth-child(3),
+.todo-list > :nth-child(3) { animation-delay: 0.08s; }
+.course-card-grid > :nth-child(n + 4),
+.plain-list.boxed > :nth-child(n + 4),
+.due-soon .list-row:nth-child(n + 4),
+.todo-list > :nth-child(n + 4) { animation-delay: 0.12s; }
+
+/* Not found ----------------------------------------------------------------*/
+.notfound { max-width: 46ch; padding: var(--space-6) 0 var(--space-5); }
+.notfound h1 { margin: 0 0 var(--space-3); font-size: var(--text-xl); }
+.notfound .sub { color: var(--ink-soft); margin: 0; }
+/* The address itself, set as what it is. Inline in the sentence a long path
+   wraps mid-word and drags the prose apart. */
+.notfound-path {
+  display: inline-block; max-width: 100%; margin: 0 0 var(--space-4);
+  padding: 0.3rem 0.55rem; border-radius: var(--radius-xs);
+  background: var(--surface-2); font-family: var(--font-mono);
+  font-size: var(--text-xs); overflow-wrap: anywhere;
+}

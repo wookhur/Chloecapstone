@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
+import { NavLink, Navigate, Route, Routes, matchPath, useLocation } from 'react-router-dom';
 import { useApp } from './context/AppContext';
 import { isDemoRequested } from './lib/supabase';
 import Dashboard from './pages/Dashboard';
@@ -7,6 +7,7 @@ import Feed from './pages/Feed';
 import SignIn from './pages/SignIn';
 import Icon, { BrandMark, type IconName } from './components/Icon';
 import Skeleton from './components/Skeleton';
+import NotFound from './pages/NotFound';
 
 // Everything past the two screens students open first is split out, so a phone
 // on school wifi downloads a fraction of the app up front.
@@ -41,6 +42,29 @@ const COUNSELOR_NAV: NavItem[] = [
 
 // Guardians get one read-only screen; nothing here is theirs to edit.
 const PARENT_NAV: NavItem[] = [{ to: '/family', glyph: 'family', label: 'Family' }];
+
+// Every path the app answers to, for any role. Used to tell "this address
+// isn't yours" apart from "this address isn't anything".
+const KNOWN_PATHS = [
+  '/dashboard', '/courses', '/courses/browse', '/courses/manage', '/courses/import',
+  '/courses/:classId/*', '/classes', '/teach', '/homework', '/calendar',
+  '/discussions', '/inbox', '/counselor', '/family',
+];
+
+/**
+ * What to do with a path this account's route table didn't claim.
+ *
+ * The two reasons you get here need opposite answers. A real page that belongs
+ * to another role — a guardian sitting on /dashboard after switching accounts —
+ * means the app moved out from under you, so put you on your own screen without
+ * comment. A path that exists for nobody means the link is broken, and saying
+ * so beats a silent redirect that looks like the click did nothing.
+ */
+function Fallback({ home }: { home: string }) {
+  const { pathname } = useLocation();
+  const isRealPage = KNOWN_PATHS.some((p) => matchPath(p, pathname));
+  return isRealPage ? <Navigate to={home} replace /> : <NotFound home={home} />;
+}
 
 export default function App() {
   const {
@@ -272,7 +296,7 @@ export default function App() {
                 <Route path="/inbox" element={<Navigate to="/discussions" replace />} />
               </>
             )}
-            <Route path="*" element={<Navigate to={home} replace />} />
+            <Route path="*" element={<Fallback home={home} />} />
           </Routes>
           </Suspense>
         </main>
