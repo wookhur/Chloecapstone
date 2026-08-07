@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import * as repo from '../../lib/repository';
 import type { ClassInfo } from '../../lib/types';
 import { displayName } from '../../lib/names';
+import EmptyState from '../../components/EmptyState';
 
 export default function AnnouncementsTab({ cls }: { cls: ClassInfo }) {
   const { currentUser, announcements, profileById, refresh } = useApp();
@@ -37,7 +38,7 @@ export default function AnnouncementsTab({ cls }: { cls: ClassInfo }) {
 
   return (
     <div>
-      <div className="row-between" style={{ marginBottom: '1rem' }}>
+      <div className="row-between mb-4">
         <h2 className="section-title">Announcements</h2>
         {isCourseTeacher && (
           <button
@@ -50,7 +51,7 @@ export default function AnnouncementsTab({ cls }: { cls: ClassInfo }) {
       </div>
 
       {showForm && (
-        <div className="card" style={{ marginBottom: '1rem' }}>
+        <div className="card mb-4">
           <div className="field">
             <label>Title</label>
             <input aria-label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -69,9 +70,11 @@ export default function AnnouncementsTab({ cls }: { cls: ClassInfo }) {
       )}
 
       {list.length === 0 ? (
-        <div className="empty">No announcements yet.</div>
+        <EmptyState icon="pin" title="No announcements yet">
+          <p>Notices the teacher sends to the whole class land here.</p>
+        </EmptyState>
       ) : (
-        <div className="stack" style={{ gap: '0.75rem' }}>
+        <div className="stack gap-3">
           {list.map((an) => (
             <div key={an.id} className="card">
               <div className="row-between">
@@ -84,8 +87,8 @@ export default function AnnouncementsTab({ cls }: { cls: ClassInfo }) {
                   })}
                 </span>
               </div>
-              <p className="sub" style={{ margin: '6px 0 0', whiteSpace: 'pre-wrap' }}>{an.body}</p>
-              <div className="row-between" style={{ marginTop: '0.6rem' }}>
+              <p className="sub post-body caption">{an.body}</p>
+              <div className="row-between mt-3">
                 <span className="meta">
                   — {displayName(profileById(an.author_id))}
                 </span>

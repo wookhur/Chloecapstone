@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import * as repo from '../lib/repository';
-import { subjectColor } from '../lib/subjectColor';
+import { accent, subjectColor } from '../lib/subjectColor';
 import { SCHOOL_YEAR, SUBJECTS } from '../lib/types';
 import { displayName } from '../lib/names';
 import Icon from '../components/Icon';
@@ -84,13 +84,13 @@ export default function ClassPicker() {
           return (
             <div
               key={c.id}
-              className={`card class-card${selected ? ' selected' : ''}`}
-              style={{ borderLeft: `4px solid ${color}` }}
+              className={`card class-card accent-left${selected ? ' selected' : ''}`}
+              style={accent(color)}
             >
               <div className="row-between">
                 <div>
-                  <h3 style={{ margin: 0 }}>{c.name}</h3>
-                  <p className="sub" style={{ marginTop: 2 }}>
+                  <h3 className="m-0">{c.name}</h3>
+                  <p className="sub mt-1">
                     <span className="subject-chip">
                       <span className="legend-dot" style={{ background: color }} />
                       {c.subject}

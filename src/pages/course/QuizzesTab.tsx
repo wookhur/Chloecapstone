@@ -6,6 +6,7 @@ import type { ClassInfo, PracticeQuestion } from '../../lib/types';
 import { displayName, initial } from '../../lib/names';
 import { bankFor, cardKey, dedupe } from '../../lib/quizBank';
 import Icon from '../../components/Icon';
+import EmptyState from '../../components/EmptyState';
 
 /**
  * Quizlet-style practice quizzes. Any student (or the teacher) can create a
@@ -27,7 +28,7 @@ export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: 
 
   return (
     <div>
-      <div className="row-between" style={{ marginBottom: '0.35rem' }}>
+      <div className="row-between mb-1">
         <h2 className="section-title">Practice Quizzes</h2>
         {canPost && (
           <button
@@ -38,7 +39,7 @@ export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: 
           </button>
         )}
       </div>
-      <p className="sub" style={{ marginBottom: '1rem' }}>
+      <p className="sub mb-4">
         Made by students, for students. Create a quiz to help your classmates study,
         or practice one below — it's not graded, so practice as much as you like.
       </p>
@@ -49,7 +50,7 @@ export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: 
         <div className="card bank-card">
           <div>
             <strong>Class question bank</strong>
-            <p className="sub" style={{ margin: '2px 0 0' }}>
+            <p className="sub caption">
               {bank.length} card{bank.length === 1 ? '' : 's'} from every quiz in{' '}
               {cls.name}, shuffled together.
             </p>
@@ -72,7 +73,12 @@ export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: 
       )}
 
       {quizzes.length === 0 ? (
-        <div className="empty">No practice quizzes yet — be the first to make one!</div>
+        <EmptyState icon="cards" title="No practice quizzes yet">
+          <p>
+            Quizzes here are written by the class, for the class. Nothing is
+            graded, so the first one only has to be useful, not perfect.
+          </p>
+        </EmptyState>
       ) : (
         <div className="quiz-card-grid">
           {quizzes.map((q) => {
@@ -82,17 +88,17 @@ export default function QuizzesTab({ cls, canPost }: { cls: ClassInfo; canPost: 
             return (
               <div key={q.id} className="card quiz-card">
                 <div>
-                  <h3 style={{ margin: '0 0 0.25rem', fontSize: '1rem' }}>{q.title}</h3>
+                  <h3 className="mb-1 text-md">{q.title}</h3>
                   {q.description && (
-                    <p className="sub" style={{ margin: '0 0 0.5rem' }}>{q.description}</p>
+                    <p className="sub mb-2">{q.description}</p>
                   )}
-                  <p className="meta" style={{ margin: 0 }}>
+                  <p className="meta m-0">
                     <span className="avatar">{initial(author)}</span>
                     {displayName(author)} · {count} card
                     {count === 1 ? '' : 's'}
                   </p>
                 </div>
-                <div className="inline" style={{ gap: '0.4rem', marginTop: '0.75rem' }}>
+                <div className="inline gap-1 mt-3">
                   {count > 0 ? (
                     <Link to={`../quizzes/${q.id}/practice`} className="btn small">
                       <Icon name="play" size="0.8em" /> Practice
@@ -156,7 +162,7 @@ function QuizBuilder({
 
   if (!quizId) {
     return (
-      <div className="card" style={{ marginBottom: '1rem' }}>
+      <div className="card mb-4">
         <div className="field">
           <label>Quiz title</label>
           <input
@@ -185,8 +191,8 @@ aria-label="Quiz title"             value={title}
   const nextPosition = questions.reduce((max, q) => Math.max(max, q.position), 0) + 1;
 
   return (
-    <div className="card" style={{ marginBottom: '1rem' }}>
-      <div className="row-between" style={{ marginBottom: '0.5rem' }}>
+    <div className="card mb-4">
+      <div className="row-between mb-2">
         <strong>“{title}” · {questions.length} card{questions.length === 1 ? '' : 's'}</strong>
         <button className="btn small" onClick={onDone}>Done</button>
       </div>
@@ -277,7 +283,7 @@ function BankPicker({
   };
 
   return (
-    <div className="card subtle" style={{ marginTop: '0.75rem' }}>
+    <div className="card subtle mt-3">
       <div className="row-between">
         <strong>From the class bank</strong>
         <button className="btn small secondary" onClick={() => setOpen((v) => !v)}>
@@ -285,7 +291,7 @@ function BankPicker({
         </button>
       </div>
       {open && (
-        <ul className="plain-list" style={{ marginTop: '0.6rem' }}>
+        <ul className="plain-list mt-3">
           {available.map((c) => (
             <li key={c.id} className="quiz-question-row">
               <div>
@@ -354,7 +360,7 @@ function QuestionEditor({
   const correctIsBlank = choices[correct]?.trim() === '';
 
   return (
-    <div className="card subtle" style={{ marginTop: '0.75rem' }}>
+    <div className="card subtle mt-3">
       <div className="field">
         <label htmlFor={`q-text-${quizId}`}>New question</label>
         <input
@@ -363,16 +369,16 @@ function QuestionEditor({
           onChange={(e) => setQuestion(e.target.value)}
         />
       </div>
-      <div className="inline" style={{ gap: '0.6rem', flexWrap: 'wrap' }}>
+      <div className="inline gap-2">
         {choices.map((c, i) => (
           <div key={i} className="field builder-choice">
-            <label className="inline" style={{ gap: '0.35rem' }}>
+            <label className="inline gap-1">
               <input
                 type="radio"
                 name={`correct-${quizId}`}
                 checked={correct === i}
                 onChange={() => setCorrect(i)}
-                style={{ width: 'auto' }}
+                className="w-auto"
               />
               Choice {i + 1} {correct === i && <span className="hint">(correct)</span>}
             </label>

@@ -31,15 +31,15 @@ export default class ErrorBoundary extends Component<Props, State> {
 
     return (
       <div className="center-screen">
-        <div className="card" style={{ maxWidth: 460, textAlign: 'center' }}>
+        <div className="card narrow-centre">
           <div className="signin-mark"><Icon name="alert" size="1.4rem" /></div>
-          <h1 style={{ fontSize: 'var(--text-lg)', margin: '0.5rem 0 0.25rem' }}>
+          <h1 className="text-lg detail-head">
             Something went wrong
           </h1>
-          <p className="meta" style={{ marginBottom: '1rem' }}>
+          <p className="meta mb-4">
             The page hit an unexpected error. Reloading usually fixes it.
           </p>
-          <div className="inline" style={{ justifyContent: 'center', gap: '0.5rem' }}>
+          <div className="inline justify-center gap-2">
             <button className="btn small" onClick={() => window.location.reload()}>
               Reload
             </button>
@@ -54,13 +54,12 @@ export default class ErrorBoundary extends Component<Props, State> {
               Start over
             </button>
           </div>
-          <details style={{ marginTop: '1rem', textAlign: 'left' }}>
-            <summary className="meta" style={{ cursor: 'pointer' }}>
+          <details className="mt-4">
+            <summary className="meta">
               Technical details
             </summary>
             <pre
-              className="meta"
-              style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', marginTop: '0.5rem' }}
+              className="meta post-body table-scroll mt-2"
             >
               {error.message}
             </pre>

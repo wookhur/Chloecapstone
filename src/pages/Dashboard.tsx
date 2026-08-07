@@ -113,9 +113,9 @@ export default function Dashboard() {
           )}
 
           {recentAnnouncements.length > 0 && (
-            <div className="section" style={{ marginTop: '1.5rem' }}>
+            <div className="section mt-5">
               <h2>Recent announcements</h2>
-              <div className="stack" style={{ gap: '0.6rem' }}>
+              <div className="stack gap-2">
                 {recentAnnouncements.map((an) => {
                   const cls = classById(an.class_id);
                   return (
@@ -127,7 +127,7 @@ export default function Dashboard() {
                       <div className="row-between">
                         <div>
                           <strong>{an.title}</strong>
-                          <p className="sub" style={{ margin: '2px 0 0' }}>
+                          <p className="sub caption">
                             {cls?.name} · {displayName(profileById(an.author_id))}
                           </p>
                         </div>

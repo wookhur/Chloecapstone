@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Feed from './pages/Feed';
 import SignIn from './pages/SignIn';
 import Icon, { BrandMark, type IconName } from './components/Icon';
+import Skeleton from './components/Skeleton';
 
 // Everything past the two screens students open first is split out, so a phone
 // on school wifi downloads a fraction of the app up front.
@@ -56,10 +57,44 @@ export default function App() {
     signOut,
   } = useApp();
 
-  if (loading || authLoading) return <div className="center-screen">Loading Homework Hub…</div>;
+  // Auth settles first, and it decides which of two unrelated screens is
+  // coming — the app, or the sign-in card. Blocking out the shape of one before
+  // that's known just means redrawing the page when the guess turns out wrong,
+  // so this stretch stays plain and the skeleton waits until there's something
+  // certain to stand in for.
+  if (authLoading) {
+    return <div className="center-screen" role="status">Loading Homework Hub…</div>;
+  }
 
   // With Supabase connected, nothing is reachable until you sign in.
   if (authEnabled && !authUser) return <SignIn />;
+
+  // Now the destination is known, so the wait can show the page that's coming.
+  // This has to sit above the check below: mid-load there is no currentUser
+  // yet, and without it a student would be told their account doesn't exist
+  // for the second or two before their own data arrives.
+  // The rail and the topbar are drawn for real here, not blocked out: they're
+  // the same whatever the data turns out to say, so putting them up front means
+  // the page arriving underneath doesn't shove everything sideways. Only the
+  // nav items wait, since which ones there are depends on who you are.
+  if (loading) {
+    return (
+      <div className="app-shell rail-layout">
+        <aside className="global-rail">
+          <div className="rail-brand" title="Homework Hub"><BrandMark /></div>
+        </aside>
+        <div className="rail-main">
+          <header className="topbar">
+            <div className="brand">
+              <BrandMark size="20" />
+              <span className="name">Homework Hub</span>
+            </div>
+          </header>
+          <main className="content"><Skeleton /></main>
+        </div>
+      </div>
+    );
+  }
 
   // Signed in with an address the school hasn't set up yet. Better to say so
   // than to show an app with no classes in it and let them wonder.
@@ -124,7 +159,7 @@ export default function App() {
           <div className="brand">
             <BrandMark size="20" />
             <span className="name">Homework Hub</span>
-            <span className="chip" style={{ marginLeft: '0.5rem' }}>
+            <span className="chip ml-2">
               {currentUser?.role ?? '—'}
             </span>
           </div>
@@ -204,7 +239,7 @@ export default function App() {
             </div>
           )}
 
-          <Suspense fallback={<div className="center-screen">Loading…</div>}>
+          <Suspense fallback={<Skeleton rows={2} />}>
           {/*
             Only the routes a role is allowed to open are declared, so anything
             else falls through to "*" and lands them back on their own home.

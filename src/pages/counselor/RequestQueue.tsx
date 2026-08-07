@@ -4,6 +4,7 @@ import * as repo from '../../lib/repository';
 import { displayName } from '../../lib/names';
 import { today } from '../../lib/dates';
 import type { MeetingRequest } from '../../lib/types';
+import EmptyState from '../../components/EmptyState';
 
 /**
  * Requests students have sent, and the two things a counselor can do with one:
@@ -28,14 +29,16 @@ export default function RequestQueue({ counselorId }: { counselorId: string }) {
       <h2 className="section-title">Requests from students ({pending.length})</h2>
 
       {pending.length === 0 ? (
-        <div className="empty">No open requests.</div>
+        <EmptyState icon="mail" title="No open requests">
+          <p>Students who ask for a meeting appear here until you schedule them.</p>
+        </EmptyState>
       ) : (
         <ul className="plain-list boxed">
           {pending.map((r) => (
             <li key={r.id} className="list-row">
               <div>
                 <strong>{displayName(profileById(r.student_id))}</strong>
-                <div className="meta" style={{ marginTop: 2 }}>{r.reason}</div>
+                <div className="meta mt-1">{r.reason}</div>
                 {r.preferred && <div className="meta">Prefers: {r.preferred}</div>}
               </div>
               <button className="btn small" onClick={() => setAnswering(r)}>
@@ -122,22 +125,22 @@ function RespondForm({
   };
 
   return (
-    <div className="card" style={{ marginTop: '0.75rem' }}>
-      <h3 style={{ margin: '0 0 0.5rem' }}>Respond to {student}</h3>
-      <p className="meta" style={{ marginBottom: '0.75rem' }}>
+    <div className="card mt-3">
+      <h3 className="mb-2">Respond to {student}</h3>
+      <p className="meta mb-3">
         “{request.reason}”{request.preferred ? ` — prefers ${request.preferred}` : ''}
       </p>
 
-      <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div className="field" style={{ flex: '0 0 160px' }}>
+      <div className="inline form-row">
+        <div className="field w-date">
           <label htmlFor="resp-date">Date</label>
           <input id="resp-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
-        <div className="field" style={{ flex: '0 0 130px' }}>
+        <div className="field w-short">
           <label htmlFor="resp-time">Time <span className="hint">(optional)</span></label>
           <input id="resp-time" value={time} placeholder="11:15am" onChange={(e) => setTime(e.target.value)} />
         </div>
-        <div className="field" style={{ flex: '0 0 150px' }}>
+        <div className="field w-mid">
           <label htmlFor="resp-loc">Location <span className="hint">(optional)</span></label>
           <input id="resp-loc" value={location} placeholder="Room 102" onChange={(e) => setLocation(e.target.value)} />
         </div>
@@ -154,7 +157,7 @@ function RespondForm({
 
       <div className="row-between">
         <button className="btn secondary small" onClick={onCancel}>Close</button>
-        <div className="inline" style={{ gap: '0.4rem' }}>
+        <div className="inline gap-1">
           <button className="btn secondary small" disabled={busy} onClick={decline}>
             Decline
           </button>

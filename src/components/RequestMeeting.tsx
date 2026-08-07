@@ -108,7 +108,7 @@ export default function RequestMeeting() {
 
   return (
     <section className="section">
-      <div className="row-between" style={{ marginBottom: '0.6rem' }}>
+      <div className="row-between mb-3">
         <h2 className="section-title">Counselor</h2>
         <button
           className={`btn small ${open ? 'secondary' : ''}`}
@@ -119,7 +119,7 @@ export default function RequestMeeting() {
       </div>
 
       {open && (
-        <div className="card" style={{ marginBottom: '0.75rem' }}>
+        <div className="card mb-3">
           {counselors.length > 1 && (
             <div className="field">
               <label htmlFor="req-counselor">Counselor</label>
@@ -178,7 +178,7 @@ export default function RequestMeeting() {
           )}
 
           {error && (
-            <div className="banner error" role="alert" style={{ marginBottom: '0.75rem' }}>
+            <div className="banner error mb-3" role="alert">
               <span className="dot" />
               {error}
             </div>
@@ -210,7 +210,7 @@ export default function RequestMeeting() {
             <li key={r.id} className="list-row">
               <div>
                 <strong>{r.reason}</strong>
-                <div className="meta" style={{ marginTop: 2 }}>
+                <div className="meta mt-1">
                   {displayName(profileById(r.counselor_id ?? ''))} ·{' '}
                   {parseISO(r.created_at.slice(0, 10)).toLocaleDateString(undefined, {
                     month: 'short',

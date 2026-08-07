@@ -45,7 +45,7 @@ export default function PeopleTab({ cls }: { cls: ClassInfo }) {
       </table>
       </div>
       {students.length === 0 && (
-        <p className="meta" style={{ marginTop: '0.75rem' }}>No students enrolled yet.</p>
+        <p className="meta mt-3">No students enrolled yet.</p>
       )}
     </div>
   );

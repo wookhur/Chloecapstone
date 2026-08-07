@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import * as repo from '../../lib/repository';
 import { WEEKDAY_LABELS, parseISO, today, weeklyDates } from '../../lib/dates';
 import { displayName } from '../../lib/names';
+import EmptyState from '../../components/EmptyState';
 
 /**
  * Times a counselor says they're free. Students book these themselves, which is
@@ -72,14 +73,14 @@ export default function Availability({ counselorId }: { counselorId: string }) {
   return (
     <div className="section">
       <h2 className="section-title">My open times ({open.length})</h2>
-      <p className="sub" style={{ margin: '0 0 0.75rem' }}>
+      <p className="sub mb-3">
         Students book these themselves — no back-and-forth, and nobody waits on an
         email to find out whether you're free.
       </p>
 
-      <div className="card" style={{ marginBottom: '0.75rem' }}>
-        <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div className="field" style={{ flex: '0 0 160px' }}>
+      <div className="card mb-3">
+        <div className="inline form-row">
+          <div className="field w-date">
             <label htmlFor="slot-date">Date</label>
             <input
               id="slot-date"
@@ -88,7 +89,7 @@ export default function Availability({ counselorId }: { counselorId: string }) {
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
-          <div className="field" style={{ flex: '1 1 170px' }}>
+          <div className="field">
             <label htmlFor="slot-time">Time</label>
             <input
               id="slot-time"
@@ -97,11 +98,11 @@ export default function Availability({ counselorId }: { counselorId: string }) {
               onChange={(e) => setTime(e.target.value)}
             />
           </div>
-          <div className="field" style={{ flex: '0 0 150px' }}>
+          <div className="field w-mid">
             <label htmlFor="slot-loc">Where <span className="hint">(optional)</span></label>
             <input id="slot-loc" value={location} onChange={(e) => setLocation(e.target.value)} />
           </div>
-          <div className="field" style={{ flex: '0 0 190px' }}>
+          <div className="field w-wide">
             <label htmlFor="slot-until">
               Repeat weekly until <span className="hint">(optional)</span>
             </label>
@@ -128,7 +129,9 @@ export default function Availability({ counselorId }: { counselorId: string }) {
       </div>
 
       {mine.length === 0 ? (
-        <div className="empty">No open times posted yet.</div>
+        <EmptyState icon="clock" title="No open times posted yet">
+          <p>Post the hours you're free and students book themselves in — no emailing dates back and forth.</p>
+        </EmptyState>
       ) : (
         <ul className="plain-list boxed">
           {mine.map((s) => {
@@ -150,7 +153,7 @@ export default function Availability({ counselorId }: { counselorId: string }) {
                   </div>
                 </div>
                 {s.booked_by ? (
-                  <span className="inline" style={{ gap: '0.4rem' }}>
+                  <span className="inline gap-1">
                     <span className="chip request-accepted">Booked</span>
                     <button
                       className="btn secondary small"

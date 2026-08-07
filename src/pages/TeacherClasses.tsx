@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import AssignmentCard from '../components/AssignmentCard';
 import * as repo from '../lib/repository';
 import { today } from '../lib/dates';
-import { subjectColor } from '../lib/subjectColor';
+import { accent, subjectColor } from '../lib/subjectColor';
 import {
   ASSIGNMENT_TYPES,
   SCHOOL_YEAR,
@@ -13,6 +13,7 @@ import {
   type ClassInfo,
 } from '../lib/types';
 import Icon from '../components/Icon';
+import EmptyState from '../components/EmptyState';
 
 export default function TeacherClasses() {
   const { currentUser, classes, assignments, refresh } = useApp();
@@ -36,7 +37,7 @@ export default function TeacherClasses() {
         <span className="callout-icon"><Icon name="info" /></span>
         <div>
           <strong>Post a due date for every assignment — even paper handouts.</strong>
-          <p style={{ margin: '4px 0 0' }}>
+          <p className="caption">
             When the due date lives here, students turn work in on time, so you grade
             each assignment <em>once</em> instead of chasing late makeups — and the
             posted date is a clear, shared record everyone can point to.
@@ -44,7 +45,7 @@ export default function TeacherClasses() {
         </div>
       </div>
 
-      <div className="row-between" style={{ marginBottom: '1rem' }}>
+      <div className="row-between mb-4">
         <span className="muted">{myClasses.length} class{myClasses.length === 1 ? '' : 'es'}</span>
         <button
           className={`btn small ${showNewClass ? "secondary" : ""}`}
@@ -62,7 +63,9 @@ export default function TeacherClasses() {
       )}
 
       {myClasses.length === 0 && !showNewClass ? (
-        <div className="empty">You haven't created any classes yet. Click “Add a class”.</div>
+        <EmptyState icon="courses" title="No classes yet">
+          <p>Add a class and your students can find it and enrol themselves.</p>
+        </EmptyState>
       ) : (
         <div className="stack">
           {myClasses.map((c) => (
@@ -114,29 +117,29 @@ function NewClassForm({
   };
 
   return (
-    <div className="card" style={{ marginBottom: '1rem' }}>
-      <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div className="field" style={{ flex: '1 1 200px' }}>
+    <div className="card mb-4">
+      <div className="inline form-row">
+        <div className="field">
           <label>Class name</label>
           <input aria-label="Class name" type="text" value={name} placeholder="e.g. Algebra II" onChange={(e) => setName(e.target.value)} />
         </div>
-        <div className="field" style={{ flex: '0 0 160px' }}>
+        <div className="field w-date">
           <label>Subject</label>
           <select aria-label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)}>
             {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
-        <div className="field" style={{ flex: '0 0 100px' }}>
+        <div className="field w-tiny">
           <label>Grade</label>
           <select aria-label="Grade" value={grade} onChange={(e) => setGrade(Number(e.target.value))}>
             {[9, 10, 11, 12].map((g) => <option key={g} value={g}>{g}</option>)}
           </select>
         </div>
-        <div className="field" style={{ flex: '0 0 90px' }}>
+        <div className="field w-tiny">
           <label>Period</label>
           <input aria-label="Period" type="text" value={period} onChange={(e) => setPeriod(e.target.value)} />
         </div>
-        <div className="field" style={{ flex: '0 0 110px' }}>
+        <div className="field w-short">
           <label>Room</label>
           <input aria-label="Room" type="text" value={room} onChange={(e) => setRoom(e.target.value)} />
         </div>
@@ -178,11 +181,11 @@ function ClassBlock({
   };
 
   return (
-    <div className="card" style={{ borderLeft: `4px solid ${color}` }}>
+    <div className="card accent-left" style={accent(color)}>
       <div className="row-between">
         <div>
-          <h3 style={{ margin: 0 }}>{cls.name}</h3>
-          <p className="sub" style={{ marginTop: 2 }}>
+          <h3 className="m-0">{cls.name}</h3>
+          <p className="sub mt-1">
             {cls.subject} · Grade {cls.grade_level} · {cls.period} · Room {cls.room ?? '—'}
           </p>
         </div>
@@ -275,21 +278,21 @@ function AssignmentForm({
   };
 
   return (
-    <div className="card subtle" style={{ marginTop: '0.85rem' }}>
-      <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div className="field" style={{ flex: '1 1 240px' }}>
+    <div className="card subtle mt-3">
+      <div className="inline form-row">
+        <div className="field">
           <label>Title</label>
           <input aria-label="Title" type="text" value={title} placeholder="e.g. Chapter 4 worksheet" onChange={(e) => setTitle(e.target.value)} />
         </div>
-        <div className="field" style={{ flex: '0 0 150px' }}>
+        <div className="field w-mid">
           <label>Type</label>
           <select aria-label="Type" value={type} onChange={(e) => setType(e.target.value as AssignmentType)}>
             {ASSIGNMENT_TYPES.map((t) => (
-              <option key={t} value={t} style={{ textTransform: 'capitalize' }}>{t}</option>
+              <option key={t} value={t} className="capitalize">{t}</option>
             ))}
           </select>
         </div>
-        <div className="field" style={{ flex: '0 0 170px' }}>
+        <div className="field w-mid">
           <label>Due date</label>
           <input aria-label="Due date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         </div>
@@ -303,7 +306,7 @@ function AssignmentForm({
         <input aria-label="Resource link" type="text" value={link} placeholder="https://…" onChange={(e) => setLink(e.target.value)} />
       </div>
       <div className="row-between">
-        <span className="muted" style={{ fontSize: '0.8rem' }}>
+        <span className="muted text-xs">
           {existing ? 'Editing an assignment' : 'New assignment'}
         </span>
         <button className="btn small" onClick={submit} disabled={!title.trim() || busy}>

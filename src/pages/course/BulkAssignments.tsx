@@ -106,8 +106,8 @@ export default function BulkAssignments({
   };
 
   return (
-    <div className="card" style={{ marginBottom: '1rem' }}>
-      <div className="toggle-group" style={{ marginBottom: '0.85rem' }}>
+    <div className="card mb-4">
+      <div className="toggle-group mb-3">
         <button
           className={`toggle ${mode === 'list' ? 'on' : ''}`}
           onClick={() => { setMode('list'); setResult(null); }}
@@ -131,12 +131,12 @@ export default function BulkAssignments({
             <textarea
               id="bulk-paste"
               value={pasted}
-              style={{ minHeight: 120, fontFamily: 'ui-monospace, monospace' }}
+              className="code-input"
               placeholder={'Chapter 4 worksheet, 2026-09-12\nUnit 4 quiz, 2026-09-19\nUnit 4 test, 2026-09-26'}
               onChange={(e) => setPasted(e.target.value)}
             />
           </div>
-          <div className="field" style={{ maxWidth: 180 }}>
+          <div className="field w-cap">
             <label htmlFor="bulk-type">Type for all</label>
             <select
               id="bulk-type"
@@ -167,7 +167,7 @@ export default function BulkAssignments({
             </div>
           )}
 
-          <div className="row-between" style={{ marginTop: '0.75rem' }}>
+          <div className="row-between mt-3">
             {result ? <span className="meta">{result}</span> : <span />}
             <button
               className="btn small"
@@ -180,8 +180,8 @@ export default function BulkAssignments({
         </>
       ) : (
         <>
-          <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <div className="field" style={{ flex: '1 1 220px' }}>
+          <div className="inline form-row">
+            <div className="field">
               <label htmlFor="repeat-title">Title</label>
               <input
                 id="repeat-title"
@@ -190,7 +190,7 @@ export default function BulkAssignments({
                 onChange={(e) => setRepeatTitle(e.target.value)}
               />
             </div>
-            <div className="field" style={{ flex: '0 0 140px' }}>
+            <div className="field w-short">
               <label htmlFor="repeat-day">Every</label>
               <select
                 id="repeat-day"
@@ -202,7 +202,7 @@ export default function BulkAssignments({
                 ))}
               </select>
             </div>
-            <div className="field" style={{ flex: '0 0 150px' }}>
+            <div className="field w-mid">
               <label htmlFor="repeat-from">From</label>
               <input
                 id="repeat-from"
@@ -211,7 +211,7 @@ export default function BulkAssignments({
                 onChange={(e) => setFrom(e.target.value)}
               />
             </div>
-            <div className="field" style={{ flex: '0 0 150px' }}>
+            <div className="field w-mid">
               <label htmlFor="repeat-until">Until</label>
               <input
                 id="repeat-until"
@@ -220,7 +220,7 @@ export default function BulkAssignments({
                 onChange={(e) => setUntil(e.target.value)}
               />
             </div>
-            <div className="field" style={{ flex: '0 0 130px' }}>
+            <div className="field w-short">
               <label htmlFor="repeat-type">Type</label>
               <select
                 id="repeat-type"
@@ -242,7 +242,7 @@ export default function BulkAssignments({
             </p>
           )}
 
-          <div className="row-between" style={{ marginTop: '0.75rem' }}>
+          <div className="row-between mt-3">
             {result ? <span className="meta">{result}</span> : <span />}
             <button
               className="btn small"

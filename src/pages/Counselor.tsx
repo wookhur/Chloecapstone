@@ -5,6 +5,7 @@ import { today, parseISO } from '../lib/dates';
 import { displayName } from '../lib/names';
 import Availability from './counselor/Availability';
 import RequestQueue from './counselor/RequestQueue';
+import EmptyState from '../components/EmptyState';
 
 /**
  * Counselor console: schedule counseling meetings straight onto a student's
@@ -83,10 +84,10 @@ export default function Counselor() {
 
       <RequestQueue counselorId={currentUser.id} />
 
-      <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <h2 className="section-title" style={{ marginBottom: '0.75rem' }}>Schedule a meeting</h2>
-        <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div className="field" style={{ flex: '1 1 220px' }}>
+      <div className="card mb-5">
+        <h2 className="section-title mb-3">Schedule a meeting</h2>
+        <div className="inline form-row">
+          <div className="field">
             <label>Student</label>
             <select aria-label="Student" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
               <option value="">Choose a student…</option>
@@ -97,21 +98,21 @@ export default function Counselor() {
               ))}
             </select>
           </div>
-          <div className="field" style={{ flex: '1 1 200px' }}>
+          <div className="field">
             <label>Title</label>
             <input aria-label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
         </div>
-        <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div className="field" style={{ flex: '0 0 160px' }}>
+        <div className="inline form-row">
+          <div className="field w-date">
             <label>Date</label>
             <input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
-          <div className="field" style={{ flex: '0 0 130px' }}>
+          <div className="field w-short">
             <label>Time <span className="hint">(optional)</span></label>
             <input aria-label="Time" value={time} placeholder="11:15am" onChange={(e) => setTime(e.target.value)} />
           </div>
-          <div className="field" style={{ flex: '0 0 150px' }}>
+          <div className="field w-mid">
             <label>Location <span className="hint">(optional)</span></label>
             <input aria-label="Location" value={location} placeholder="Room 102" onChange={(e) => setLocation(e.target.value)} />
           </div>
@@ -131,14 +132,16 @@ export default function Counselor() {
       <div className="section">
         <h2 className="section-title">Upcoming meetings ({upcoming.length})</h2>
         {upcoming.length === 0 ? (
-          <div className="empty">No meetings scheduled yet.</div>
+          <EmptyState icon="calendar" title="No meetings scheduled yet">
+            <p>Anything you book lands straight on the student's calendar.</p>
+          </EmptyState>
         ) : (
           <ul className="plain-list boxed">
             {upcoming.map((m) => (
               <li key={m.id} className="list-row">
                 <div>
                   <strong>{displayName(profileById(m.owner_id))}</strong>
-                  <div className="meta" style={{ marginTop: 2 }}>
+                  <div className="meta mt-1">
                     {parseISO(m.date).toLocaleDateString(undefined, {
                       weekday: 'short',
                       month: 'short',

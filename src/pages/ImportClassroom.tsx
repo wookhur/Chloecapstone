@@ -10,7 +10,7 @@ import {
 } from '../lib/googleClassroom';
 import { SCHOOL_YEAR, type AssignmentType } from '../lib/types';
 import { today } from '../lib/dates';
-import { subjectColor } from '../lib/subjectColor';
+import { accent, subjectColor } from '../lib/subjectColor';
 import Icon from '../components/Icon';
 
 type Phase = 'idle' | 'connecting' | 'preview' | 'importing' | 'done';
@@ -185,9 +185,9 @@ export default function ImportClassroom() {
       {phase === 'idle' && (
         <div className="card gc-connect">
           <div className="gc-logo"><Icon name="download" size="1.5rem" /></div>
-          <div style={{ flex: 1 }}>
-            <h3 style={{ margin: '0 0 0.25rem' }}>Connect Google Classroom</h3>
-            <p className="sub" style={{ margin: 0 }}>
+          <div className="grow">
+            <h3 className="mb-1">Connect Google Classroom</h3>
+            <p className="sub m-0">
               We'll read your courses, their coursework (with due dates), and
               announcements — read-only. Nothing is changed in Google Classroom.
             </p>
@@ -204,7 +204,7 @@ export default function ImportClassroom() {
 
       {phase === 'preview' && snapshot && (
         <div>
-          <div className="row-between" style={{ marginBottom: '0.75rem' }}>
+          <div className="row-between mb-3">
             <h2 className="section-title">
               Choose courses to import ({selected.size}/{snapshot.courses.length})
             </h2>
@@ -223,8 +223,8 @@ export default function ImportClassroom() {
               return (
                 <label
                   key={c.id}
-                  className={`card gc-course ${selected.has(c.id) ? 'picked' : ''}`}
-                  style={{ borderLeft: `4px solid ${color}` }}
+                  className={`card gc-course accent-left ${selected.has(c.id) ? 'picked' : ''}`}
+                  style={accent(color)}
                 >
                   <input
                     type="checkbox"
@@ -233,13 +233,13 @@ export default function ImportClassroom() {
                     onChange={() => toggle(c.id)}
                   />
                   <div>
-                    <h3 style={{ margin: '0 0 0.2rem', fontSize: '1rem' }}>{c.name}</h3>
-                    <p className="sub" style={{ margin: 0 }}>
+                    <h3 className="mb-1 text-md">{c.name}</h3>
+                    <p className="sub m-0">
                       {c.ownerName}
                       {c.section ? ` · ${c.section}` : ''}
                       {c.room ? ` · Room ${c.room}` : ''}
                     </p>
-                    <p className="meta" style={{ margin: '4px 0 0' }}>
+                    <p className="meta caption">
                       {work} assignment{work === 1 ? '' : 's'} · {anns} announcement
                       {anns === 1 ? '' : 's'}
                       {already && ' · already imported'}
@@ -255,9 +255,9 @@ export default function ImportClassroom() {
       {phase === 'importing' && <div className="empty">Importing…</div>}
 
       {phase === 'done' && summary && (
-        <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+        <div className="card empty">
           <div className="success-mark"><Icon name="check" size="1.5rem" /></div>
-          <h2 style={{ margin: '0.5rem 0 0.25rem' }}>Import complete</h2>
+          <h2 className="detail-head">Import complete</h2>
           <p className="sub">
             Added {summary.classes} course{summary.classes === 1 ? '' : 's'},{' '}
             {summary.assignments} assignment{summary.assignments === 1 ? '' : 's'}, and{' '}
@@ -268,7 +268,7 @@ export default function ImportClassroom() {
               Skipped (already imported): {summary.skipped.join(', ')}
             </p>
           )}
-          <div className="inline" style={{ justifyContent: 'center', gap: '0.6rem', marginTop: '0.5rem' }}>
+          <div className="inline justify-center gap-2 mt-2">
             <button className="btn secondary small" onClick={() => navigate('/courses')}>
               View my courses
             </button>
@@ -279,7 +279,7 @@ export default function ImportClassroom() {
         </div>
       )}
 
-      <p className="meta" style={{ marginTop: '1.25rem' }}>
+      <p className="meta mt-5">
         <Icon name="chevron-left" size="0.9em" /> Back to <Link to="/courses">Courses</Link>
       </p>
     </div>

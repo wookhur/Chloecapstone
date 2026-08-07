@@ -12,6 +12,7 @@ import {
   type ClassInfo,
 } from '../../lib/types';
 import Icon, { ASSIGNMENT_ICON } from '../../components/Icon';
+import EmptyState from '../../components/EmptyState';
 
 /** Assignment listings for a course (informational — no online submission). */
 export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
@@ -37,29 +38,29 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
     const overdue = !done && a.due_date < today();
     return (
       <li key={a.id} className={`list-row assignment-row ${done ? 'is-done' : ''}`}>
-        <div className="inline" style={{ gap: '0.5rem' }}>
+        <div className="inline gap-2">
           <DoneCheckbox assignment={a} />
           <div>
           <Icon name={ASSIGNMENT_ICON[a.type]} className="type-glyph" />
-          <Link to={`../assignments/${a.id}`} style={{ fontWeight: 600 }}>
+          <Link to={`../assignments/${a.id}`} className="semibold">
             {a.title}
           </Link>
-          <div className={`due ${overdue ? 'overdue' : ''}`} style={{ marginTop: 2 }}>
+          <div className={`due mt-1 ${overdue ? 'overdue' : ''}`}>
             {dueLabel(a.due_date)}
           </div>
           </div>
         </div>
-        <span className="chip" style={{ textTransform: 'capitalize' }}>{a.type}</span>
+        <span className="chip capitalize">{a.type}</span>
       </li>
     );
   };
 
   return (
     <div>
-      <div className="row-between" style={{ marginBottom: '1rem' }}>
+      <div className="row-between mb-4">
         <h2 className="section-title">Assignments</h2>
         {isCourseTeacher && (
-          <div className="inline" style={{ gap: '0.4rem' }}>
+          <div className="inline gap-1">
             <button
               className={`btn secondary small ${showBulk ? "on" : ""}`}
               onClick={() => { setShowBulk((v) => !v); setShowForm(false); }}
@@ -96,7 +97,9 @@ export default function AssignmentsTab({ cls }: { cls: ClassInfo }) {
       )}
 
       {upcoming.length === 0 && past.length === 0 ? (
-        <div className="empty">No assignments yet.</div>
+        <EmptyState icon="checklist" title="No assignments yet">
+          <p>Work the teacher posts for this course shows up here, and on your calendar.</p>
+        </EmptyState>
       ) : (
         <>
           {upcoming.length > 0 && (
@@ -154,13 +157,13 @@ function NewAssignmentForm({
   };
 
   return (
-    <div className="card" style={{ marginBottom: '1rem' }}>
-      <div className="inline" style={{ gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div className="field" style={{ flex: '1 1 220px' }}>
+    <div className="card mb-4">
+      <div className="inline form-row">
+        <div className="field">
           <label>Title</label>
           <input aria-label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
-        <div className="field" style={{ flex: '0 0 130px' }}>
+        <div className="field w-short">
           <label>Type</label>
           <select aria-label="Type" value={type} onChange={(e) => setType(e.target.value as AssignmentType)}>
             {ASSIGNMENT_TYPES.map((t) => (
@@ -168,7 +171,7 @@ function NewAssignmentForm({
             ))}
           </select>
         </div>
-        <div className="field" style={{ flex: '0 0 150px' }}>
+        <div className="field w-mid">
           <label>Due date</label>
           <input aria-label="Due date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         </div>

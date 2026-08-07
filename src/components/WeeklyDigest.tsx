@@ -49,7 +49,7 @@ export default function WeeklyDigest() {
 
   return (
     <section className="section">
-      <div className="row-between" style={{ marginBottom: '0.6rem' }}>
+      <div className="row-between mb-3">
         <h2 className="section-title">Weekly email</h2>
         <button
           className={`btn small ${open ? 'secondary' : ''}`}
@@ -59,7 +59,7 @@ export default function WeeklyDigest() {
         </button>
       </div>
 
-      <p className="meta" style={{ marginTop: 0 }}>
+      <p className="meta mt-0">
         {currentUser.wants_digest
           ? 'Every Sunday evening you get one email with the week ahead — so a deadline can reach you without you opening anything.'
           : "You're not getting the Sunday email."}{' '}
@@ -74,11 +74,13 @@ export default function WeeklyDigest() {
             <span className="meta">Subject</span>
             <strong>{digest.subject}</strong>
           </div>
-          <p style={{ marginBottom: digest.empty ? 0 : '0.75rem' }}>{digest.greeting}</p>
+          {/* With nothing due, the greeting is the whole email — no trailing
+              gap under it waiting for a list that never comes. */}
+          <p className={digest.empty ? 'mb-0' : 'mb-3'}>{digest.greeting}</p>
           {digest.days.map((d) => (
-            <div key={d.date} style={{ marginBottom: '0.6rem' }}>
+            <div key={d.date} className="mb-3">
               <strong>{d.label}</strong>
-              <ul className="plain-list" style={{ marginTop: '0.2rem' }}>
+              <ul className="plain-list mt-1">
                 {d.items.map((item, i) => (
                   <li key={`${d.date}-${i}`}>
                     {item.emphasis ? <strong>{item.title}</strong> : item.title}{' '}
@@ -88,7 +90,7 @@ export default function WeeklyDigest() {
               </ul>
             </div>
           ))}
-          <p className="meta" style={{ margin: 0 }}>
+          <p className="meta m-0">
             Due dates only. Grades live in the school system.
           </p>
         </div>
