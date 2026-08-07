@@ -6,7 +6,7 @@ import { subjectColor } from '../lib/subjectColor';
 import DueSoon from '../components/DueSoon';
 import RequestMeeting from '../components/RequestMeeting';
 import WeeklyDigest from '../components/WeeklyDigest';
-import { displayName } from '../lib/names';
+import { displayName, firstName } from '../lib/names';
 import Icon from '../components/Icon';
 
 export default function Dashboard() {
@@ -56,7 +56,7 @@ export default function Dashboard() {
     <div>
       <div className="page-head">
         <h1>Dashboard</h1>
-        <p>Welcome back, {displayName(currentUser)}.</p>
+        <p>Welcome back, {firstName(currentUser)}.</p>
       </div>
 
       <DueSoon />
@@ -92,20 +92,21 @@ export default function Dashboard() {
                         <span className="dot-sm" style={{ background: color }} />
                         {c.subject}
                       </p>
-                      <h3>{c.name}</h3>
+                      {/* The count sits on the title's line rather than alone
+                          at the foot of the card. It's the one thing on here
+                          that changes, so it belongs next to the name — and it
+                          fills the width the two-up grid opened up instead of
+                          leaving a void to the right of every heading. */}
+                      <div className="course-card-head">
+                        <h3>{c.name}</h3>
+                        <span className={`course-card-stat ${openCount === 0 ? 'is-clear' : ''}`}>
+                          {openCount === 0 ? 'Nothing due' : `${openCount} due`}
+                        </span>
+                      </div>
                       <p className="sub">
-                        {c.period} · Room {c.room ?? '—'}
+                        {displayName(teacher)} · {c.period} · Room {c.room ?? '—'}
                       </p>
-                      <p className="sub">{displayName(teacher)}</p>
                     </div>
-                    {/* Counts, not a row of identical icons. Four bare glyphs
-                        repeated on every card told a student nothing they
-                        couldn't already see. */}
-                    <p className="course-card-stat">
-                      {openCount === 0
-                        ? 'Nothing due'
-                        : `${openCount} due`}
-                    </p>
                   </Link>
                 );
               })}
@@ -115,16 +116,19 @@ export default function Dashboard() {
           {recentAnnouncements.length > 0 && (
             <div className="section mt-5">
               <h2>Recent announcements</h2>
-              <div className="stack gap-2">
+              {/* One panel with rules between the rows, not four separate
+                  cards. Four notices from four teachers are a list; stacking
+                  them as boxes made the page a column of identical rectangles
+                  and said each one was its own object. */}
+              <ul className="plain-list boxed">
                 {recentAnnouncements.map((an) => {
                   const cls = classById(an.class_id);
                   return (
-                    <Link
-                      key={an.id}
-                      to={`/courses/${an.class_id}/announcements`}
-                      className="card announcement-row"
-                    >
-                      <div className="row-between">
+                    <li key={an.id}>
+                      <Link
+                        to={`/courses/${an.class_id}/announcements`}
+                        className="list-row announcement-row"
+                      >
                         <div>
                           <strong>{an.title}</strong>
                           <p className="sub caption">
@@ -137,11 +141,11 @@ export default function Dashboard() {
                             day: 'numeric',
                           })}
                         </span>
-                      </div>
-                    </Link>
+                      </Link>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </div>
           )}
         </div>

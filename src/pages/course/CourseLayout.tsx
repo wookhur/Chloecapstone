@@ -1,6 +1,6 @@
 import { NavLink, Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { subjectColor } from '../../lib/subjectColor';
+import { accent, subjectColor } from '../../lib/subjectColor';
 import { displayName } from '../../lib/names';
 import CourseHome from './CourseHome';
 import AnnouncementsTab from './AnnouncementsTab';
@@ -39,9 +39,12 @@ export default function CourseLayout() {
 
   return (
     <div className="course-shell">
-      <div className="course-header" style={{ borderColor: color }}>
+      {/* The subject colour is in the rule under the title, not in the title.
+          A 2rem heading set in the accent reads as a link you failed to click,
+          and it makes the loudest thing on the page a decoration. */}
+      <div className="course-header" style={accent(color)}>
         <div>
-          <h1 style={{ color }}>{cls.name}</h1>
+          <h1>{cls.name}</h1>
           <p className="sub">
             {cls.subject} · Grade {cls.grade_level} · {cls.period} · Room {cls.room ?? '—'} ·{' '}
             {displayName(teacher)}

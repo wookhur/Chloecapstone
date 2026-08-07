@@ -17,12 +17,12 @@ insert into profiles (id, name, email, role, grade) values
   ('00000000-0000-0000-0000-0000000000d2', 'Mr. Brooks',   'brooks@school.example',   'teacher', null),
   ('00000000-0000-0000-0000-0000000000d3', 'Dr. Chen',     'chen@school.example',     'teacher', null),
   ('00000000-0000-0000-0000-0000000000d4', 'Sr. Diaz',     'diaz@school.example',     'teacher', null),
-  ('00000000-0000-0000-0000-0000000000e1', 'Mina (Student)', 'mina@school.example', 'student', 10),
-  ('00000000-0000-0000-0000-0000000000e2', 'Jay (Student)',  'jay@school.example',  'student', 11),
-  ('00000000-0000-0000-0000-0000000000e3', 'Leo (Student)',  'leo@school.example',  'student', 10),
-  ('00000000-0000-0000-0000-0000000000e4', 'Zoe (Student)',  'zoe@school.example',  'student', 10),
-  ('00000000-0000-0000-0000-0000000000b1', 'Ms. Rivera (Counselor)', 'rivera@school.example', 'counselor', null),
-  ('00000000-0000-0000-0000-0000000000f1', 'Mrs. Kim (Parent)', 'kim.family@school.example', 'parent', null),
+  ('00000000-0000-0000-0000-0000000000e1', 'Mina Kim', 'mina@school.example', 'student', 10),
+  ('00000000-0000-0000-0000-0000000000e2', 'Jay Okonkwo',  'jay@school.example',  'student', 11),
+  ('00000000-0000-0000-0000-0000000000e3', 'Leo Fontaine',  'leo@school.example',  'student', 10),
+  ('00000000-0000-0000-0000-0000000000e4', 'Zoe Halvorsen',  'zoe@school.example',  'student', 10),
+  ('00000000-0000-0000-0000-0000000000b1', 'Ms. Rivera', 'rivera@school.example', 'counselor', null),
+  ('00000000-0000-0000-0000-0000000000f1', 'Sun-Hee Kim', 'kim.family@school.example', 'parent', null),
   ('00000000-0000-0000-0000-0000000000a1', 'School Office', 'office@school.example', 'admin', null);
 
 -- Class catalog -------------------------------------------------------------

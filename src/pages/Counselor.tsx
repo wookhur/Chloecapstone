@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import * as repo from '../lib/repository';
 import { today, parseISO } from '../lib/dates';
-import { displayName } from '../lib/names';
+import { displayName, firstName } from '../lib/names';
 import Availability from './counselor/Availability';
 import RequestQueue from './counselor/RequestQueue';
 import EmptyState from '../components/EmptyState';
@@ -55,7 +55,9 @@ export default function Counselor() {
         created_by: currentUser.id,
       });
       await refresh();
-      const who = displayName(profileById(studentId));
+      // First name only. "Added to Zoe Halvorsen's calendar" is how a form
+      // letter talks; a counsellor confirming their own booking says "Zoe".
+      const who = firstName(profileById(studentId));
       setFlash(`Added to ${who}'s calendar`);
       setNote('');
       setTime('');

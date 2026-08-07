@@ -35,7 +35,7 @@ export default function CourseHome({ cls }: { cls: ClassInfo }) {
         ) : (
           <div className="stack gap-2">
             {recent.map((an) => (
-              <div key={an.id} className="card subtle">
+              <div key={an.id} className="card">
                 <strong>{an.title}</strong>
                 <p className="sub post-body caption">{an.body}</p>
                 <p className="meta caption">
